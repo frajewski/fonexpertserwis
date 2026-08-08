@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "gsmserviceapp-ff8f6"
+  },
+  "targets": {
+    "gsmserviceapp-ff8f6": {
+      "hosting": {
+        "klient": [
+          "gsm-serwis-klient"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

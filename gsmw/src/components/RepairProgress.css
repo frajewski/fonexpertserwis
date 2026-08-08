@@ -1,0 +1,139 @@
+.rp-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 28px 4px 8px;
+  overflow-x: auto;
+}
+
+.rp-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 56px;
+}
+
+.rp-node-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.rp-connector {
+  position: absolute;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+
+.rp-connector-on {
+  background: var(--accent);
+}
+
+.rp-node {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.rp-node-done {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.rp-node-done .rp-icon {
+  color: #fff;
+}
+
+.rp-node-active {
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.rp-node-future {
+  opacity: 0.5;
+}
+
+.rp-icon {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1;
+}
+
+.rp-node-active .rp-icon {
+  color: var(--accent);
+}
+
+.rp-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  animation: rp-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes rp-ping {
+  0%   { transform: scale(0.9); opacity: 0.8; }
+  75%  { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.rp-label {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.rp-label-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.rp-sublabel {
+  font-size: 10px;
+  color: var(--wait);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.rp-cancelled {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 18px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.rp-cancelled-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-pulse { animation: none; }
+}

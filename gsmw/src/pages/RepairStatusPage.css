@@ -1,0 +1,255 @@
+.rs-page { min-height: 100vh; }
+
+.rs-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--ink-soft);
+  font-size: 14px;
+  text-align: center;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 24px;
+}
+
+.rs-back-link { color: var(--accent); font-weight: 600; }
+
+.rs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rs-back {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.rs-back:hover { color: var(--accent); }
+
+.rs-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--navy);
+}
+
+.rs-main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 22px 18px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Karta urządzenia */
+.rs-device-card {
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  padding: 22px 22px 24px;
+}
+
+.rs-device-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.rs-number {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #A8B3D6;
+}
+
+.rs-date {
+  font-size: 12px;
+  color: #8089AC;
+}
+
+.rs-device-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.rs-device-desc {
+  font-size: 14px;
+  color: #C7CCE3;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Karta postępu */
+.rs-progress-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 6px 14px 14px;
+}
+
+/* Karta kosztorysu */
+.rs-estimate-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px 22px;
+}
+
+.rs-estimate-pending {
+  border: 2px solid var(--wait);
+  box-shadow: var(--shadow-lift);
+}
+
+.rs-estimate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.rs-estimate-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rs-estimate-amount {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rs-estimate-note {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 12px 0 16px;
+}
+
+.rs-estimate-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.rs-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.rs-btn:active { transform: scale(0.97); }
+.rs-btn:disabled { opacity: 0.6; cursor: wait; }
+
+.rs-btn-primary { background: var(--accent); color: #fff; }
+.rs-btn-primary:hover { background: #5253E8; }
+
+.rs-btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+}
+.rs-btn-ghost:hover { border-color: var(--warn); color: var(--warn); }
+
+.rs-estimate-status {
+  margin-top: 14px;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.rs-status-good { background: var(--good-soft); color: var(--good); }
+.rs-status-warn { background: var(--warn-soft); color: var(--warn); }
+
+.rs-warranty {
+  margin-top: 14px;
+  padding: 11px 13px;
+  background: var(--good-soft);
+  color: #157A3B;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Historia */
+.rs-history { margin-top: 8px; }
+
+.rs-history-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.rs-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rs-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 13px 15px;
+  box-shadow: var(--shadow-card);
+  text-align: left;
+}
+
+.rs-history-item:hover { box-shadow: var(--shadow-lift); }
+
+.rs-history-device {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rs-history-meta {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.rs-history-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.rs-badge-good { background: var(--good-soft); color: var(--good); }
+.rs-badge-warn { background: var(--warn-soft); color: var(--warn); }
+.rs-badge-wait { background: var(--wait-soft); color: var(--wait); }
+
+/* CTA umów naprawę */
+.rs-booking-cta {
+  margin-top: 8px;
+  text-align: center;
+  padding: 15px;
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-md);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.rs-booking-cta:hover { border-color: var(--accent); background: var(--accent-soft); }

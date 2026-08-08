@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+android/
+ios/
+.expo/
+*.log
+.DS_Store
+.env
+.env.local
+firebase-debug.log

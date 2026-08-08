@@ -1,0 +1,22 @@
+{
+  "name": "gsm-system",
+  "private": true,
+  "workspaces": [
+    "new",
+    "gsm-admin-panel",
+    "gsmw",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile": "npm run start --workspace=new",
+    "admin": "npm run dev --workspace=gsm-admin-panel",
+    "client": "npm run dev --workspace=gsmw"
+  },
+  "overrides": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

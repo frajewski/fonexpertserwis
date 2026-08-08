@@ -1,0 +1,19 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: { port: 5174 }, // inny port niż gsm-web-portal (5173), żeby móc uruchomić oba naraz
+  resolve: {
+    // @gsm/shared-core jest symlinkiem (npm workspaces) do packages/shared-core/ –
+    // bez tego Vite czasem traktuje kod z workspace jako "zewnętrzny" i pomija
+    // go przy transformacji/HMR
+    preserveSymlinks: false,
+  },
+  optimizeDeps: {
+    // Wymuszamy traktowanie pakietu workspace jako kodu źródłowego projektu
+    // (nie pre-zbudowanej zależności z node_modules), żeby zmiany w
+    // packages/shared-core/ były widoczne bez restartu serwera dev
+    exclude: ['@gsm/shared-core'],
+  },
+})

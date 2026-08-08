@@ -1,0 +1,20 @@
+{
+  "name": "@gsm/shared-core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./useStore": "./src/useStore.js",
+    "./firestoreDb": "./src/firestoreDb.js",
+    "./firebaseAuthService": "./src/firebaseAuthService.js",
+    "./userProfileService": "./src/userProfileService.js",
+    "./constants/*.js": "./src/constants/*.js",
+    "./utils/*.js": "./src/utils/*.js"
+  },
+  "dependencies": {
+    "zustand": "^4.5.2"
+  },
+  "peerDependencies": {
+    "firebase": "^10.14.1"
+  }
+}

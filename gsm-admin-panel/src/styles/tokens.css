@@ -1,0 +1,138 @@
+/* ============================================================
+   tokens.css – fundament wizualny panelu administracyjnego GSM Serwis
+   Inny charakter niż panel klienta: to narzędzie pracy używane godzinami
+   na dużym ekranie, nie jednorazowy, ciepły kontakt — stąd gęstsza
+   informacja, stały sidebar, mniej "oddychającej" przestrzeni.
+   ============================================================ */
+
+:root {
+  /* Ta sama paleta bazowa co panel klienta — konsekwencja marki */
+  --ink:        #14192B;
+  --ink-soft:   #5B6178;
+  --ink-faint:  #9499AB;
+  --paper:      #F4F5F7;   /* chłodniejsza niż w panelu klienta — bardziej "biurowa" */
+  --surface:    #FFFFFF;
+  --line:       #E3E5EA;
+
+  --navy:       #1A2438;
+  --navy-soft:  #2A3650;
+  --navy-deep:  #11172B;   /* tło sidebara — głębszy niż navy */
+
+  --accent:     #6465FF;
+  --accent-soft: #EDEDFF;
+  --accent-deep: #5253E8;
+
+  --good:       #1DB954;
+  --good-soft:  #E7F8ED;
+  --warn:       #E8533D;
+  --warn-soft:  #FCEAE6;
+  --wait:       #C99A2E;
+  --wait-soft:  #FAF1DD;
+  --info:       #3B82F6;
+  --info-soft:  #EAF1FE;
+
+  --accent-gradient: linear-gradient(135deg, #7B7CFF 0%, #5253E8 100%);
+  --navy-gradient: linear-gradient(180deg, #151C33 0%, #0D1220 100%);
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-card: 0 1px 2px rgba(20, 25, 43, 0.04), 0 2px 6px rgba(20, 25, 43, 0.05), 0 8px 20px -6px rgba(20, 25, 43, 0.06);
+  --shadow-lift: 0 6px 20px -4px rgba(20, 25, 43, 0.14), 0 2px 8px rgba(20, 25, 43, 0.08);
+  --shadow-modal: 0 24px 60px -12px rgba(20, 25, 43, 0.32);
+  --shadow-accent: 0 8px 24px -6px rgba(100, 101, 255, 0.35);
+
+  --sidebar-width: 232px;
+  --topbar-height: 56px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { min-height: 100vh; }
+
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+table { border-collapse: collapse; width: 100%; }
+
+button:focus-visible, input:focus-visible, a:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+
+/* ============================================================
+   WYKOŃCZENIE — mikro-interakcje na kartach i przyciskach
+   Każda podstrona nazywa swoje karty inaczej (rd-card, tr-card,
+   pt-card...), więc łapiemy je wszystkie po wspólnym wzorcu nazwy,
+   tak samo jak w bloku mobile niżej. Efekt: spójne, "żywe" odczucie
+   wszędzie naraz, bez przechodzenia pliku po pliku.
+   ============================================================ */
+[class$="-card"] {
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+button {
+  transition: transform 0.1s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+button:active:not(:disabled) { transform: scale(0.97); }
+
+input, select, textarea {
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================
+   SIATKA BEZPIECZEŃSTWA — mobile responsiveness
+   Globalne poprawki dla telefonów, żeby nie trzeba było ręcznie
+   wchodzić w CSS każdej podstrony z osobna. Konkretne strony mogą
+   nadal mieć własne, bardziej dopracowane @media (max-width: ...)
+   — te reguły tylko łapią wszystko, czego nie złapały.
+   ============================================================ */
+@media (max-width: 600px) {
+  /* Zmniejszony margines na wszystkich stronach (każda ma inną nazwę klasy
+     -page, więc łapiemy je wszystkie razem po wspólnym wzorcu przyrostka) */
+  [class$="-page"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-top: 16px !important;
+  }
+
+  /* Tabele nie mieszczą się na wąskim ekranie — zamiast się łamać,
+     dają scroll w poziomie wewnątrz swojego kontenera */
+  table { min-width: 560px; }
+  [class*="-table-wrap"] { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+
+  /* Siatki dwukolumnowe (statystyki, formularze) na jedną kolumnę */
+  [class$="-row"] { grid-template-columns: 1fr !important; }
+
+  /* Nagłówki stron z przyciskiem po prawej – żeby się nie ścieśniały w linii */
+  [class$="-header"] { flex-wrap: wrap !important; gap: 12px; }
+
+  /* Karty z akcjami w rzędzie (przyciski) – żeby dało się kliknąć kciukiem */
+  button { min-height: 36px; }
+}

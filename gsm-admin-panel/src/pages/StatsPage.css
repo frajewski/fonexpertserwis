@@ -1,0 +1,63 @@
+.st-page { padding: 28px 32px 60px; max-width: 1100px; }
+.st-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--ink); margin: 0 0 20px; }
+
+.st-periods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+
+.st-period-card { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 18px 20px; }
+.st-period-label { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.02em; }
+.st-period-grid { display: flex; justify-content: space-between; }
+.st-period-grid > div { display: flex; flex-direction: column; gap: 2px; }
+.st-period-value { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--ink); }
+.st-period-sub { font-size: 11px; color: var(--ink-faint); }
+
+.st-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+.st-card { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 20px 22px; }
+.st-section-title { font-size: 13px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; margin: 0 0 14px; }
+
+.st-ranking { display: flex; flex-direction: column; gap: 8px; }
+.st-ranking-row { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+.st-ranking-pos { width: 18px; height: 18px; border-radius: 50%; background: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--ink-soft); flex-shrink: 0; }
+.st-ranking-name { flex: 1; color: var(--ink); }
+.st-ranking-count { font-family: var(--font-mono); font-weight: 600; color: var(--ink-soft); }
+
+.st-empty { font-size: 13px; color: var(--ink-faint); margin: 0; }
+
+.st-trade-stats { display: flex; gap: 32px; }
+.st-trade-stats > div { display: flex; flex-direction: column; gap: 2px; }
+.st-trade-value { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--ink); }
+.st-trade-label { font-size: 11.5px; color: var(--ink-faint); }
+
+.st-good { color: var(--good) !important; }
+.st-bad { color: var(--warn) !important; }
+.st-ranking-sub { color: var(--ink-faint); font-weight: 400; font-size: 12px; }
+
+.st-month-detail { border: 1.5px solid var(--accent-soft, var(--line)); }
+.st-month-header { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; }
+.st-month-nav { width: 32px; height: 32px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--line); font-size: 14px; font-weight: 700; color: var(--ink); }
+.st-month-nav:hover { border-color: var(--accent); color: var(--accent); }
+.st-month-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+.st-month-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; display: flex; align-items: center; gap: 8px; }
+.st-month-current-badge { font-size: 10.5px; font-weight: 700; text-transform: uppercase; background: var(--good-soft); color: var(--good); padding: 3px 8px; border-radius: 20px; }
+.st-month-summary { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.st-month-summary:last-of-type { border-bottom: none; margin-bottom: 8px; }
+.st-month-sub { flex: 1; }
+.st-month-sub-title { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.02em; margin: 0 0 12px; }
+
+.st-bars { display: flex; align-items: flex-end; gap: 6px; height: 140px; padding-top: 10px; }
+.st-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
+.st-bar { width: 100%; max-width: 28px; border-radius: 4px 4px 0 0; transition: height 0.2s; }
+.st-bar-good { background: var(--good); }
+.st-bar-bad { background: var(--warn); }
+.st-bar-label { font-size: 10.5px; color: var(--ink-faint); text-transform: uppercase; }
+
+.st-stale-card { border: 1.5px solid var(--warn-soft); }
+.st-stale-list { display: flex; flex-direction: column; gap: 6px; }
+.st-stale-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.st-stale-row:last-child { border-bottom: none; }
+.st-stale-name { color: var(--ink); font-weight: 600; }
+.st-stale-days { color: var(--warn); font-size: 12px; font-weight: 600; white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .st-periods, .st-row { grid-template-columns: 1fr; }
+}

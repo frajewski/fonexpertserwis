@@ -1,0 +1,257 @@
+.td-page { padding: 24px 32px 60px; max-width: 1100px; }
+
+.td-back {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+.td-back:hover { color: var(--accent); }
+
+.td-notfound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 80px 0;
+  color: var(--ink-soft);
+}
+
+.td-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.td-main, .td-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.td-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 20px 22px;
+}
+
+.td-header-card { padding-bottom: 18px; }
+
+.td-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.td-header-actions { display: flex; align-items: center; gap: 10px; }
+.td-btn-edit { padding: 6px 12px; font-size: 12px; }
+
+.td-dates { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; }
+
+.td-edit-form { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.td-edit-row { display: flex; gap: 12px; }
+.td-edit-row .td-edit-field { flex: 1; }
+.td-edit-field { display: flex; flex-direction: column; gap: 6px; }
+.td-edit-field span { font-size: 12px; font-weight: 600; color: var(--ink); }
+.td-textarea { width: 100%; resize: vertical; font-family: inherit; }
+.td-edit-actions { display: flex; gap: 8px; margin-top: 4px; }
+.td-edit-actions .td-btn-ghost { flex: 1; }
+.td-edit-actions .td-btn-primary-sm { flex: 1; }
+
+.td-number {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.td-device {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 2px 0 0;
+}
+
+.td-imei { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); margin-bottom: 8px; }
+.td-desc { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin: 0; }
+
+.td-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 14px;
+}
+
+.td-customer-row { display: flex; justify-content: space-between; align-items: center; }
+.td-customer-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.td-customer-phone { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+
+.td-cost-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--line);
+}
+.td-cost-row:last-of-type { border-bottom: none; }
+
+.td-cost-total {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1.5px solid var(--line);
+}
+
+.td-status-line {
+  margin-top: 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+}
+.td-status-good { background: var(--good-soft); color: var(--good); }
+.td-status-warn { background: var(--warn-soft); color: var(--warn); }
+.td-status-wait { background: var(--wait-soft); color: var(--wait); }
+
+.td-warranty-text { font-size: 14px; color: var(--good); font-weight: 600; margin: 0; }
+
+.td-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.td-badge-good    { background: var(--good-soft); color: var(--good); }
+.td-badge-warn    { background: var(--warn-soft); color: var(--warn); }
+.td-badge-wait    { background: var(--wait-soft); color: var(--wait); }
+.td-badge-info    { background: var(--info-soft); color: var(--info); }
+.td-badge-neutral { background: var(--paper); color: var(--ink-soft); }
+
+/* Panel akcji */
+.td-status-options { display: flex; flex-direction: column; gap: 6px; }
+
+.td-status-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  font-size: 13px;
+  color: var(--ink);
+  text-align: left;
+}
+.td-status-option:hover:not(:disabled) { background: var(--accent-soft); }
+.td-status-option-active { background: var(--accent); color: #fff; font-weight: 600; }
+.td-status-option:disabled { cursor: default; }
+
+.td-warranty-card { border: 1.5px solid var(--wait); }
+.td-warranty-options { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+
+.td-warranty-option {
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.td-warranty-option-active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.td-btn-primary {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+}
+.td-btn-primary:hover { background: var(--accent-deep); }
+
+.td-btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+}
+.td-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.td-danger-card { border: 1.5px solid var(--warn-soft); }
+
+.td-btn-danger-ghost {
+  width: 100%;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+}
+
+.td-danger-text { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 12px; }
+.td-danger-actions { display: flex; gap: 8px; }
+.td-danger-actions .td-btn-ghost { flex: 1; }
+
+.td-btn-danger {
+  flex: 1;
+  background: var(--warn);
+  color: #fff;
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+}
+.td-btn-danger:hover { opacity: 0.9; }
+
+@media (max-width: 860px) {
+  .td-layout { grid-template-columns: 1fr; }
+}
+
+/* Style specyficzne dla TradeDetailPage, nieobecne w RepairDetailPage */
+.td-status-icon { font-size: 22px; }
+.td-meta { display: flex; gap: 6px; font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
+.td-imei { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); }
+
+.td-locks { display: flex; flex-direction: column; gap: 8px; }
+.td-lock { font-size: 13px; color: var(--ink); background: var(--paper); padding: 8px 12px; border-radius: var(--radius-sm); }
+.td-lock-warn { background: var(--warn-soft); color: var(--warn); }
+
+.td-sell-form { display: flex; gap: 8px; margin-top: 10px; }
+.td-input { flex: 1; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; background: var(--paper); }
+.td-input:focus { border-color: var(--accent); background: var(--surface); }
+
+.td-btn-primary-sm { background: var(--accent); color: #fff; font-weight: 600; font-size: 12.5px; padding: 9px 14px; border-radius: var(--radius-sm); white-space: nowrap; }
+.td-btn-primary-sm:hover { background: var(--accent-deep); }
+
+.td-notes { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+
+.td-profit-good span:last-child { color: var(--good); }
+.td-profit-bad span:last-child { color: var(--warn); }
+
+.td-empty-hint { font-size: 12.5px; color: var(--ink-faint); margin: 0; }
+
+.td-used-parts-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+.td-used-part-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--paper); border-radius: var(--radius-sm); padding: 7px 10px;
+  font-size: 12.5px; color: var(--ink);
+}
+.td-used-part-remove { color: var(--warn); font-weight: 700; font-size: 13px; padding: 0 4px; }
+.td-used-part-remove:hover { opacity: 0.7; }
+
+.td-add-part-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+.td-add-part-row .td-input { flex: 1; min-width: 0; }
+.td-add-part-qty { width: 60px; flex-shrink: 0; flex: none !important; }

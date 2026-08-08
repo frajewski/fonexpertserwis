@@ -1,0 +1,111 @@
+.tr-page { padding: 28px 32px 60px; max-width: 1200px; }
+
+.tr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.tr-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+.tr-count { font-size: 13px; color: var(--ink-soft); margin: 0; }
+
+.tr-new-btn { background: var(--accent); color: #fff; font-weight: 600; font-size: 13.5px; padding: 10px 18px; border-radius: var(--radius-sm); }
+.tr-new-btn:hover { background: var(--accent-deep); }
+
+.tr-header-actions { display: flex; gap: 10px; }
+.tr-import-btn { background: transparent; border: 1.5px solid var(--line); color: var(--ink-soft); font-weight: 600; font-size: 13.5px; padding: 10px 18px; border-radius: var(--radius-sm); }
+.tr-import-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.tr-toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+
+.tr-search { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 0 12px; max-width: 380px; }
+.tr-search-icon { color: var(--ink-faint); font-size: 14px; }
+.tr-search-input { flex: 1; border: none; background: none; padding: 9px 0; font-size: 13.5px; }
+.tr-search-input:focus { outline: none; }
+
+.tr-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tr-chip { padding: 6px 12px; border-radius: 20px; background: var(--surface); border: 1.5px solid var(--line); font-size: 12.5px; font-weight: 500; color: var(--ink-soft); }
+.tr-chip:hover { border-color: var(--accent); }
+.tr-chip-active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.tr-toolbar-secondary { flex-direction: row; align-items: center; flex-wrap: wrap; margin-top: -6px; }
+.tr-select-all-btn { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 12.5px; font-weight: 600; background: var(--paper); color: var(--ink); white-space: nowrap; }
+.tr-select-all-btn:hover { border-color: var(--accent); color: var(--accent); }
+.tr-filter-select { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 7px 10px; font-size: 12.5px; background: var(--paper); color: var(--ink); }
+.tr-filter-select:focus { border-color: var(--accent); background: var(--surface); }
+.tr-chip-clear { color: var(--warn); border-color: var(--warn-soft); background: var(--warn-soft); }
+.tr-chip-clear:hover { border-color: var(--warn); }
+
+.tr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+
+.tr-card { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 16px; cursor: pointer; }
+.tr-card:hover { box-shadow: var(--shadow-lift); }
+.tr-card-selected { outline: 2px solid var(--accent); }
+
+.tr-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.tr-card-top-left { display: flex; align-items: flex-start; gap: 8px; }
+.tr-checkbox { margin-top: 2px; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+.tr-device { font-weight: 600; font-size: 14px; color: var(--ink); }
+
+.tr-bulk-bar {
+  position: sticky; bottom: 16px; margin-top: 20px;
+  background: var(--ink); color: #fff; border-radius: var(--radius-md);
+  padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap; box-shadow: var(--shadow-lift);
+}
+.tr-bulk-count { font-weight: 700; font-size: 13.5px; white-space: nowrap; }
+.tr-bulk-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tr-bulk-status-btn { background: rgba(255,255,255,0.15); color: #fff; font-size: 12.5px; font-weight: 600; padding: 8px 12px; border-radius: var(--radius-sm); }
+.tr-bulk-status-btn:hover { background: rgba(255,255,255,0.28); }
+.tr-bulk-status-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.tr-bulk-cancel { background: transparent; border: 1.5px solid rgba(255,255,255,0.4); color: #fff; font-size: 12.5px; font-weight: 600; padding: 8px 12px; border-radius: var(--radius-sm); }
+.tr-bulk-cancel:hover { border-color: #fff; }
+
+.tr-badge { font-size: 14px; }
+
+.tr-meta { display: flex; gap: 8px; font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; flex-wrap: wrap; }
+.tr-grade { font-weight: 600; }
+
+.tr-locks { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.tr-lock-tag { font-size: 10.5px; background: var(--paper); padding: 3px 8px; border-radius: 10px; color: var(--ink-soft); }
+.tr-lock-tag-warn { background: var(--warn-soft); color: var(--warn); }
+
+.tr-prices { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--ink-soft); padding-top: 8px; border-top: 1px solid var(--line); font-family: var(--font-mono); }
+.tr-profit-good { color: var(--good); font-weight: 600; }
+.tr-profit-bad { color: var(--warn); font-weight: 600; }
+
+.tr-empty { grid-column: 1 / -1; padding: 60px; text-align: center; color: var(--ink-faint); font-size: 13.5px; }
+
+.tr-filters-btn {
+  border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+  padding: 7px 14px; font-size: 12.5px; font-weight: 600;
+  background: var(--paper); color: var(--ink); white-space: nowrap;
+}
+.tr-filters-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.tr-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 20px;
+}
+
+.tr-modal {
+  background: var(--surface); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal); padding: 24px;
+  width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto;
+}
+
+.tr-modal-title {
+  font-family: var(--font-display); font-size: 18px; font-weight: 700;
+  color: var(--ink); margin: 0 0 18px;
+}
+
+.tr-modal-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;
+}
+@media (max-width: 560px) { .tr-modal-grid { grid-template-columns: 1fr; } }
+
+.tr-modal-field { display: flex; flex-direction: column; gap: 6px; }
+.tr-modal-field span { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+
+.tr-modal-actions {
+  display: flex; gap: 10px; margin-top: 18px; padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.tr-modal-actions .tr-select-all-btn { flex: 1; }
+.tr-modal-actions .tr-new-btn { flex: 1; }
