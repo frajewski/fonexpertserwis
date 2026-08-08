@@ -1,0 +1,204 @@
+// ============================================================
+//  firestore.rules – reguły bezpieczeństwa Firestore
+//  WERSJA Z CUSTOM CLAIMS (nie get() do users/{uid})
+//
+//  Rola żyje jako CUSTOM CLAIM na koncie Firebase Auth, ustawiana przez
+//  Cloud Functions (decideInitialRole, setUserRoleClaim – patrz functions/index.js).
+//  Reguły odczytują request.auth.token.role – to jest zaszyte w tokenie JWT
+//  klienta, darmowe do odczytu i NIE wymaga get() do innego dokumentu.
+//
+//  Dlaczego ta zmiana: get() w złożonych warunkach OR używanych w operacjach
+//  `list` (zapytania z onSnapshot) bywa niestabilny i może powodować błędne
+//  odmowy permission-denied nawet gdy logika wygląda poprawnie. Custom claims
+//  eliminują tę klasę problemów całkowicie, bo nie wymagają żadnego
+//  dodatkowego odczytu z bazy podczas ewaluacji reguły.
+//
+//  WAŻNE OGRANICZENIE: rola w dokumencie users/{uid} (pole "role") i rola
+//  w custom claim mogą się chwilowo rozjechać, jeśli klient nie odświeży
+//  tokenu (getIdToken(true)) po zmianie roli. Token Firebase odświeża się
+//  automatycznie co godzinę, ale dla natychmiastowego efektu po zmianie
+//  roli wymagane jest wylogowanie/zalogowanie albo wymuszone odświeżenie
+//  (patrz useStore.js – wywołane po decideInitialRole/setUserRoleClaim).
+//
+//  Wdrożenie: firebase deploy --only firestore:rules
+// ============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Funkcje pomocnicze ----------
+    // Wszystkie czytają TYLKO request.auth.token – żadnych get()/exists()
+    // do innych dokumentów, więc są bezpieczne nawet w operacjach list.
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && myRole() == 'admin';
+    }
+
+    function isStaff() {
+      return isSignedIn() && (myRole() == 'admin' || myRole() == 'worker');
+    }
+
+    function isOwner(customerId) {
+      return isSignedIn() && request.auth.uid == customerId;
+    }
+
+    // Klient panelu webowego loguje się anonimowo (signInAnonymously) – bez
+    // hasła, tylko po to żeby Firestore go widział jako "zalogowanego".
+    // WAŻNE: tokeny anonimowe można wygenerować przez REST API Firebase
+    // niezależnie od naszej apki, więc same w sobie NIE są dowodem że żądanie
+    // przyszło z prawdziwego panelu – dlatego ograniczamy je dodatkowo do
+    // zapytań z konkretnym dopasowaniem numeru telefonu (patrz reguła repairs),
+    // nigdy do odczytu całej kolekcji czy dowolnego dokumentu.
+    function isAnonymous() {
+      return isSignedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    // ---------- USERS ----------
+    // Każdy zalogowany może odczytać profile (potrzebne do list klientów,
+    // przypisywania zleceń itd.) — to nie są dane wrażliwe per się.
+    //
+    // Tworzenie własnego profilu: pole "role" w dokumencie MUSI być zgodne
+    // z custom claim ustawionym wcześniej przez Cloud Function – więc klient
+    // nie może sam sobie przyznać roli innej niż ta, którą Cloud Function
+    // (decideInitialRole) faktycznie mu ustawiła. Bezpieczne, bo claim jest
+    // ustawiany z uprawnieniami Admin SDK, poza zasięgiem klienta.
+    //
+    // Update: użytkownik może zmieniać swoje dane (imię, telefon), ale pole
+    // "role" w dokumencie zmienia tylko Admin – musi być zgodne z claim
+    // (synchronizacja przez setUserRoleClaim, wywołane razem z updateUserRole).
+    match /users/{userId} {
+      // Anonimowi klienci panelu webowego NIE mają tu żadnego dostępu –
+      // ta kolekcja zawiera dane osobowe (imiona, telefony, emaile)
+      // wszystkich kont, a panel webowy nie potrzebuje jej wcale (dane
+      // klienta widoczne w panelu są zapisane bezpośrednio w repairs).
+      allow read: if isSignedIn() && !isAnonymous();
+
+      allow create: if (
+                      // Samorejestracja: użytkownik zapisuje WŁASNY profil pod
+                      // swoim UID, z rolą zgodną z custom claim
+                      isSignedIn() && request.auth.uid == userId
+                      && request.resource.data.role == myRole()
+                    )
+                    || (
+                      // Klient "papierowy" (walk-in): personel dodaje go ręcznie
+                      // przy przyjęciu zlecenia (AddRepairScreen). Dokument ma
+                      // wygenerowane ID (nie UID), więc request.auth.uid == userId
+                      // nigdy nie byłoby prawdziwe – ta ścieżka jest niezależna.
+                      isStaff()
+                      && request.resource.data.isWalkIn == true
+                      && request.resource.data.role == 'customer'
+                    );
+
+      allow update: if isAdmin()
+                    || (
+                      isSignedIn() && request.auth.uid == userId
+                      && request.resource.data.role == resource.data.role // rola niezmieniona
+                    );
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- REPAIRS ----------
+    // Klient (apka mobilna, zalogowany) widzi tylko swoje zlecenia, po customerId.
+    // Admin/pracownik widzą wszystkie. Tworzenie nowego zlecenia: tylko personel.
+    //
+    // Panel webowy (klient bez konta, anonimowy) NIE czyta/zapisuje repairs
+    // bezpośrednio przez te reguły – nie da się tu bezpiecznie zweryfikować
+    // "ten anonimowy użytkownik = ten numer telefonu" (tokeny anonimowe nie mają
+    // pola phone_number). Panel webowy rozmawia wyłącznie przez Cloud Functions
+    // (lookupRepair, acceptEstimateWeb, rejectEstimateWeb – patrz functions/index.js),
+    // które same weryfikują zgodność numeru zlecenia + telefonu po stronie serwera,
+    // z uprawnieniami Admin SDK, niezależnie od reguł poniżej.
+    match /repairs/{repairId} {
+      allow read: if isStaff() || isOwner(resource.data.customerId);
+
+      allow create: if isStaff();
+
+      allow update: if isStaff()
+                    || (
+                      // Klient (apka mobilna) może zaktualizować WYŁĄCZNIE pole
+                      // estimateAccepted (akceptacja/odrzucenie kosztorysu)
+                      isOwner(resource.data.customerId)
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                           .hasOnly(['estimateAccepted'])
+                    );
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- PHONES (skup) ----------
+    // Dane finansowe (buyPrice, sellPrice) chronione na poziomie reguł
+    // częściowo nie da się tu w pełni odtworzyć ukrywania pól przed pracownikiem
+    // (Firestore rules nie filtrują pól w odpowiedzi) – to wciąż obowiązek UI,
+    // tak jak teraz w apce mobilnej. Reguły blokują tylko KTO w ogóle ma dostęp.
+    match /phones/{phoneId} {
+      allow read: if isStaff();
+      allow create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // Magazyn generycznych części zamiennych (nie konkretne telefony jak
+    // wyżej) – ilość na stanie może zmieniać każdy ze staffu (pracownik
+    // zużywa część przy naprawie), usuwanie całej pozycji z katalogu
+    // tylko admin.
+    match /parts/{partId} {
+      allow read: if isStaff();
+      allow create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- BOOKING REQUESTS ----------
+    // Klient tworzy zgłoszenie i widzi swoje. Personel widzi i edytuje wszystkie
+    // (akceptacja, propozycja innego terminu, konwersja na zlecenie).
+    match /bookingRequests/{bookingId} {
+      allow read: if isStaff() || isOwner(resource.data.customerId);
+
+      allow create: if isSignedIn()
+                    && request.resource.data.customerId == request.auth.uid;
+
+      allow update: if isStaff();
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- META ----------
+    // Dokument adminAssigned – używany WYŁĄCZNIE przez Cloud Function
+    // (decideInitialRole) do bezpiecznego, atomowego oznaczenia "kto stał się
+    // pierwszym adminem". Nikt z frontu nie powinien tego czytać ani zapisywać.
+    match /meta/adminAssigned {
+      allow read, write: if false;
+    }
+
+    // Dokument settings – dane serwisu (nazwa, adres, telefon) używane na
+    // potwierdzeniach, współdzielone między apką mobilną i panelami webowymi.
+    // Każdy zalogowany może odczytać (np. klient widzący nazwę serwisu na
+    // potwierdzeniu), ale edytować mogą tylko Admin/Pracownik.
+    match /meta/settings {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    // ---------- COUNTERS (numeracja zleceń N/ROK) ----------
+    // Tylko personel może inkrementować licznik (przy tworzeniu zlecenia).
+    // Nikt nie odczytuje tego z frontu poza tym mechanizmem.
+    match /counters/{counterId} {
+      allow read: if isStaff();
+      allow write: if isStaff();
+    }
+
+    // Domyślnie: brak dostępu do czegokolwiek nieujętego wyżej
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

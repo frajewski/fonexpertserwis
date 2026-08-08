@@ -1,0 +1,63 @@
+// ============================================================
+//  storage.rules – reguły bezpieczeństwa Firebase Storage
+//
+//  Struktura plików:
+//    /repairs/{repairId}/{fileName}       – zdjęcia urządzenia / po naprawie
+//    /trade/{phoneId}/{fileName}          – zdjęcia umowy zakupu (skup)
+//
+//  Zasada: każdy zalogowany może wgrywać/czytać zdjęcia (te same osoby,
+//  które mają dostęp do odpowiadającego dokumentu Firestore – personel
+//  do wszystkiego, klient tylko do podglądu zdjęć swoich zleceń, co i tak
+//  Firestore już ogranicza na poziomie dostępu do samego dokumentu repair).
+//  Storage rules nie potrafią łatwo odpytać Firestore o właściciela
+//  konkretnego zlecenia bez kosztownego get() przy KAŻDYM odczycie pliku
+//  (a zdjęć ładuje się dużo, więc to byłoby drogie) – więc ograniczamy
+//  się do "zalogowany = może czytać", a faktyczna ochrona przed dostępem
+//  do CUDZYCH zleceń odbywa się przez to, że adres URL pliku jest znany
+//  tylko komuś, kto już ma dostęp do dokumentu repair (zawierającego ten URL).
+// ============================================================
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Personel (admin/pracownik) – to samo źródło prawdy co w firestore.rules
+    // (custom claim, nie get() do Firestore). Zapis/kasowanie zdjęć ograniczamy
+    // do personelu, bo wcześniejsza reguła "każdy zalogowany" (w tym anonimowa
+    // sesja panelu klienta) pozwalała komukolwiek nadpisać albo skasować
+    // zdjęcie w DOWOLNYM zleceniu, nie tylko swoim.
+    function isStaff() {
+      return isSignedIn()
+             && (request.auth.token.role == 'admin' || request.auth.token.role == 'worker');
+    }
+
+    // Maksymalny rozmiar jednego zdjęcia: 8 MB (typowe zdjęcie z telefonu
+    // po kompresji ~0.7 w expo-image-picker to 1-3 MB, 8 MB to bezpieczny margines)
+    function isValidImage() {
+      return request.resource.size < 8 * 1024 * 1024
+             && request.resource.contentType.matches('image/.*');
+    }
+
+    match /repairs/{repairId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isStaff() && isValidImage();
+      allow delete: if isStaff();
+    }
+
+    match /trade/{phoneId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isStaff() && isValidImage();
+      allow delete: if isStaff();
+    }
+
+    // Domyślnie: brak dostępu do czegokolwiek nieujętego wyżej
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
