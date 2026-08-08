@@ -123,15 +123,15 @@ Zdjęcia urządzeń wgrywane są do Firebase Storage — widoczne z każdego urz
 
 ### 🖥️ Panel admina
 
+**Codzienne korzystanie (produkcja):** **https://gsm-serwis-admin.web.app/** — to jest oficjalny, wdrożony link. Zaloguj się kontem Admina lub Pracownika. Na telefonie: Chrome/Safari → "Dodaj do ekranu głównego" — apka instaluje się jako PWA, bez App Store/Play Store.
+
+**Praca deweloperska (zmiany w kodzie, lokalnie na komputerze):**
 ```bash
 cd gsm-admin-panel
 npm install
 npm run dev
 ```
-
-Otworzy się na `http://localhost:5174`. Zaloguj się kontem Admina lub Pracownika.
-
-**Instalacja jako PWA:** wejdź na wdrożony link (np. `gsm-serwis-admin.web.app`) na telefonie w Chrome/Safari → "Dodaj do ekranu głównego" — apka instaluje się bez App Store/Play Store.
+Otworzy się na `http://localhost:5174` — to działa tylko na Twoim komputerze, do testowania zmian PRZED wdrożeniem (`npm run build` + `firebase deploy --only hosting:admin`).
 
 ### 🌐 Panel klienta
 
