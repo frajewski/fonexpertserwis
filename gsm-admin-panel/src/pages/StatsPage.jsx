@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import useStore from '../store/useStore';
 import { getStatsByPeriod, getTopBrands, getTopFaults, filterByMonth, filterDeliveredByMonth, calcRevenue, calcProfit } from '../utils/calcProfit';
-import { getTopSellingModels, getAvgProfitByBrand, getStalePhones, getMonthlyTradeData, getTradeStatsForMonth } from '../utils/calcTradeStats';
+import { getTopSellingModels, getAvgProfitByBrand, getStalePhones, getMonthlyTradeData, getTradeStatsForMonth, getTradeProfitToday, getTradeProfitThisMonth, getTradeProfitThisYear } from '../utils/calcTradeStats';
 import STATUS from '../constants/statuses';
 import './StatsPage.css';
 
@@ -45,6 +45,9 @@ export default function StatsPage() {
 
   const completed = repairs.filter((r) => r.status === STATUS.DELIVERED);
   const stats = getStatsByPeriod(completed);
+  const tradeProfitToday = getTradeProfitToday(phones);
+  const tradeProfitThisMonth = getTradeProfitThisMonth(phones);
+  const tradeProfitThisYear = getTradeProfitThisYear(phones);
   const topBrands = getTopBrands(completed).slice(0, 5);
   const topFaults = getTopFaults(completed);
 
@@ -62,9 +65,9 @@ export default function StatsPage() {
       <h1 className="st-title">Statystyki</h1>
 
       <div className="st-periods">
-        <PeriodCard label="Dziś" data={stats.today} />
-        <PeriodCard label="Ten miesiąc" data={stats.thisMonth} />
-        <PeriodCard label="Ten rok" data={stats.thisYear} />
+        <PeriodCard label="Dziś" data={stats.today} tradeProfit={tradeProfitToday} />
+        <PeriodCard label="Ten miesiąc" data={stats.thisMonth} tradeProfit={tradeProfitThisMonth} />
+        <PeriodCard label="Ten rok" data={stats.thisYear} tradeProfit={tradeProfitThisYear} />
       </div>
 
       <div className="st-card st-month-detail">
@@ -84,6 +87,7 @@ export default function StatsPage() {
         </div>
         <div className="st-trade-stats st-month-summary">
           <div><span className="st-trade-value">{monthTrade.boughtCount}</span><span className="st-trade-label">Telefonów kupionych</span></div>
+          <div><span className="st-trade-value">{monthTrade.boughtCost} zł</span><span className="st-trade-label">Kwota zakupu telefonów</span></div>
           <div><span className="st-trade-value">{monthTrade.soldCount}</span><span className="st-trade-label">Telefonów sprzedanych</span></div>
           <div><span className={`st-trade-value ${monthTrade.profit >= 0 ? 'st-good' : 'st-bad'}`}>{monthTrade.profit >= 0 ? '+' : ''}{monthTrade.profit} zł</span><span className="st-trade-label">Zysk ze skupu</span></div>
         </div>
@@ -258,14 +262,19 @@ export default function StatsPage() {
   );
 }
 
-function PeriodCard({ label, data }) {
+function PeriodCard({ label, data, tradeProfit = 0 }) {
+  const combined = data.profit + tradeProfit;
   return (
     <div className="st-period-card">
       <h3 className="st-period-label">{label}</h3>
       <div className="st-period-grid">
         <div><span className="st-period-value">{data.count}</span><span className="st-period-sub">napraw</span></div>
         <div><span className="st-period-value">{data.revenue} zł</span><span className="st-period-sub">przychód</span></div>
-        <div><span className="st-period-value st-good">{data.profit} zł</span><span className="st-period-sub">zysk</span></div>
+        <div><span className="st-period-value st-good">{data.profit} zł</span><span className="st-period-sub">zysk napraw</span></div>
+      </div>
+      <div className="st-period-combined">
+        <span className={combined >= 0 ? 'st-good' : 'st-bad'}>{combined >= 0 ? '+' : ''}{combined} zł</span>
+        <span className="st-period-combined-label">łączny zysk (+ skup)</span>
       </div>
     </div>
   );

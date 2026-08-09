@@ -74,5 +74,35 @@ export const getTradeStatsForMonth = (phonesArray, year, month) => {
   const bought = phonesArray.filter((p) => isInMonth(p.boughtAt, year, month));
   const sold = phonesArray.filter((p) => p.status === 'Sprzedany' && isInMonth(p.soldAt, year, month));
   const profit = sold.reduce((sum, p) => sum + ((p.sellPrice || 0) - (p.buyPrice || 0)), 0);
-  return { boughtCount: bought.length, soldCount: sold.length, profit, soldPhones: sold };
+  // Ile realnie wydano na zakup telefonów w tym miesiącu (niezależnie czy
+  // dany telefon już się sprzedał, czy jeszcze leży w magazynie)
+  const boughtCost = bought.reduce((sum, p) => sum + (p.buyPrice || 0), 0);
+  return { boughtCount: bought.length, soldCount: sold.length, profit, boughtCost, soldPhones: sold };
+};
+
+// Zysk ze skupu (tylko liczba, do złączenia z zyskiem z napraw w kartach
+// okresów "Dziś"/"Ten miesiąc"/"Ten rok") – liczony po dacie SPRZEDAŻY.
+const calcTradeProfit = (soldPhones) =>
+  soldPhones.reduce((sum, p) => sum + ((p.sellPrice || 0) - (p.buyPrice || 0)), 0);
+
+export const getTradeProfitToday = (phonesArray) => {
+  const today = new Date();
+  const sold = phonesArray.filter((p) => {
+    if (p.status !== 'Sprzedany' || !p.soldAt) return false;
+    const d = new Date(p.soldAt);
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+  });
+  return calcTradeProfit(sold);
+};
+
+export const getTradeProfitThisMonth = (phonesArray) => {
+  const now = new Date();
+  const sold = phonesArray.filter((p) => p.status === 'Sprzedany' && isInMonth(p.soldAt, now.getFullYear(), now.getMonth()));
+  return calcTradeProfit(sold);
+};
+
+export const getTradeProfitThisYear = (phonesArray) => {
+  const year = new Date().getFullYear();
+  const sold = phonesArray.filter((p) => p.status === 'Sprzedany' && p.soldAt && new Date(p.soldAt).getFullYear() === year);
+  return calcTradeProfit(sold);
 };
