@@ -15,6 +15,12 @@ const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—'
 
 export function printRepairConfirmation(repair, customer, shopSettings) {
   const total = (repair.partsCost || 0) + (repair.serviceCost || 0);
+  const trackingUrl = repair.trackingToken
+    ? `https://gsm-serwis-klient.web.app/?token=${repair.trackingToken}`
+    : null;
+  const qrCodeUrl = trackingUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=130x130&margin=0&data=${encodeURIComponent(trackingUrl)}`
+    : null;
 
   const row = (label, value) =>
     value ? `<div class="row"><span class="rowLabel">${label}:</span> <span class="rowValue">${value}</span></div>` : '';
@@ -55,13 +61,19 @@ export function printRepairConfirmation(repair, customer, shopSettings) {
             font-size: 18px;
             font-weight: 900;
           }
+          .headerRow { position: relative; }
+          .qrBox { position: absolute; top: 0; right: 0; text-align: center; width: 100px; }
+          .qrLabel { font-size: 9px; color: #555; margin-top: 2px; }
           @media print { @page { margin: 16mm; } }
         </style>
       </head>
       <body>
-        <p class="shopName">${shopSettings.shopName}</p>
-        <p class="shopSub">${shopSettings.shopAddress}</p>
-        <p class="shopSub">${shopSettings.shopPhone}</p>
+        <div class="headerRow">
+          <p class="shopName">${shopSettings.shopName}</p>
+          <p class="shopSub">${shopSettings.shopAddress}</p>
+          <p class="shopSub">${shopSettings.shopPhone}</p>
+          ${qrCodeUrl ? `<div class="qrBox"><img src="${qrCodeUrl}" width="80" height="80" /><p class="qrLabel">Zeskanuj, aby<br/>śledzić status</p></div>` : ''}
+        </div>
         <div class="divider"></div>
 
         <p class="title">POTWIERDZENIE PRZYJĘCIA URZĄDZENIA</p>
