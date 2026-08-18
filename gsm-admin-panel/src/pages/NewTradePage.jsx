@@ -49,7 +49,7 @@ export default function NewTradePage() {
     const part = parts.find((p) => p.id === pickPartId);
     if (!part) return;
     const qty = parseInt(pickQuantity) || 1;
-    setUsedPartsInput((prev) => [...prev, { partId: part.id, name: part.name, quantity: qty }]);
+    setUsedPartsInput((prev) => [...prev, { partId: part.id, name: part.name, quantity: qty, unitCost: part.unitCost || 0 }]);
     setPickPartId('');
     setPickQuantity('1');
   };
@@ -91,10 +91,15 @@ export default function NewTradePage() {
 
     setLoading(true);
     try {
+      // Cena zakupu wpisana ręcznie + koszt części z magazynu wybranych
+      // w sekcji "Wymienione elementy" (jeśli jakieś wybrano) – tak samo jak
+      // przy edycji istniejącego telefonu.
+      const usedPartsCost = usedPartsInput.reduce((sum, p) => sum + (p.partId ? (p.unitCost || 0) * p.quantity : 0), 0);
+
       const phone = await addPhone({
         brand, model: model.trim(), imei: imei.trim(),
         color: color.trim(), storage, grade, source, sourceNote: sourceNote.trim(),
-        buyPrice: parseFloat(buyPrice) || 0,
+        buyPrice: (parseFloat(buyPrice) || 0) + usedPartsCost,
         boughtAt: boughtDate ? new Date(boughtDate).toISOString() : undefined,
         sellPrice: 0,
         status: TRADE_STATUS.BOUGHT,

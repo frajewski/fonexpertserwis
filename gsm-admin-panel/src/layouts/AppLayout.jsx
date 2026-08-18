@@ -4,11 +4,13 @@ import useStore from '../store/useStore';
 import './AppLayout.css';
 
 const NAV_ITEMS = [
+  { to: '/pulpit',     label: 'Pulpit',       icon: '⌂', roles: ['admin', 'worker'] },
   { to: '/',          label: 'Zlecenia',     icon: '◆', roles: ['admin', 'worker'] },
   { to: '/magazyn',    label: 'Magazyn',      icon: '▤', roles: ['admin', 'worker'] },
   { to: '/skup',       label: 'Skup',         icon: '◈', roles: ['admin'] },
   { to: '/klienci',    label: 'Klienci',      icon: '◎', roles: ['admin', 'worker'] },
   { to: '/statystyki', label: 'Statystyki',   icon: '◬', roles: ['admin'] },
+  { to: '/koszty',     label: 'Koszty firmy', icon: '💸', roles: ['admin'] },
   { to: '/uzytkownicy', label: 'Użytkownicy', icon: '◐', roles: ['admin'] },
   { to: '/ustawienia', label: 'Ustawienia',   icon: '◑', roles: ['admin'] },
 ];

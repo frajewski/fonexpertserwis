@@ -16,6 +16,7 @@ const MONTH_NAMES_FULL = [
 export default function StatsPage() {
   const repairs = useStore((s) => s.getVisibleRepairs());
   const phones = useStore((s) => s.phones);
+  const expenses = useStore((s) => s.expenses);
 
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
@@ -40,6 +41,18 @@ export default function StatsPage() {
   const monthTopBrands = getTopBrands(monthCompleted).slice(0, 5);
   const monthTopFaults = getTopFaults(monthCompleted);
   const monthTrade = getTradeStatsForMonth(phones, selectedDate.year, selectedDate.month);
+
+  // Koszty firmy – liczone TYLKO dla "Ten miesiąc"/"Ten rok"/wybranego
+  // miesiąca (nie dla "Dziś", bo koszty stałe wpisywane są per-miesiąc,
+  // więc odjęcie całego miesięcznego ZUS-u od zysku jednego dnia
+  // wyglądałoby myląco).
+  const currentYM = new Date().toISOString().slice(0, 7);
+  const currentYear = new Date().getFullYear();
+  const selectedYM = `${selectedDate.year}-${String(selectedDate.month + 1).padStart(2, '0')}`;
+
+  const expensesThisMonth = expenses.filter((e) => e.month === currentYM).reduce((s, e) => s + (e.amount || 0), 0);
+  const expensesThisYear = expenses.filter((e) => (e.month || '').startsWith(String(currentYear))).reduce((s, e) => s + (e.amount || 0), 0);
+  const expensesSelectedMonth = expenses.filter((e) => e.month === selectedYM).reduce((s, e) => s + (e.amount || 0), 0);
   const monthTopModels = getTopSellingModels(monthTrade.soldPhones, 5);
   const monthAvgMargin = getAvgProfitByBrand(monthTrade.soldPhones);
 
@@ -66,8 +79,8 @@ export default function StatsPage() {
 
       <div className="st-periods">
         <PeriodCard label="Dziś" data={stats.today} tradeProfit={tradeProfitToday} />
-        <PeriodCard label="Ten miesiąc" data={stats.thisMonth} tradeProfit={tradeProfitThisMonth} />
-        <PeriodCard label="Ten rok" data={stats.thisYear} tradeProfit={tradeProfitThisYear} />
+        <PeriodCard label="Ten miesiąc" data={stats.thisMonth} tradeProfit={tradeProfitThisMonth} expenses={expensesThisMonth} />
+        <PeriodCard label="Ten rok" data={stats.thisYear} tradeProfit={tradeProfitThisYear} expenses={expensesThisYear} />
       </div>
 
       <div className="st-card st-month-detail">
@@ -84,6 +97,7 @@ export default function StatsPage() {
           <div><span className="st-trade-value">{monthCompleted.length}</span><span className="st-trade-label">Napraw ukończonych</span></div>
           <div><span className="st-trade-value">{monthRevenue} zł</span><span className="st-trade-label">Przychód z napraw</span></div>
           <div><span className={`st-trade-value ${monthProfit >= 0 ? 'st-good' : 'st-bad'}`}>{monthProfit >= 0 ? '+' : ''}{monthProfit} zł</span><span className="st-trade-label">Zysk z napraw</span></div>
+          <div><span className="st-trade-value st-bad">{expensesSelectedMonth} zł</span><span className="st-trade-label">Koszty firmy</span></div>
         </div>
         <div className="st-trade-stats st-month-summary">
           <div><span className="st-trade-value">{monthTrade.boughtCount}</span><span className="st-trade-label">Telefonów kupionych</span></div>
@@ -262,8 +276,8 @@ export default function StatsPage() {
   );
 }
 
-function PeriodCard({ label, data, tradeProfit = 0 }) {
-  const combined = data.profit + tradeProfit;
+function PeriodCard({ label, data, tradeProfit = 0, expenses = 0 }) {
+  const netProfit = data.profit + tradeProfit - expenses;
   return (
     <div className="st-period-card">
       <h3 className="st-period-label">{label}</h3>
@@ -273,8 +287,10 @@ function PeriodCard({ label, data, tradeProfit = 0 }) {
         <div><span className="st-period-value st-good">{data.profit} zł</span><span className="st-period-sub">zysk napraw</span></div>
       </div>
       <div className="st-period-combined">
-        <span className={combined >= 0 ? 'st-good' : 'st-bad'}>{combined >= 0 ? '+' : ''}{combined} zł</span>
-        <span className="st-period-combined-label">łączny zysk (+ skup)</span>
+        <span className={netProfit >= 0 ? 'st-good' : 'st-bad'}>{netProfit >= 0 ? '+' : ''}{netProfit} zł</span>
+        <span className="st-period-combined-label">
+          {expenses > 0 ? `zysk netto (+ skup, − koszty ${expenses} zł)` : 'łączny zysk (+ skup)'}
+        </span>
       </div>
     </div>
   );

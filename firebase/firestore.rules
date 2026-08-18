@@ -157,6 +157,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Koszty utrzymania firmy (księgowość, ZUS, VAT, PIT, reklama itd.) –
+    // dane finansowe wrażliwsze niż magazyn części, więc TYLKO Admin,
+    // w odróżnieniu od /parts/ gdzie Pracownik też ma dostęp.
+    match /expenses/{expenseId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
     // ---------- BOOKING REQUESTS ----------
     // Klient tworzy zgłoszenie i widzi swoje. Personel widzi i edytuje wszystkie
     // (akceptacja, propozycja innego terminu, konwersja na zlecenie).

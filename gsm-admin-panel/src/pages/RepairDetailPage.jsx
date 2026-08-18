@@ -186,7 +186,10 @@ export default function RepairDetailPage() {
     const part = parts.find((p) => p.id === pickPartId);
     if (!part) return;
     const qty = parseInt(pickQuantity) || 1;
-    setUsedPartsInput((prev) => [...prev, { partId: part.id, name: part.name, quantity: qty }]);
+    // Zapamiętujemy cenę jednostkową Z MOMENTU dodania (nie odczytujemy jej
+    // na nowo przy zapisie) – żeby późniejsza zmiana ceny części w magazynie
+    // nie przeliczała wstecz kosztu już wykonanych zleceń.
+    setUsedPartsInput((prev) => [...prev, { partId: part.id, name: part.name, quantity: qty, unitCost: part.unitCost || 0 }]);
     setPickPartId('');
     setPickQuantity('1');
   };
@@ -221,9 +224,18 @@ export default function RepairDetailPage() {
       if (delta !== 0) await adjustPartQuantity(partId, -delta);
     }
 
+    // Ta sama zasada co ze stanem magazynowym – doliczamy do kosztorysu
+    // zlecenia TYLKO różnicę kosztu części z magazynu (stara suma vs nowa),
+    // żeby nie dublować przy wielokrotnej edycji, i żeby nie ruszać części
+    // kosztu wpisanej ręcznie w Kosztorysie (za części spoza magazynu).
+    const oldPartsCost = (repair.usedParts || []).reduce((sum, p) => sum + (p.partId ? (p.unitCost || 0) * p.quantity : 0), 0);
+    const newPartsCost = usedPartsInput.reduce((sum, p) => sum + (p.partId ? (p.unitCost || 0) * p.quantity : 0), 0);
+    const costDelta = newPartsCost - oldPartsCost;
+
     await updateRepair(id, {
       workDescription: workDescriptionInput.trim(),
       usedParts: usedPartsInput,
+      ...(costDelta !== 0 ? { partsCost: (repair.partsCost || 0) + costDelta } : {}),
     });
     setEditingWork(false);
   };

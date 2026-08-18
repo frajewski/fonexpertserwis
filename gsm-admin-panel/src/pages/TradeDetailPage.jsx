@@ -108,7 +108,10 @@ export default function TradeDetailPage() {
     const part = parts.find((p) => p.id === pickPartId);
     if (!part) return;
     const qty = parseInt(pickQuantity) || 1;
-    setUsedPartsInput((prev) => [...prev, { partId: part.id, name: part.name, quantity: qty }]);
+    // Zapamiętujemy cenę jednostkową Z MOMENTU dodania (nie odczytujemy jej
+    // na nowo przy zapisie) – żeby późniejsza zmiana ceny części w magazynie
+    // nie przeliczała wstecz kosztu już zrealizowanego skupu.
+    setUsedPartsInput((prev) => [...prev, { partId: part.id, name: part.name, quantity: qty, unitCost: part.unitCost || 0 }]);
     setPickPartId('');
     setPickQuantity('1');
   };
@@ -137,7 +140,19 @@ export default function TradeDetailPage() {
       const delta = (newByPartId[partId] || 0) - (oldByPartId[partId] || 0);
       if (delta !== 0) await adjustPartQuantity(partId, -delta);
     }
-    await updatePhone(id, { usedParts: usedPartsInput });
+
+    // Ta sama zasada co ze stanem magazynowym – doliczamy do kosztu zakupu
+    // telefonu TYLKO różnicę kosztu części z magazynu, żeby nie dublować
+    // przy wielokrotnej edycji, i żeby nie ruszać kosztu wpisanego ręcznie
+    // (za części spoza magazynu).
+    const oldPartsCost = (phone.usedParts || []).reduce((sum, p) => sum + (p.partId ? (p.unitCost || 0) * p.quantity : 0), 0);
+    const newPartsCost = usedPartsInput.reduce((sum, p) => sum + (p.partId ? (p.unitCost || 0) * p.quantity : 0), 0);
+    const costDelta = newPartsCost - oldPartsCost;
+
+    await updatePhone(id, {
+      usedParts: usedPartsInput,
+      ...(costDelta !== 0 ? { buyPrice: (phone.buyPrice || 0) + costDelta } : {}),
+    });
     setEditingUsedParts(false);
   };
 

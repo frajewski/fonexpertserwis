@@ -41,7 +41,7 @@ import {
 import { STATUS } from '../constants/statuses.js';
 import { BOOKING_STATUS } from '../constants/bookingStatuses.js';
 
-const WEB_PANEL_URL = 'https://gsmserviceapp-ff8f6.web.app';
+const WEB_PANEL_URL = 'https://gsm-serwis-klient.web.app';
 const RECENT_DAYS = 30;
 
 const generateTrackingToken = () =>
@@ -369,6 +369,89 @@ export function createFirestoreDb(db) {
     });
   };
 
+  // ---------- KOSZTY UTRZYMANIA FIRMY ----------
+  // Wydatki stałe/okresowe (księgowość, ZUS, VAT, PIT, reklama, materiały
+  // eksploatacyjne itd.) – żeby zysk miesięczny w Statystykach dało się
+  // pokazać jako prawdziwy zysk NETTO, nie tylko przychód z napraw+skupu.
+  // Każdy wydatek ma "month" (YYYY-MM) – do którego miesiąca się liczy,
+  // niezależnie kiedy faktycznie został wpisany do systemu.
+
+  const getExpenses = async () => {
+    const snap = await getDocs(query(collection(db, 'expenses'), orderBy('month', 'desc')));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  };
+
+  const addExpense = async (data) => {
+    const docRef = await addDoc(collection(db, 'expenses'), {
+      category: data.category || 'other',
+      name: data.name || '',
+      amount: data.amount || 0,
+      month: data.month || new Date().toISOString().slice(0, 7),
+      notes: data.notes || '',
+      createdAt: new Date().toISOString(),
+    });
+    return { id: docRef.id, ...data };
+  };
+
+  const updateExpense = async (id, changes) => {
+    await updateDoc(doc(db, 'expenses', id), changes);
+    return true;
+  };
+
+  const deleteExpense = async (id) => {
+    await deleteDoc(doc(db, 'expenses', id));
+    return true;
+  };
+
+  const subscribeToExpenses = (callback) => {
+    const q = query(collection(db, 'expenses'), orderBy('month', 'desc'));
+    return onSnapshot(q, (snap) => {
+      callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+  };
+
+  // ---------- ZADANIA (todo) ----------
+  // Prosta wspólna lista zadań dla całego zespołu (Admin + Pracownik) –
+  // "zrób X dzisiaj/jutro", nie osobne listy per-osoba.
+
+  const getTasks = async () => {
+    const snap = await getDocs(query(collection(db, 'tasks'), orderBy('dueDate')));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  };
+
+  const addTask = async (data) => {
+    const docRef = await addDoc(collection(db, 'tasks'), {
+      text: data.text || '',
+      dueDate: data.dueDate || new Date().toISOString().slice(0, 10),
+      done: false,
+      doneAt: null,
+      createdAt: new Date().toISOString(),
+    });
+    return { id: docRef.id, ...data };
+  };
+
+  const updateTask = async (id, changes) => {
+    await updateDoc(doc(db, 'tasks', id), changes);
+    return true;
+  };
+
+  const toggleTaskDone = async (id, done) => {
+    await updateDoc(doc(db, 'tasks', id), { done, doneAt: done ? new Date().toISOString() : null });
+    return true;
+  };
+
+  const deleteTask = async (id) => {
+    await deleteDoc(doc(db, 'tasks', id));
+    return true;
+  };
+
+  const subscribeToTasks = (callback) => {
+    const q = query(collection(db, 'tasks'), orderBy('dueDate'));
+    return onSnapshot(q, (snap) => {
+      callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+  };
+
   // ---------- BOOKING REQUESTS ----------
 
   const getBookingById = async (id) => {
@@ -429,6 +512,10 @@ export function createFirestoreDb(db) {
     // phones
     getPhoneById, addPhone, updatePhone, deletePhone, subscribeToPhones,
     getParts, addPart, updatePart, adjustPartQuantity, deletePart, subscribeToParts,
+    // koszty firmy
+    getExpenses, addExpense, updateExpense, deleteExpense, subscribeToExpenses,
+    // zadania
+    getTasks, addTask, updateTask, toggleTaskDone, deleteTask, subscribeToTasks,
     // bookings
     getBookingById, getBookingsByCustomer, addBookingRequest, updateBookingRequest, subscribeToBookings,
   };

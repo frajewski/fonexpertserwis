@@ -46,6 +46,15 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
     adjustPartQuantity: dbAdjustPartQuantity,
     deletePart: dbDeletePart,
     subscribeToParts,
+    addExpense: dbAddExpense,
+    updateExpense: dbUpdateExpense,
+    deleteExpense: dbDeleteExpense,
+    subscribeToExpenses,
+    addTask: dbAddTask,
+    updateTask: dbUpdateTask,
+    toggleTaskDone: dbToggleTaskDone,
+    deleteTask: dbDeleteTask,
+    subscribeToTasks,
     addBookingRequest: dbAddBooking,
     updateBookingRequest: dbUpdateBooking,
     subscribeToBookings,
@@ -66,6 +75,8 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
   let unsubRepairs = null;
   let unsubPhones = null;
   let unsubParts = null;
+  let unsubExpenses = null;
+  let unsubTasks = null;
   let unsubBookings = null;
 
   return create((set, get) => ({
@@ -109,7 +120,7 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
     logout: async () => {
       get().stopListening();
       await firebaseLogout();
-      set({ currentUser: null, repairs: [], phones: [], parts: [], bookings: [], users: [] });
+      set({ currentUser: null, repairs: [], phones: [], parts: [], expenses: [], tasks: [], bookings: [], users: [] });
     },
 
     sendPasswordReset: async (email) => firebaseSendPasswordReset(email),
@@ -190,8 +201,10 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
       if (isStaff) {
         unsubPhones = subscribeToPhones((phones) => set({ phones }));
         unsubParts = subscribeToParts((parts) => set({ parts }));
+        unsubExpenses = subscribeToExpenses((expenses) => set({ expenses }));
+        unsubTasks = subscribeToTasks((tasks) => set({ tasks }));
       } else {
-        set({ phones: [], parts: [] });
+        set({ phones: [], parts: [], expenses: [], tasks: [] });
       }
     },
 
@@ -200,11 +213,15 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
       unsubRepairs?.();
       unsubPhones?.();
       unsubParts?.();
+      unsubExpenses?.();
+      unsubTasks?.();
       unsubBookings?.();
       unsubUsers = null;
       unsubRepairs = null;
       unsubPhones = null;
       unsubParts = null;
+      unsubExpenses = null;
+      unsubTasks = null;
       unsubBookings = null;
     },
 
@@ -323,6 +340,26 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
     },
     getPartById: (id) => get().parts.find((p) => p.id === id) || null,
     getLowStockParts: () => get().parts.filter((p) => (p.quantity || 0) <= (p.minQuantity || 0)),
+
+    // ── KOSZTY UTRZYMANIA FIRMY ────────────────────────────────
+    expenses: [],
+    addExpense: async (data) => dbAddExpense(data),
+    updateExpense: async (id, changes) => dbUpdateExpense(id, changes),
+    deleteExpense: async (id) => {
+      await dbDeleteExpense(id);
+      return true;
+    },
+    getExpensesForMonth: (yearMonth) => get().expenses.filter((e) => e.month === yearMonth),
+
+    // ── ZADANIA ────────────────────────────────────────────────
+    tasks: [],
+    addTask: async (data) => dbAddTask(data),
+    updateTask: async (id, changes) => dbUpdateTask(id, changes),
+    toggleTaskDone: async (id, done) => dbToggleTaskDone(id, done),
+    deleteTask: async (id) => {
+      await dbDeleteTask(id);
+      return true;
+    },
 
     // ── UI ────────────────────────────────────────────────────
 

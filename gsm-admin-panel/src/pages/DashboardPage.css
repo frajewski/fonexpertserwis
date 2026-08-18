@@ -1,0 +1,78 @@
+.db-page { padding: 28px 32px 60px; max-width: 760px; }
+
+.db-title { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--ink); margin: 0 0 20px; }
+
+.db-today-card {
+  display: flex;
+  gap: 32px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.db-today-main { display: flex; flex-direction: column; gap: 4px; }
+.db-today-label { font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.02em; }
+.db-today-value { font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--ink); }
+.db-good { color: var(--good) !important; }
+.db-bad { color: var(--warn) !important; }
+
+.db-section-title { font-size: 13px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.02em; margin: 0 0 12px; }
+
+.db-alerts { margin-bottom: 20px; }
+.db-alert-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  text-align: left;
+}
+.db-alert-row:hover { box-shadow: var(--shadow-lift); }
+.db-alert-icon { font-size: 20px; flex-shrink: 0; }
+.db-alert-text { flex: 1; font-size: 13.5px; color: var(--ink-soft); line-height: 1.4; }
+.db-alert-text strong { color: var(--ink); }
+.db-alert-arrow { color: var(--ink-faint); font-size: 16px; }
+
+.db-actions { margin-bottom: 20px; }
+.db-actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.db-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.db-action-btn:hover { box-shadow: var(--shadow-lift); }
+.db-action-icon { font-size: 26px; }
+
+.db-month-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px 22px;
+  text-align: left;
+}
+.db-month-card:hover { box-shadow: var(--shadow-lift); }
+.db-month-sub { font-size: 12.5px; color: var(--ink-faint); }
+.db-month-profit { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.db-month-profit span:first-child { font-family: var(--font-display); font-size: 22px; font-weight: 800; }
+.db-month-profit-label { font-size: 11px; color: var(--ink-faint); }
+
+@media (max-width: 600px) {
+  .db-today-card { flex-wrap: wrap; gap: 20px; }
+}

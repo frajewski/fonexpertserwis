@@ -43,7 +43,7 @@ export default function LoginPage() {
       return;
     }
 
-    navigate('/');
+    navigate('/pulpit');
   };
 
   const handleSendReset = async (e) => {

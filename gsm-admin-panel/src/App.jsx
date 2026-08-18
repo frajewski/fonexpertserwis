@@ -17,6 +17,8 @@ import NewTradePage from './pages/NewTradePage';
 import ImportPhonesPage from './pages/ImportPhonesPage';
 import CalculatorPage from './pages/CalculatorPage';
 import PartsPage from './pages/PartsPage';
+import DashboardPage from './pages/DashboardPage';
+import CostsPage from './pages/CostsPage';
 import AccountPage from './pages/AccountPage';
 import TradeDetailPage from './pages/TradeDetailPage';
 import StatsPage from './pages/StatsPage';
@@ -77,6 +79,8 @@ export default function App() {
       <Route path="/skup/import" element={<AdminOnlyRoute><ImportPhonesPage /></AdminOnlyRoute>} />
       <Route path="/skup/kalkulator" element={<AdminOnlyRoute><CalculatorPage /></AdminOnlyRoute>} />
       <Route path="/magazyn" element={<ProtectedRoute><PartsPage /></ProtectedRoute>} />
+      <Route path="/pulpit" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/koszty" element={<AdminOnlyRoute><CostsPage /></AdminOnlyRoute>} />
       <Route path="/moje-konto" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
       <Route path="/skup/:id" element={<AdminOnlyRoute><TradeDetailPage /></AdminOnlyRoute>} />
       <Route path="/statystyki" element={<AdminOnlyRoute><StatsPage /></AdminOnlyRoute>} />
