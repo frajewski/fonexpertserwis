@@ -306,6 +306,7 @@ export default function TradePage() {
                 {p.storage && <span className="tr-storage">{p.storage}</span>}
                 {p.color && <span className="tr-color">{p.color}</span>}
               </div>
+
               {(p.hasIcloudLock || p.hasCarrierLock || p.isReported) && (
                 <div className="tr-locks">
                   {p.hasIcloudLock && <span className="tr-lock-tag">🔒 iCloud</span>}

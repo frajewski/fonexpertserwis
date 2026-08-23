@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import STATUS, { terminalStatuses } from '../constants/statuses';
@@ -14,6 +15,13 @@ export default function DashboardPage() {
   const phones = useStore((s) => s.phones);
   const parts = useStore((s) => s.parts);
   const expenses = useStore((s) => s.expenses);
+  const tasks = useStore((s) => s.tasks);
+  const addTask = useStore((s) => s.addTask);
+  const toggleTaskDone = useStore((s) => s.toggleTaskDone);
+  const deleteTask = useStore((s) => s.deleteTask);
+
+  const [newTaskText, setNewTaskText] = useState('');
+  const [newTaskDate, setNewTaskDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   const isAdmin = currentUser?.role === 'admin';
   const hour = new Date().getHours();
@@ -46,6 +54,20 @@ export default function DashboardPage() {
 
   const alertsCount = lowStockParts.length + repairsToOrder.length + staleRepairs.length;
 
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const tomorrowISO = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  const overdueTasks = tasks.filter((t) => !t.done && t.dueDate < todayISO);
+  const todayTasks = tasks.filter((t) => !t.done && t.dueDate === todayISO);
+  const tomorrowTasks = tasks.filter((t) => !t.done && t.dueDate === tomorrowISO);
+
+  const handleAddTask = async (e) => {
+    e.preventDefault();
+    if (!newTaskText.trim()) return;
+    await addTask({ text: newTaskText.trim(), dueDate: newTaskDate });
+    setNewTaskText('');
+  };
+
   return (
     <div className="db-page">
       <h1 className="db-title">{greeting}, {currentUser?.name?.split(' ')[0] || ''}</h1>
@@ -68,6 +90,80 @@ export default function DashboardPage() {
             <span className="db-today-label">Status</span>
             <span className="db-today-value db-good">✓ Wszystko pod kontrolą</span>
           </div>
+        )}
+      </div>
+
+      <div className="db-tasks">
+        <h2 className="db-section-title">Zadania</h2>
+
+        <form className="db-task-add" onSubmit={handleAddTask}>
+          <input
+            className="db-task-input"
+            placeholder="Co trzeba zrobić…"
+            value={newTaskText}
+            onChange={(e) => setNewTaskText(e.target.value)}
+          />
+          <div className="db-task-date-toggle">
+            <button
+              type="button"
+              className={`db-task-date-btn ${newTaskDate === todayISO ? 'db-task-date-active' : ''}`}
+              onClick={() => setNewTaskDate(todayISO)}
+            >
+              Dziś
+            </button>
+            <button
+              type="button"
+              className={`db-task-date-btn ${newTaskDate === tomorrowISO ? 'db-task-date-active' : ''}`}
+              onClick={() => setNewTaskDate(tomorrowISO)}
+            >
+              Jutro
+            </button>
+          </div>
+          <button className="db-task-submit" type="submit">Dodaj</button>
+        </form>
+
+        {overdueTasks.length > 0 && (
+          <div className="db-task-group">
+            <span className="db-task-group-label db-bad">⚠️ Zaległe</span>
+            {overdueTasks.map((t) => (
+              <div key={t.id} className="db-task-row">
+                <input type="checkbox" checked={false} onChange={() => toggleTaskDone(t.id, true)} />
+                <span className="db-task-text">{t.text}</span>
+                <span className="db-task-due db-bad">{t.dueDate}</span>
+                <button className="db-task-delete" onClick={() => deleteTask(t.id)}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {todayTasks.length > 0 && (
+          <div className="db-task-group">
+            <span className="db-task-group-label">Dziś</span>
+            {todayTasks.map((t) => (
+              <div key={t.id} className="db-task-row">
+                <input type="checkbox" checked={false} onChange={() => toggleTaskDone(t.id, true)} />
+                <span className="db-task-text">{t.text}</span>
+                <button className="db-task-delete" onClick={() => deleteTask(t.id)}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tomorrowTasks.length > 0 && (
+          <div className="db-task-group">
+            <span className="db-task-group-label">Jutro</span>
+            {tomorrowTasks.map((t) => (
+              <div key={t.id} className="db-task-row">
+                <input type="checkbox" checked={false} onChange={() => toggleTaskDone(t.id, true)} />
+                <span className="db-task-text">{t.text}</span>
+                <button className="db-task-delete" onClick={() => deleteTask(t.id)}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {overdueTasks.length === 0 && todayTasks.length === 0 && tomorrowTasks.length === 0 && (
+          <p className="db-empty">Brak zadań na dziś/jutro.</p>
         )}
       </div>
 

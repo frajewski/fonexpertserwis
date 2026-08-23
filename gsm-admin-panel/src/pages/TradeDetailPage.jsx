@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import TRADE_STATUS, { tradeStatusIcons, tradeStatusList } from '../constants/tradeStatuses';
 import grades from '../constants/grades';
+import tradeSources from '../constants/tradeSources';
 import './TradeDetailPage.css';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
@@ -239,6 +240,15 @@ export default function TradeDetailPage() {
                   {phone.color && <span>· {phone.color}</span>}
                 </div>
                 {phone.imei && <div className="td-imei">IMEI: {phone.imei}</div>}
+                {phone.source && (() => {
+                  const src = tradeSources.find((s) => s.value === phone.source);
+                  return (
+                    <div className="td-source">
+                      Kupiony od: {src ? `${src.emoji} ${src.label}` : phone.source}
+                      {phone.sourceNote && ` — ${phone.sourceNote}`}
+                    </div>
+                  );
+                })()}
                 <div className="td-dates">
                   <span>Kupiony: {fmtDate(phone.boughtAt)}</span>
                   {phone.status === TRADE_STATUS.SOLD && <span>Sprzedany: {fmtDate(phone.soldAt)}</span>}

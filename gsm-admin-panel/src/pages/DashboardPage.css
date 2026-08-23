@@ -76,3 +76,78 @@
 @media (max-width: 600px) {
   .db-today-card { flex-wrap: wrap; gap: 20px; }
 }
+
+.db-tasks { margin-bottom: 20px; }
+
+.db-task-add {
+  display: flex;
+  gap: 8px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.db-task-input {
+  flex: 1;
+  min-width: 160px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 13px;
+  background: var(--paper);
+}
+.db-task-input:focus { border-color: var(--accent); background: var(--surface); }
+
+.db-task-date-toggle { display: flex; gap: 4px; }
+.db-task-date-btn {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.db-task-date-active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.db-task-submit {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+}
+.db-task-submit:hover { background: var(--accent-deep); }
+
+.db-task-group { margin-bottom: 10px; }
+.db-task-group-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+.db-task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  padding: 10px 14px;
+  margin-bottom: 6px;
+}
+.db-task-row input[type="checkbox"] { width: 17px; height: 17px; flex-shrink: 0; cursor: pointer; }
+.db-task-text { flex: 1; font-size: 13.5px; color: var(--ink); }
+.db-task-due { font-size: 11px; font-weight: 700; white-space: nowrap; }
+.db-task-delete { color: var(--ink-faint); font-weight: 700; font-size: 13px; padding: 0 4px; }
+.db-task-delete:hover { color: var(--warn); }
+
+.db-empty { font-size: 12.5px; color: var(--ink-faint); padding: 8px 2px; }

@@ -75,7 +75,7 @@
   margin: 2px 0 0;
 }
 
-.td-imei { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); margin-bottom: 8px; }
+
 .td-desc { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin: 0; }
 
 .td-section-title {
@@ -223,7 +223,8 @@
 /* Style specyficzne dla TradeDetailPage, nieobecne w RepairDetailPage */
 .td-status-icon { font-size: 22px; }
 .td-meta { display: flex; gap: 6px; font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
-.td-imei { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); }
+.td-imei { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); margin-bottom: 8px; }
+.td-source { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 10px; max-width: 90%; }
 
 .td-locks { display: flex; flex-direction: column; gap: 8px; }
 .td-lock { font-size: 13px; color: var(--ink); background: var(--paper); padding: 8px 12px; border-radius: var(--radius-sm); }
