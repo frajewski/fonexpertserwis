@@ -186,6 +186,14 @@ export default function RepairDetailPage() {
     const part = parts.find((p) => p.id === pickPartId);
     if (!part) return;
     const qty = parseInt(pickQuantity) || 1;
+    if ((part.quantity || 0) <= 0) {
+      alert(`Brak "${part.name}" na stanie magazynowym. Uzupełnij stan w Magazynie przed dodaniem.`);
+      return;
+    }
+    if (qty > (part.quantity || 0)) {
+      alert(`Na stanie jest tylko ${part.quantity} szt. "${part.name}", nie ${qty}.`);
+      return;
+    }
     // Zapamiętujemy cenę jednostkową Z MOMENTU dodania (nie odczytujemy jej
     // na nowo przy zapisie) – żeby późniejsza zmiana ceny części w magazynie
     // nie przeliczała wstecz kosztu już wykonanych zleceń.

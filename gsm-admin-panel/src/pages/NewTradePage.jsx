@@ -49,6 +49,14 @@ export default function NewTradePage() {
     const part = parts.find((p) => p.id === pickPartId);
     if (!part) return;
     const qty = parseInt(pickQuantity) || 1;
+    if ((part.quantity || 0) <= 0) {
+      alert(`Brak "${part.name}" na stanie magazynowym. Uzupełnij stan w Magazynie przed dodaniem.`);
+      return;
+    }
+    if (qty > (part.quantity || 0)) {
+      alert(`Na stanie jest tylko ${part.quantity} szt. "${part.name}", nie ${qty}.`);
+      return;
+    }
     setUsedPartsInput((prev) => [...prev, { partId: part.id, name: part.name, quantity: qty, unitCost: part.unitCost || 0 }]);
     setPickPartId('');
     setPickQuantity('1');
