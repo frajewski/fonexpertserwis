@@ -11,7 +11,7 @@ const TONE = {
 };
 
 const EMPTY_FILTERS = {
-  brand: '', model: '', storage: '', grade: '', source: '',
+  brand: '', model: '', storage: '', grade: '', source: '', sellerNote: '',
   boughtFrom: '', boughtTo: '', priceMin: '', priceMax: '',
 };
 
@@ -75,13 +75,14 @@ export default function TradePage() {
         const matchStorage = !filters.storage || p.storage === filters.storage;
         const matchGrade = !filters.grade || p.grade === filters.grade;
         const matchSource = !filters.source || p.source === filters.source;
+        const matchSellerNote = !filters.sellerNote || (p.sourceNote || '').toLowerCase().includes(filters.sellerNote.toLowerCase());
         const boughtTime = p.boughtAt ? new Date(p.boughtAt).getTime() : null;
         const matchBoughtFrom = !filters.boughtFrom || (boughtTime !== null && boughtTime >= new Date(filters.boughtFrom).getTime());
         const matchBoughtTo = !filters.boughtTo || (boughtTime !== null && boughtTime <= new Date(filters.boughtTo).getTime() + 86399999);
         const matchPriceMin = !filters.priceMin || (p.buyPrice || 0) >= parseFloat(filters.priceMin);
         const matchPriceMax = !filters.priceMax || (p.buyPrice || 0) <= parseFloat(filters.priceMax);
         return matchSearch && matchStatus && matchBrand && matchModel && matchStorage
-          && matchGrade && matchSource && matchBoughtFrom && matchBoughtTo && matchPriceMin && matchPriceMax;
+          && matchGrade && matchSource && matchSellerNote && matchBoughtFrom && matchBoughtTo && matchPriceMin && matchPriceMax;
       })
       .sort(SORTERS[sortBy] || SORTERS.boughtAt);
   }, [phones, search, statusFilter, filters, sortBy]);
@@ -229,6 +230,11 @@ export default function TradePage() {
                   <option value="">Wszyscy</option>
                   {tradeSources.map((s) => <option key={s.value} value={s.value}>{s.emoji} {s.label}</option>)}
                 </select>
+              </label>
+
+              <label className="tr-modal-field">
+                <span>Sprzedawca (imię / nick)</span>
+                <input className="tr-filter-select" placeholder="np. Jan Kowalski" value={draftFilters.sellerNote} onChange={(e) => setDraftFilters({ ...draftFilters, sellerNote: e.target.value })} />
               </label>
 
               <label className="tr-modal-field">

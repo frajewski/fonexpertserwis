@@ -30,6 +30,27 @@ export default function RepairsPage() {
   const repairs = useStore((s) => s.getVisibleRepairs());
   const getUserById = useStore((s) => s.getUserById);
   const parts = useStore((s) => s.parts);
+  const getRepairsHistoryPage = useStore((s) => s.getRepairsHistoryPage);
+  const addHistoricalRepairsToCache = useStore((s) => s.addHistoricalRepairsToCache);
+
+  // Subskrypcja na żywo pokazuje tylko ostatnie 30 dni (dla wydajności) –
+  // starsze zlecenia dociągamy osobno, ręcznie, na życzenie ("Pokaż starsze")
+  const [historicalRepairs, setHistoricalRepairs] = useState([]);
+  const [historyLastDoc, setHistoryLastDoc] = useState(null);
+  const [historyHasMore, setHistoryHasMore] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyStarted, setHistoryStarted] = useState(false);
+
+  const handleLoadOlderRepairs = async () => {
+    setHistoryLoading(true);
+    const result = await getRepairsHistoryPage(50, historyLastDoc);
+    setHistoricalRepairs((prev) => [...prev, ...result.repairs]);
+    addHistoricalRepairsToCache(result.repairs);
+    setHistoryLastDoc(result.lastDoc);
+    setHistoryHasMore(result.hasMore);
+    setHistoryStarted(true);
+    setHistoryLoading(false);
+  };
 
   const isAdmin = currentUser?.role === 'admin';
 
@@ -67,9 +88,15 @@ export default function RepairsPage() {
     setShowFilterModal(false);
   };
 
+  // Do listy/filtrowania łączymy zlecenia z ostatnich 30 dni (na żywo) +
+  // wszystko co doładowano przyciskiem "Pokaż starsze" – ale liczniki przy
+  // chipach statusów i banery (zamów części, zawieszone) celowo zostają
+  // liczone tylko z ostatnich 30 dni, bo to "co wymaga akcji teraz".
+  const allRepairsForList = useMemo(() => [...repairs, ...historicalRepairs], [repairs, historicalRepairs]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return [...repairs]
+    return [...allRepairsForList]
       .filter((r) => {
         const matchSearch = !q
           || r.brand?.toLowerCase().includes(q)
@@ -110,7 +137,7 @@ export default function RepairsPage() {
         if (bNum.year !== aNum.year) return bNum.year - aNum.year;
         return bNum.num - aNum.num;
       });
-  }, [repairs, search, statusFilter, filters, getUserById]);
+  }, [allRepairsForList, search, statusFilter, filters, getUserById]);
 
   // Liczniki przy chipach statusów – liczone z tego samego zestawu co lista
   // (uwzględniają wyszukiwarkę i filtry z modala), tylko BEZ samego filtra
@@ -348,6 +375,16 @@ export default function RepairsPage() {
             <p>Brak zleceń spełniających kryteria</p>
           </div>
         )}
+      </div>
+
+      <div className="rp-history-footer">
+        {historyHasMore ? (
+          <button className="rp-select-all-btn" onClick={handleLoadOlderRepairs} disabled={historyLoading}>
+            {historyLoading ? 'Wczytuję…' : historyStarted ? '↓ Pokaż jeszcze starsze' : '↓ Pokaż starsze zlecenia (starsze niż 30 dni)'}
+          </button>
+        ) : historyStarted ? (
+          <p className="rp-history-end">To już wszystkie zlecenia w bazie.</p>
+        ) : null}
       </div>
     </div>
   );

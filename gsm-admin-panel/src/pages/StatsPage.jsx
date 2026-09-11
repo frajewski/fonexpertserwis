@@ -66,6 +66,7 @@ export default function StatsPage() {
 
   const soldPhones = phones.filter((p) => p.status === 'Sprzedany');
   const tradeProfit = soldPhones.reduce((sum, p) => sum + ((p.sellPrice || 0) - (p.buyPrice || 0)), 0);
+  const tradeRevenue = soldPhones.reduce((sum, p) => sum + (p.sellPrice || 0), 0);
 
   const topSellingModels = getTopSellingModels(phones, 5);
   const avgProfitByBrand = getAvgProfitByBrand(phones);
@@ -103,6 +104,7 @@ export default function StatsPage() {
           <div><span className="st-trade-value">{monthTrade.boughtCount}</span><span className="st-trade-label">Telefonów kupionych</span></div>
           <div><span className="st-trade-value">{monthTrade.boughtCost} zł</span><span className="st-trade-label">Kwota zakupu telefonów</span></div>
           <div><span className="st-trade-value">{monthTrade.soldCount}</span><span className="st-trade-label">Telefonów sprzedanych</span></div>
+          <div><span className="st-trade-value">{monthTrade.revenue} zł</span><span className="st-trade-label">Przychód ze sprzedaży</span></div>
           <div><span className={`st-trade-value ${monthTrade.profit >= 0 ? 'st-good' : 'st-bad'}`}>{monthTrade.profit >= 0 ? '+' : ''}{monthTrade.profit} zł</span><span className="st-trade-label">Zysk ze skupu</span></div>
         </div>
 
@@ -208,6 +210,7 @@ export default function StatsPage() {
         <div className="st-trade-stats">
           <div><span className="st-trade-value">{soldPhones.length}</span><span className="st-trade-label">Sprzedanych</span></div>
           <div><span className="st-trade-value">{phones.length - soldPhones.length}</span><span className="st-trade-label">W magazynie</span></div>
+          <div><span className="st-trade-value">{tradeRevenue} zł</span><span className="st-trade-label">Przychód ze sprzedaży</span></div>
           <div><span className={`st-trade-value ${tradeProfit >= 0 ? 'st-good' : 'st-bad'}`}>{tradeProfit >= 0 ? '+' : ''}{tradeProfit} zł</span><span className="st-trade-label">Zysk ze sprzedaży</span></div>
         </div>
       </div>

@@ -252,6 +252,18 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
 
     getVisibleRepairs: () => get().repairs,
     getRepairById: (id) => get().repairs.find((r) => r.id === id) || null,
+
+    // Dopisuje doładowaną (przyciskiem "Pokaż starsze") historię zleceń do
+    // głównej listy w store, żeby getRepairById mógł je znaleźć po kliknięciu
+    // w szczegóły – bez tego karta zlecenia pokazywała "nie znaleziono",
+    // bo real-time subskrypcja obejmuje tylko ostatnie 30 dni.
+    addHistoricalRepairsToCache: (repairsArray) => {
+      set((state) => {
+        const existingIds = new Set(state.repairs.map((r) => r.id));
+        const newOnes = repairsArray.filter((r) => !existingIds.has(r.id));
+        return newOnes.length > 0 ? { repairs: [...state.repairs, ...newOnes] } : {};
+      });
+    },
     getRepairsByCustomer: (id) => get().repairs.filter((r) => r.customerId === id),
     getRepairsHistoryPage, // jednorazowe, paginowane pobranie starszej historii (nie real-time)
 

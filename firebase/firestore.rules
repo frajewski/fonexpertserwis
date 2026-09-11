@@ -164,6 +164,12 @@ service cloud.firestore {
       allow read, create, update, delete: if isAdmin();
     }
 
+    // Wspólna lista zadań zespołu (Admin + Pracownik) – "zrób X dzisiaj",
+    // nie dane finansowe, więc dostęp dla całego staffu.
+    match /tasks/{taskId} {
+      allow read, create, update, delete: if isStaff();
+    }
+
     // ---------- BOOKING REQUESTS ----------
     // Klient tworzy zgłoszenie i widzi swoje. Personel widzi i edytuje wszystkie
     // (akceptacja, propozycja innego terminu, konwersja na zlecenie).

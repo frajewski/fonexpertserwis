@@ -77,7 +77,10 @@ export const getTradeStatsForMonth = (phonesArray, year, month) => {
   // Ile realnie wydano na zakup telefonów w tym miesiącu (niezależnie czy
   // dany telefon już się sprzedał, czy jeszcze leży w magazynie)
   const boughtCost = bought.reduce((sum, p) => sum + (p.buyPrice || 0), 0);
-  return { boughtCount: bought.length, soldCount: sold.length, profit, boughtCost, soldPhones: sold };
+  // Obrót ze sprzedaży (suma cen sprzedaży) – NIE to samo co zysk (profit),
+  // to ile realnie wpłynęło od kupujących, bez odejmowania kosztu zakupu
+  const revenue = sold.reduce((sum, p) => sum + (p.sellPrice || 0), 0);
+  return { boughtCount: bought.length, soldCount: sold.length, profit, boughtCost, revenue, soldPhones: sold };
 };
 
 // Zysk ze skupu (tylko liczba, do złączenia z zyskiem z napraw w kartach

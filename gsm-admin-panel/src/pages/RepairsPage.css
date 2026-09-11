@@ -240,3 +240,6 @@
   width: 100%;
 }
 .rp-filter-select:focus { border-color: var(--accent); background: var(--surface); }
+
+.rp-history-footer { display: flex; justify-content: center; margin-top: 18px; }
+.rp-history-end { font-size: 12.5px; color: var(--ink-faint); text-align: center; }
