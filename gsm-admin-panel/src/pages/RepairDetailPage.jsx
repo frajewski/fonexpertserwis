@@ -495,8 +495,16 @@ export default function RepairDetailPage() {
                   <button type="button" className="rd-btn-ghost" onClick={handleCopyMessage}>
                     {messageCopied ? '✓ Skopiowano' : '📋 Kopiuj treść'}
                   </button>
-                  {smsUrl && <a className="rd-btn-ghost" href={smsUrl}>💬 Otwórz SMS</a>}
-                  {mailUrl && <a className="rd-btn-ghost" href={mailUrl}>✉️ Otwórz e-mail</a>}
+                  {smsUrl && (
+                    <button type="button" className="rd-btn-ghost" onClick={() => { window.location.href = smsUrl; }}>
+                      💬 Otwórz SMS
+                    </button>
+                  )}
+                  {mailUrl && (
+                    <button type="button" className="rd-btn-ghost" onClick={() => { window.location.href = mailUrl; }}>
+                      ✉️ Otwórz e-mail
+                    </button>
+                  )}
                 </div>
               </div>
             );

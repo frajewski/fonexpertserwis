@@ -30,6 +30,7 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
   const {
     subscribeToUsers,
     updateUserRole: dbUpdateUserRole,
+    updateUser: dbUpdateUser,
     deleteUser: dbDeleteUser,
     addWalkInCustomer: dbAddWalkInCustomer,
     mergeWalkInIntoFirebaseAccount: dbMergeWalkIn,
@@ -282,6 +283,12 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
       const updated = await dbUpdateUserRole(userId, newRole);
       await setUserRoleClaimFn({ targetUid: userId, newRole });
       if (get().currentUser?.id === userId) set({ currentUser: updated });
+      return updated;
+    },
+
+    updateUser: async (userId, changes) => {
+      const updated = await dbUpdateUser(userId, changes);
+      if (get().currentUser?.id === userId) set({ currentUser: { ...get().currentUser, ...updated } });
       return updated;
     },
 

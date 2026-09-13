@@ -4,6 +4,8 @@ import useStore from '../store/useStore';
 import TRADE_STATUS, { tradeStatusIcons, tradeStatusList } from '../constants/tradeStatuses';
 import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
+import { printPurchaseAgreement } from '../utils/printPurchaseAgreement';
+import { printConsignmentAgreement } from '../utils/printConsignmentAgreement';
 import './TradeDetailPage.css';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
@@ -176,6 +178,14 @@ export default function TradeDetailPage() {
               <h1 className="td-device">{phone.brand} {phone.model}</h1>
               <div className="td-header-actions">
                 <span className="td-status-icon">{tradeStatusIcons[phone.status]}</span>
+                {isAdmin && (
+                  <button
+                    className="td-btn-ghost"
+                    onClick={() => phone.transactionType === 'consignment' ? printConsignmentAgreement(phone) : printPurchaseAgreement(phone)}
+                  >
+                    📄 Drukuj umowę
+                  </button>
+                )}
                 {isAdmin && !editing && (
                   <button className="td-btn-ghost td-btn-edit" onClick={handleStartEdit}>Edytuj</button>
                 )}

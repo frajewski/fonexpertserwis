@@ -18,6 +18,29 @@ export default function CustomerCardPage() {
   const customer = useStore((s) => s.getUserById(id));
   const repairs = useStore((s) => s.getRepairsByCustomer(id));
   const deleteUser = useStore((s) => s.deleteUser);
+  const updateUser = useStore((s) => s.updateUser);
+
+  const [editingContact, setEditingContact] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+
+  const handleStartEditContact = () => {
+    setEditName(customer.name || '');
+    setEditPhone(customer.phone || '');
+    setEditEmail(customer.email || '');
+    setEditingContact(true);
+  };
+
+  const handleSaveContact = async () => {
+    if (!editName.trim()) return;
+    await updateUser(customer.id, {
+      name: editName.trim(),
+      phone: editPhone.trim(),
+      email: editEmail.trim(),
+    });
+    setEditingContact(false);
+  };
 
   const isAdmin = currentUser?.role === 'admin';
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -54,10 +77,23 @@ export default function CustomerCardPage() {
 
       <div className="cc-header-card">
         <div className="cc-avatar">{customer.name?.[0]?.toUpperCase() || '?'}</div>
-        <div>
-          <h1 className="cc-name">{customer.name}</h1>
-          <p className="cc-meta">{customer.phone || 'Brak numeru'} {customer.email ? `· ${customer.email}` : ''}</p>
-        </div>
+        {editingContact ? (
+          <div className="cc-edit-form">
+            <input className="cc-edit-input" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Imię i nazwisko" />
+            <input className="cc-edit-input" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Telefon" />
+            <input className="cc-edit-input" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email (opcjonalnie)" />
+            <div className="cc-edit-actions">
+              <button className="cc-btn-ghost" onClick={() => setEditingContact(false)}>Anuluj</button>
+              <button className="cc-btn-primary" onClick={handleSaveContact}>Zapisz</button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h1 className="cc-name">{customer.name}</h1>
+            <p className="cc-meta">{customer.phone || 'Brak numeru'} {customer.email ? `· ${customer.email}` : ''}</p>
+            <button className="cc-btn-ghost cc-edit-trigger" onClick={handleStartEditContact}>✎ Edytuj dane</button>
+          </div>
+        )}
       </div>
 
       <div className="cc-stats">

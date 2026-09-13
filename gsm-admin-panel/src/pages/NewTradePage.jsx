@@ -41,6 +41,16 @@ export default function NewTradePage() {
   const [freeTextPartName, setFreeTextPartName] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Typ transakcji – kupno (płacisz od razu, telefon Twój) vs komis (zero
+  // wkładu własnego, sprzedający zostaje właścicielem do momentu sprzedaży)
+  const [transactionType, setTransactionType] = useState('purchase');
+  const [komisMinPrice, setKomisMinPrice] = useState('');
+
+  // Dane sprzedającego – do wydruku umowy kupna-sprzedaży/komisu
+  const [sellerFullName, setSellerFullName] = useState('');
+  const [sellerAddress, setSellerAddress] = useState('');
+  const [sellerIdNumber, setSellerIdNumber] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -115,6 +125,11 @@ export default function NewTradePage() {
         warranty: warranty.trim(),
         notes: notes.trim(),
         usedParts: usedPartsInput,
+        transactionType,
+        komisMinPrice: transactionType === 'consignment' ? (parseFloat(komisMinPrice) || 0) : 0,
+        sellerFullName: sellerFullName.trim(),
+        sellerAddress: sellerAddress.trim(),
+        sellerIdNumber: sellerIdNumber.trim(),
       });
       for (const p of usedPartsInput) {
         if (p.partId) await adjustPartQuantity(p.partId, -p.quantity);
@@ -229,6 +244,48 @@ export default function NewTradePage() {
           <label className="nt-field">
             <span className="nt-label">Notatki</span>
             <textarea className="nt-textarea" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </label>
+        </div>
+
+        <div className="nt-card">
+          <h2 className="nt-section-title">Typ transakcji i dane sprzedającego</h2>
+          <p className="nt-hint">Potrzebne do wydrukowania umowy kupna-sprzedaży / komisu.</p>
+
+          <div className="nt-condition-toggle">
+            <button
+              type="button"
+              className={`nt-condition-option ${transactionType === 'purchase' ? 'nt-condition-option-active' : ''}`}
+              onClick={() => setTransactionType('purchase')}
+            >
+              💰 Kupno
+            </button>
+            <button
+              type="button"
+              className={`nt-condition-option ${transactionType === 'consignment' ? 'nt-condition-option-active' : ''}`}
+              onClick={() => setTransactionType('consignment')}
+            >
+              🤝 Komis
+            </button>
+          </div>
+
+          {transactionType === 'consignment' && (
+            <label className="nt-field">
+              <span className="nt-label">Kwota do wypłaty sprzedającemu po sprzedaży (zł) *</span>
+              <input className="nt-input" value={komisMinPrice} onChange={(e) => setKomisMinPrice(e.target.value)} placeholder="0.00" />
+            </label>
+          )}
+
+          <label className="nt-field">
+            <span className="nt-label">Imię i nazwisko sprzedającego *</span>
+            <input className="nt-input" value={sellerFullName} onChange={(e) => setSellerFullName(e.target.value)} />
+          </label>
+          <label className="nt-field">
+            <span className="nt-label">Adres zamieszkania *</span>
+            <input className="nt-input" value={sellerAddress} onChange={(e) => setSellerAddress(e.target.value)} placeholder="ul., kod pocztowy, miasto" />
+          </label>
+          <label className="nt-field">
+            <span className="nt-label">Nr dowodu osobistego lub PESEL *</span>
+            <input className="nt-input" value={sellerIdNumber} onChange={(e) => setSellerIdNumber(e.target.value)} />
           </label>
         </div>
 

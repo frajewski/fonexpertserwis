@@ -58,3 +58,5 @@
   color: var(--ink-soft);
 }
 .nt-condition-option-active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.nt-hint { font-size: 12px; color: var(--ink-faint); margin: -4px 0 14px; }

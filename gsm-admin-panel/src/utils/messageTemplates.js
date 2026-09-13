@@ -30,6 +30,12 @@ export const messageTemplates = (repair, customerName) => {
       body: `Dzień dobry ${customerName}! Urządzenie ${repair.brand} ${repair.model} jest gotowe do odbioru. Zapraszamy pon-sob 9-21.${trackingLine} Fonexpert`,
     },
     {
+  id: 'pickupReminder',
+  label: '⏰ Przypomnienie o odbiorze',
+  body: `Dzień dobry ${customerName}. Przypominamy, że urządzenie ${repair.brand} ${repair.model} jest gotowe do odbioru i nadal oczekuje w naszym serwisie. Prosimy o odbiór w najbliższym możliwym terminie. Zapraszamy pon-sob 9-21.${trackingLine} Fonexpert`,
+},
+
+{
       id: 'delay',
       label: '⏳ Opóźnienie naprawy',
       body: `Dzień dobry ${customerName}. Naprawa ${repair.brand} ${repair.model} wymaga więcej czasu. Przepraszamy za opóźnienie.${trackingLine} Fonexpert`,

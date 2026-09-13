@@ -101,6 +101,13 @@ service cloud.firestore {
 
       allow update: if isAdmin()
                     || (
+                      // Pracownik może poprawić dane klienta (np. literówkę
+                      // w numerze telefonu po przyjęciu) - ale TYLKO klienta,
+                      // nigdy własnej roli ani roli innego pracownika/admina
+                      isStaff() && resource.data.role == 'customer'
+                      && request.resource.data.role == 'customer'
+                    )
+                    || (
                       isSignedIn() && request.auth.uid == userId
                       && request.resource.data.role == resource.data.role // rola niezmieniona
                     );

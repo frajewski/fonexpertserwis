@@ -106,6 +106,14 @@ export function createFirestoreDb(db) {
     return getUserById(userId);
   };
 
+  // Edycja podstawowych danych klienta (imię/nazwisko, telefon, email) –
+  // np. poprawa literówki po dodaniu. Osobna od updateUserRole (uprawnienia),
+  // żeby nie mieszać zmiany danych osobowych ze zmianą roli w systemie.
+  const updateUser = async (userId, changes) => {
+    await updateDoc(doc(db, 'users', userId), changes);
+    return getUserById(userId);
+  };
+
   // Usuwa dokument klienta z bazy (tylko Admin – reguły Firestore to wymuszają
   // niezależnie od tego). Nie kasuje historii zleceń tego klienta (repairs
   // zostają, ale customerId wskazuje na już nieistniejący dokument) – to
@@ -505,7 +513,7 @@ export function createFirestoreDb(db) {
   return {
     // users
     getUserById, findWalkInByEmail, adminAlreadyExists, addUser, getCustomers, getWorkers,
-    getAllUsers, subscribeToUsers, updateUserRole, deleteUser, addWalkInCustomer, mergeWalkInIntoFirebaseAccount,
+    getAllUsers, subscribeToUsers, updateUserRole, updateUser, deleteUser, addWalkInCustomer, mergeWalkInIntoFirebaseAccount,
     // repairs
     getRepairById, getRepairsByCustomer, addRepair, updateRepair, deleteRepair,
     subscribeToRepairs, getRepairsHistoryPage,
