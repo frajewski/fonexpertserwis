@@ -25,6 +25,11 @@ export const messageTemplates = (repair, customerName) => {
       body: `Dzień dobry ${customerName}! Kosztorys naprawy Państwa urządzenia ${repair.brand} ${repair.model}: ${total} zł.${trackingLine} Fonexpert`,
     },
     {
+      id: 'partsArrived',
+      label: '📦 Części dotarły',
+      body: `Dzień dobry ${customerName}! Zamówione części do Państwa urządzenia ${repair.brand} ${repair.model} dotarły. Zapraszamy z urządzeniem, naprawimy od ręki. Godziny otwarcia: pon-sob 9-21.${trackingLine} Fonexpert`,
+    },
+    {
       id: 'ready',
       label: '✅ Gotowe do odbioru',
       body: `Dzień dobry ${customerName}! Urządzenie ${repair.brand} ${repair.model} jest gotowe do odbioru. Zapraszamy pon-sob 9-21.${trackingLine} Fonexpert`,

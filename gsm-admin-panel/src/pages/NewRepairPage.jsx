@@ -35,6 +35,7 @@ export default function NewRepairPage() {
   // admin może opcjonalnie rozwinąć rozbicie wewnętrzne do własnych rozliczeń —
   // identyczna zasada co w apce mobilnej
   const [totalCostInput, setTotalCostInput] = useState('');
+  const [depositInput, setDepositInput] = useState('');
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [partsCost, setPartsCost] = useState('');
   const [serviceCost, setServiceCost] = useState('');
@@ -104,6 +105,7 @@ export default function NewRepairPage() {
       const costData = isAdmin && showBreakdown
         ? { partsCost: parseFloat(partsCost) || 0, serviceCost: (parseFloat(totalCostInput) || 0) - (parseFloat(partsCost) || 0) }
         : { partsCost: 0, serviceCost: parseFloat(totalCostInput) || 0 };
+      const depositAmount = parseFloat(depositInput) || 0;
 
       // Krok 1: stwórz zlecenie bez zdjęć – potrzebujemy id jako część ścieżki
       // w Storage (repairs/{repairId}/...), więc upload nie może być pierwszy
@@ -117,6 +119,7 @@ export default function NewRepairPage() {
         photos: [],
         createdAt: acceptedDate ? new Date(acceptedDate).toISOString() : undefined,
         ...costData,
+        deposit: depositAmount,
         estimateAccepted: null,
         screenLock: screenLock.trim(),
         documentType,
@@ -295,6 +298,16 @@ export default function NewRepairPage() {
               value={totalCostInput}
               onChange={(e) => setTotalCostInput(e.target.value)}
               placeholder="0.00"
+            />
+          </label>
+
+          <label className="nr-field">
+            <span className="nr-label">Zadatek wpłacony (zł, opcjonalnie)</span>
+            <input
+              className="nr-input"
+              value={depositInput}
+              onChange={(e) => setDepositInput(e.target.value)}
+              placeholder="np. 50.00 — na poczet zamówienia części"
             />
           </label>
 

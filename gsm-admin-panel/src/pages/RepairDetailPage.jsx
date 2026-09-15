@@ -5,6 +5,7 @@ import STATUS, { statusList, statusIcons, terminalStatuses } from '../constants/
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import { uploadRepairPhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUpload';
 import { printRepairConfirmation } from '../utils/printConfirmation';
+import { printPickupConfirmation } from '../utils/printPickupConfirmation';
 import { printDeviceLabel } from '../utils/printDeviceLabel';
 import { messageTemplates } from '../utils/messageTemplates';
 import useSettings from '../store/useSettings';
@@ -581,7 +582,16 @@ export default function RepairDetailPage() {
                     placeholder="np. FV/123/2026"
                   />
                 </label>
-
+                <label className="rd-cost-edit-field">
+                  <span>Zadatek wpłacony <span className="rd-cost-edit-optional">(opcjonalnie)</span></span>
+                  <input
+                    type="text"
+                    className="rd-cost-edit-input"
+                    value={depositEditInput}
+                    onChange={(e) => setDepositEditInput(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </label>
                 <div className="rd-cost-edit-actions">
                   <button type="button" className="rd-btn-ghost" onClick={() => setEditingCost(false)}>Anuluj</button>
                   <button type="button" className="rd-btn-primary" onClick={handleSaveCost}>Zapisz kosztorys</button>
@@ -596,6 +606,12 @@ export default function RepairDetailPage() {
                   </>
                 )}
                 <div className="rd-cost-row rd-cost-total"><span>Łącznie</span><span>{total} zł</span></div>
+                {repair.deposit > 0 && (
+                  <>
+                    <div className="rd-cost-row"><span>Zadatek wpłacony</span><span>− {repair.deposit} zł</span></div>
+                    <div className="rd-cost-row rd-cost-total"><span>Do zapłaty</span><span>{total - repair.deposit} zł</span></div>
+                  </>
+                )}
                 {(repair.partsSource || repair.partsInvoiceNumber) && (
                   <div className="rd-parts-source">
                     {repair.partsSource && <div>📦 Części z: <strong>{repair.partsSource}</strong></div>}
@@ -680,6 +696,11 @@ export default function RepairDetailPage() {
             <button className="rd-btn-ghost rd-btn-label" onClick={() => printDeviceLabel(repair)}>
               🏷️ Drukuj naklejkę na sprzęt
             </button>
+            {repair.status === STATUS.DELIVERED && (
+              <button className="rd-btn-ghost rd-btn-label" onClick={() => printPickupConfirmation(repair, customer, shopSettings)}>
+                📄 Drukuj potwierdzenie wydania
+              </button>
+            )}
           </div>
 
           <div className="rd-card">
