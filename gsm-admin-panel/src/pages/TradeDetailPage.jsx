@@ -6,6 +6,7 @@ import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
 import { printPurchaseAgreement } from '../utils/printPurchaseAgreement';
 import { printConsignmentAgreement } from '../utils/printConsignmentAgreement';
+import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import './TradeDetailPage.css';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
@@ -23,6 +24,7 @@ export default function TradeDetailPage() {
 
   const isAdmin = currentUser?.role === 'admin';
   const [sellPriceInput, setSellPriceInput] = useState('');
+  const [selectedSaleWarranty, setSelectedSaleWarranty] = useState(warrantyPeriods[2]);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editImei, setEditImei] = useState('');
@@ -35,6 +37,8 @@ export default function TradeDetailPage() {
   const [editSoldDate, setEditSoldDate] = useState('');
   const [editWarranty, setEditWarranty] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [editB2bListed, setEditB2bListed] = useState(false);
+  const [editB2bPrice, setEditB2bPrice] = useState('');
   const [editingUsedParts, setEditingUsedParts] = useState(false);
   const [usedPartsInput, setUsedPartsInput] = useState([]);
   const [pickPartId, setPickPartId] = useState('');
@@ -59,7 +63,14 @@ export default function TradeDetailPage() {
 
   const handleSetSellPrice = async () => {
     const price = parseFloat(sellPriceInput) || 0;
-    await updatePhone(id, { sellPrice: price, status: TRADE_STATUS.SOLD });
+    const soldAt = new Date().toISOString();
+    await updatePhone(id, {
+      sellPrice: price,
+      status: TRADE_STATUS.SOLD,
+      soldAt,
+      warrantyMonths: selectedSaleWarranty.months,
+      warrantyEndDate: calcWarrantyEndDate(soldAt, selectedSaleWarranty.months),
+    });
     setSellPriceInput('');
   };
 
@@ -78,6 +89,8 @@ export default function TradeDetailPage() {
     setEditBoughtDate(toDateInputValue(phone.boughtAt));
     setEditSoldDate(toDateInputValue(phone.soldAt));
     setEditWarranty(phone.warranty || '');
+    setEditB2bListed(!!phone.b2bListed);
+    setEditB2bPrice(phone.b2bPrice ? String(phone.b2bPrice) : '');
     setEditNotes(phone.notes || '');
     setEditing(true);
   };
@@ -94,6 +107,8 @@ export default function TradeDetailPage() {
       soldAt: editSoldDate ? new Date(editSoldDate).toISOString() : null,
       warranty: editWarranty.trim(),
       notes: editNotes.trim(),
+      b2bListed: editB2bListed,
+      b2bPrice: parseFloat(editB2bPrice) || 0,
     });
     setEditing(false);
   };
@@ -241,6 +256,17 @@ export default function TradeDetailPage() {
                   <span>Gwarancja</span>
                   <input className="td-input" value={editWarranty} onChange={(e) => setEditWarranty(e.target.value)} placeholder="np. 30 dni" />
                 </label>
+
+                <label className="td-edit-field td-b2b-check">
+                  <input type="checkbox" checked={editB2bListed} onChange={(e) => setEditB2bListed(e.target.checked)} />
+                  <span>W ofercie B2B (widoczny w katalogu klienta hurtowego)</span>
+                </label>
+                {editB2bListed && (
+                  <label className="td-edit-field">
+                    <span>Cena B2B (zł)</span>
+                    <input className="td-input" value={editB2bPrice} onChange={(e) => setEditB2bPrice(e.target.value)} placeholder="0.00" />
+                  </label>
+                )}
                 <label className="td-edit-field">
                   <span>Notatki</span>
                   <textarea className="td-input td-textarea" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} />
@@ -270,7 +296,12 @@ export default function TradeDetailPage() {
                 <div className="td-dates">
                   <span>Kupiony: {fmtDate(phone.boughtAt)}</span>
                   {phone.status === TRADE_STATUS.SOLD && <span>Sprzedany: {fmtDate(phone.soldAt)}</span>}
-                  {phone.warranty && <span>Gwarancja: {phone.warranty}</span>}
+                  {phone.b2bListed && <span>🏷️ B2B: {phone.b2bPrice || 0} zł</span>}
+                  {phone.warrantyMonths > 0 ? (
+                    <span>🛡️ Gwarancja: {phone.warrantyMonths} mies. — do {fmtDate(phone.warrantyEndDate)}</span>
+                  ) : phone.warranty ? (
+                    <span>Gwarancja: {phone.warranty}</span>
+                  ) : null}
                 </div>
               </>
             )}
@@ -356,6 +387,21 @@ export default function TradeDetailPage() {
               ) : (
                 <div className="td-sell-form">
                   <input className="td-input" placeholder="Cena sprzedaży (zł)" value={sellPriceInput} onChange={(e) => setSellPriceInput(e.target.value)} />
+                  <div className="td-warranty-picker">
+                    <span className="td-warranty-picker-label">Gwarancja dla kupującego:</span>
+                    <div className="td-warranty-options">
+                      {warrantyPeriods.map((w) => (
+                        <button
+                          key={w.months}
+                          type="button"
+                          className={`td-warranty-option ${selectedSaleWarranty.months === w.months ? 'td-warranty-option-active' : ''}`}
+                          onClick={() => setSelectedSaleWarranty(w)}
+                        >
+                          {w.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <button className="td-btn-primary-sm" onClick={handleSetSellPrice}>Oznacz jako sprzedany</button>
                 </div>
               )}

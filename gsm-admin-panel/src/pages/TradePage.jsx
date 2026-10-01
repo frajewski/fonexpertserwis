@@ -4,6 +4,7 @@ import useStore from '../store/useStore';
 import TRADE_STATUS, { tradeStatusIcons } from '../constants/tradeStatuses';
 import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
+import B2bLinkPanel from './B2bLinkPanel';
 import './TradePage.css';
 
 const TONE = {
@@ -158,6 +159,7 @@ export default function TradePage() {
             <button className="tr-import-btn" onClick={() => navigate('/skup/kalkulator')}>🧮 Kalkulator wyceny</button>
           )}
           <button className="tr-import-btn" onClick={() => navigate('/skup/import')}>📋 Importuj z arkusza</button>
+          {isAdmin && <B2bLinkPanel />}
           <button className="tr-new-btn" onClick={() => navigate('/skup/nowy')}>+ Dodaj telefon</button>
         </div>
       </header>

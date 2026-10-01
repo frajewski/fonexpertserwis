@@ -121,12 +121,15 @@ export default function RepairDetailPage() {
     }
   };
 
+  const [depositEditInput, setDepositEditInput] = useState('');
+
   const handleStartEditCost = () => {
     setPartsCostInput(String(repair.partsCost || 0));
     setServiceCostInput(String(repair.serviceCost || 0));
     setTotalCostInput(String((repair.partsCost || 0) + (repair.serviceCost || 0)));
     setPartsSourceInput(repair.partsSource || '');
     setPartsInvoiceInput(repair.partsInvoiceNumber || '');
+    setDepositEditInput(String(repair.deposit || 0));
     setEditingCost(true);
   };
 
@@ -149,6 +152,7 @@ export default function RepairDetailPage() {
       // wymaga części).
       partsSource: partsSourceInput.trim(),
       partsInvoiceNumber: partsInvoiceInput.trim(),
+      deposit: parseFloat(depositEditInput) || 0,
       // Jeśli klient już zaakceptował/odrzucił poprzedni kosztorys, a kwota się
       // zmieniła – reset do "czeka na decyzję", tak samo jak w apce mobilnej
       // (EstimateScreen). Klient musi zaakceptować nową kwotę, nie starą.

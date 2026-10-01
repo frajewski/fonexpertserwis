@@ -1,0 +1,24 @@
+.b2b-page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; color: #14192B; }
+.b2b-header { margin-bottom: 20px; }
+.b2b-title { font-size: 24px; font-weight: 700; margin: 0 0 6px; }
+.b2b-sub { font-size: 13px; color: #6B7280; margin: 0; }
+
+.b2b-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.b2b-input { flex: 1; min-width: 180px; border: 1.5px solid #E2E5EC; border-radius: 8px; padding: 10px 12px; font-size: 14px; background: #fff; }
+.b2b-input:focus { outline: none; border-color: #6465FF; }
+.b2b-count { font-size: 12.5px; color: #6B7280; margin: 0 0 14px; }
+
+.b2b-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.b2b-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(20,25,43,0.08); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.b2b-card-title { font-size: 15px; font-weight: 700; }
+.b2b-card-meta { font-size: 13px; color: #6B7280; min-height: 18px; }
+.b2b-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.b2b-badge { font-size: 11.5px; font-weight: 600; background: #EEF0F6; color: #3B4256; padding: 3px 9px; border-radius: 20px; }
+.b2b-badge-new { background: #E7F8ED; color: #14833B; }
+.b2b-badge-warn { background: #FCEAE6; color: #B23A26; }
+.b2b-price { font-size: 20px; font-weight: 800; margin-top: 4px; }
+
+.b2b-info { font-size: 14px; color: #6B7280; }
+.b2b-error { background: #FCEAE6; color: #B23A26; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+
+@media (max-width: 600px) { .b2b-page { padding: 20px 14px 40px; } }

@@ -173,6 +173,11 @@ service cloud.firestore {
 
     // Wspólna lista zadań zespołu (Admin + Pracownik) – "zrób X dzisiaj",
     // nie dane finansowe, więc dostęp dla całego staffu.
+    match /b2bCatalog/{token}/items/{itemId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     match /tasks/{taskId} {
       allow read, create, update, delete: if isStaff();
     }

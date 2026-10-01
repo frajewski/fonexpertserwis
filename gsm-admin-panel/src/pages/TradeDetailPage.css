@@ -230,7 +230,7 @@
 .td-lock { font-size: 13px; color: var(--ink); background: var(--paper); padding: 8px 12px; border-radius: var(--radius-sm); }
 .td-lock-warn { background: var(--warn-soft); color: var(--warn); }
 
-.td-sell-form { display: flex; gap: 8px; margin-top: 10px; }
+.td-sell-form { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 .td-input { flex: 1; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; background: var(--paper); }
 .td-input:focus { border-color: var(--accent); background: var(--surface); }
 
@@ -256,3 +256,20 @@
 .td-add-part-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
 .td-add-part-row .td-input { flex: 1; min-width: 0; }
 .td-add-part-qty { width: 60px; flex-shrink: 0; flex: none !important; }
+
+.td-warranty-picker { margin: 10px 0; }
+.td-warranty-picker-label { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
+.td-warranty-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.td-warranty-option {
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.td-warranty-option-active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.td-sell-form .td-btn-primary-sm { align-self: flex-start; }
+
+.td-b2b-check { flex-direction: row; align-items: center; gap: 8px; }
