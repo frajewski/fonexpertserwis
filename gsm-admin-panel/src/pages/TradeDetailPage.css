@@ -273,3 +273,16 @@
 .td-sell-form .td-btn-primary-sm { align-self: flex-start; }
 
 .td-b2b-check { flex-direction: row; align-items: center; gap: 8px; }
+
+.td-photo-single { width: 100%; max-width: 280px; border-radius: 10px; display: block; margin-bottom: 10px; }
+.td-photo-upload-btn {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  cursor: pointer;
+}
+.td-photo-upload-btn:hover { border-color: var(--accent); }

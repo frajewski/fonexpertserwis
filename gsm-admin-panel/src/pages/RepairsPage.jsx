@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import STATUS, { terminalStatuses } from '../constants/statuses';
@@ -61,7 +61,25 @@ export default function RepairsPage() {
   const isWeekend = todayDay === 0 || todayDay === 6;
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(
+    () => localStorage.getItem('rp_statusFilter') || null
+  );
+
+  // Filtr statusu przeżywa odświeżenie strony (F5) – zapisany w localStorage
+  useEffect(() => {
+    if (statusFilter) localStorage.setItem('rp_statusFilter', statusFilter);
+    else localStorage.removeItem('rp_statusFilter');
+  }, [statusFilter]);
+
+  // Pozycja przewijania wraca po powrocie z karty szczegółów (nie z pełnego
+  // odświeżenia strony - to celowo sessionStorage, nie localStorage)
+  useEffect(() => {
+    const saved = sessionStorage.getItem('rp_scroll');
+    if (saved) window.scrollTo(0, parseInt(saved, 10));
+    const handleScroll = () => sessionStorage.setItem('rp_scroll', String(window.scrollY));
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filters, setFilters] = useState(EMPTY_FILTERS);

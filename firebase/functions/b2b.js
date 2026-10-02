@@ -36,6 +36,7 @@ const toCatalogItem = (p) => ({
   condition: p.condition || "used",
   hasIcloudLock: !!p.hasIcloudLock,
   hasCarrierLock: !!p.hasCarrierLock,
+  photo: p.photo || null,
   price: Number(p.b2bPrice),
   updatedAt: FieldValue.serverTimestamp(),
 });

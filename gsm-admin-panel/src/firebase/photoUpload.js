@@ -39,10 +39,10 @@ const compressImageFile = (file) => new Promise((resolve, reject) => {
         0.7
       );
     };
-    img.onerror = reject;
+    img.onerror = () => reject(new Error('Nie udało się odczytać pliku jako obrazu (nieobsługiwany format?)'));
     img.src = e.target.result;
   };
-  reader.onerror = reject;
+  reader.onerror = () => reject(new Error('Nie udało się odczytać pliku z dysku'));
   reader.readAsDataURL(file);
 });
 

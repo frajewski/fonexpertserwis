@@ -5,6 +5,8 @@ import TRADE_STATUS, { tradeStatusIcons, tradeStatusList } from '../constants/tr
 import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
 import { printPurchaseAgreement } from '../utils/printPurchaseAgreement';
+import { printWarrantyCard } from '../utils/printWarrantyCard';
+import { uploadTradePhotoWeb } from '../firebase/photoUpload';
 import { printConsignmentAgreement } from '../utils/printConsignmentAgreement';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import './TradeDetailPage.css';
@@ -24,6 +26,7 @@ export default function TradeDetailPage() {
 
   const isAdmin = currentUser?.role === 'admin';
   const [sellPriceInput, setSellPriceInput] = useState('');
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [selectedSaleWarranty, setSelectedSaleWarranty] = useState(warrantyPeriods[2]);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -201,6 +204,11 @@ export default function TradeDetailPage() {
                     📄 Drukuj umowę
                   </button>
                 )}
+                {isAdmin && phone.status === TRADE_STATUS.SOLD && (
+                  <button className="td-btn-ghost" onClick={() => printWarrantyCard(phone)}>
+                    🛡️ Drukuj kartę gwarancyjną
+                  </button>
+                )}
                 {isAdmin && !editing && (
                   <button className="td-btn-ghost td-btn-edit" onClick={handleStartEdit}>Edytuj</button>
                 )}
@@ -304,6 +312,40 @@ export default function TradeDetailPage() {
                   ) : null}
                 </div>
               </>
+            )}
+          </div>
+
+          <div className="td-card">
+            <h2 className="td-section-title">Zdjęcie</h2>
+            {phone.photo ? (
+              <img src={phone.photo} alt="" className="td-photo-single" />
+            ) : (
+              <p className="td-empty-hint">Brak zdjęcia.</p>
+            )}
+            {isAdmin && (
+              <label className="td-photo-upload-btn">
+                {photoUploading ? 'Wgrywam…' : phone.photo ? 'Podmień zdjęcie' : '+ Dodaj zdjęcie'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  disabled={photoUploading}
+                  onChange={async (e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    setPhotoUploading(true);
+                    try {
+                      const url = await uploadTradePhotoWeb(id, file);
+                      await updatePhone(id, { photo: url });
+                    } catch (err) {
+                      alert('Nie udało się wgrać zdjęcia: ' + err.message);
+                    } finally {
+                      setPhotoUploading(false);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </label>
             )}
           </div>
 

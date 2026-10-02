@@ -110,3 +110,5 @@
 }
 .tr-modal-actions .tr-select-all-btn { flex: 1; }
 .tr-modal-actions .tr-new-btn { flex: 1; }
+
+.tr-b2b-badge { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import TRADE_STATUS, { tradeStatusIcons } from '../constants/tradeStatuses';
@@ -24,7 +24,25 @@ export default function TradePage() {
 
   const isAdmin = currentUser?.role === 'admin';
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(
+    () => localStorage.getItem('tr_statusFilter') || null
+  );
+
+  // Filtr statusu przeżywa odświeżenie strony (F5) – zapisany w localStorage
+  useEffect(() => {
+    if (statusFilter) localStorage.setItem('tr_statusFilter', statusFilter);
+    else localStorage.removeItem('tr_statusFilter');
+  }, [statusFilter]);
+
+  // Pozycja przewijania wraca po powrocie z karty szczegółów (nie z pełnego
+  // odświeżenia strony - to celowo sessionStorage, nie localStorage)
+  useEffect(() => {
+    const saved = sessionStorage.getItem('tr_scroll');
+    if (saved) window.scrollTo(0, parseInt(saved, 10));
+    const handleScroll = () => sessionStorage.setItem('tr_scroll', String(window.scrollY));
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   const [sortBy, setSortBy] = useState('boughtAt');
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -313,6 +331,7 @@ export default function TradePage() {
                 {grade && <span className="tr-grade" style={{ color: grade.color }}>{grade.emoji} {p.grade}</span>}
                 {p.storage && <span className="tr-storage">{p.storage}</span>}
                 {p.color && <span className="tr-color">{p.color}</span>}
+                {p.b2bListed && <span className="tr-b2b-badge">🏷️ B2B</span>}
               </div>
 
               {(p.hasIcloudLock || p.hasCarrierLock || p.isReported) && (

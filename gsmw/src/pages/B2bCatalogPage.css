@@ -1,24 +1,225 @@
-.b2b-page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; color: #14192B; }
-.b2b-header { margin-bottom: 20px; }
-.b2b-title { font-size: 24px; font-weight: 700; margin: 0 0 6px; }
-.b2b-sub { font-size: 13px; color: #6B7280; margin: 0; }
+/* ============================================================
+   Katalog B2B — jasny motyw premium, wzorowany na makiecie klienta.
+   Kafelki marek dostają kolorowy gradient zamiast prawdziwych zdjęć
+   produktowych (brak licencji na zdjęcia producentów).
+   ============================================================ */
 
-.b2b-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-.b2b-input { flex: 1; min-width: 180px; border: 1.5px solid #E2E5EC; border-radius: 8px; padding: 10px 12px; font-size: 14px; background: #fff; }
-.b2b-input:focus { outline: none; border-color: #6465FF; }
-.b2b-count { font-size: 12.5px; color: #6B7280; margin: 0 0 14px; }
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
 
-.b2b-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-.b2b-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(20,25,43,0.08); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
-.b2b-card-title { font-size: 15px; font-weight: 700; }
-.b2b-card-meta { font-size: 13px; color: #6B7280; min-height: 18px; }
-.b2b-badges { display: flex; flex-wrap: wrap; gap: 6px; }
-.b2b-badge { font-size: 11.5px; font-weight: 600; background: #EEF0F6; color: #3B4256; padding: 3px 9px; border-radius: 20px; }
-.b2b-badge-new { background: #E7F8ED; color: #14833B; }
-.b2b-badge-warn { background: #FCEAE6; color: #B23A26; }
-.b2b-price { font-size: 20px; font-weight: 800; margin-top: 4px; }
+:root {
+  --b2b-bg: #F4F6FB;
+  --b2b-ink: #0F1730;
+  --b2b-ink-soft: #5B6273;
+  --b2b-ink-faint: #8B91A3;
+  --b2b-accent-a: #C9A14A;
+  --b2b-accent-b: #B4883F;
+  --b2b-green: #1DB954;
+  --b2b-green-soft: #E7F8ED;
+  --b2b-surface: #FFFFFF;
+  --b2b-line: #E2E5EC;
+  --b2b-warn: #B4432F;
+  --b2b-warn-soft: #FBEAE6;
+}
 
-.b2b-info { font-size: 14px; color: #6B7280; }
-.b2b-error { background: #FCEAE6; color: #B23A26; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+* { box-sizing: border-box; }
 
-@media (max-width: 600px) { .b2b-page { padding: 20px 14px 40px; } }
+.b2b-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(600px 300px at 20% 0%, rgba(201,161,74,0.08), transparent),
+    radial-gradient(600px 300px at 90% 10%, rgba(29,185,84,0.06), transparent),
+    var(--b2b-bg);
+  color: var(--b2b-ink);
+  font-family: 'Inter', sans-serif;
+}
+
+.b2b-topbar {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.b2b-topbar-left { display: flex; align-items: center; gap: 12px; }
+
+.b2b-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--b2b-accent-a) 0%, var(--b2b-accent-b) 100%);
+  box-shadow: 0 8px 20px -6px rgba(180,136,63,0.45);
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+}
+.b2b-brand-wordmark { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: var(--b2b-ink); }
+
+.b2b-olx-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b2b-ink-soft);
+  background: var(--b2b-surface);
+  border: 1px solid var(--b2b-line);
+  padding: 9px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.b2b-olx-link:hover { border-color: var(--b2b-accent-a); color: var(--b2b-ink); }
+
+.b2b-hero { max-width: 900px; margin: 0 auto; padding: 36px 20px 0; }
+.b2b-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  line-height: 1.1;
+}
+.b2b-sub { font-size: 15px; color: var(--b2b-ink-soft); margin: 0; max-width: 560px; line-height: 1.5; }
+
+.b2b-info { max-width: 900px; margin: 0 auto; padding: 0 20px; font-size: 14px; color: var(--b2b-ink-soft); }
+.b2b-error { max-width: 900px; margin: 0 auto 20px; background: var(--b2b-warn-soft); color: var(--b2b-warn); padding: 12px 16px; border-radius: 10px; font-size: 14px; }
+
+/* ---- Kafelki statystyk ---- */
+.b2b-stats-grid {
+  max-width: 900px;
+  margin: 28px auto 36px;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.b2b-stat-card { background: var(--b2b-surface); border: 1px solid var(--b2b-line); border-radius: 16px; padding: 18px 20px; }
+.b2b-stat-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--b2b-ink-faint); margin-bottom: 8px; }
+.b2b-stat-value { font-size: 20px; font-weight: 800; color: var(--b2b-ink); }
+.b2b-stat-note { font-size: 11.5px; font-weight: 400; color: var(--b2b-ink-faint); margin-left: 4px; }
+.b2b-stat-note-big { font-size: 13.5px; font-weight: 600; color: var(--b2b-ink-soft); }
+
+.b2b-live { display: flex; align-items: center; gap: 9px; }
+.b2b-live-dot { position: relative; display: inline-flex; width: 12px; height: 12px; }
+.b2b-live-ping { position: absolute; inset: 0; border-radius: 50%; background: var(--b2b-green); opacity: 0.5; animation: b2b-ping 1.8s cubic-bezier(0,0,0.2,1) infinite; }
+.b2b-live-core { position: relative; display: block; width: 12px; height: 12px; border-radius: 50%; background: var(--b2b-green); }
+.b2b-live-text { font-size: 16px; font-weight: 700; color: var(--b2b-ink); }
+
+@keyframes b2b-ping {
+  0% { transform: scale(1); opacity: 0.6; }
+  75%, 100% { transform: scale(2.4); opacity: 0; }
+}
+
+.b2b-section-row { max-width: 900px; margin: 0 auto 14px; padding: 0 20px; display: flex; justify-content: space-between; align-items: baseline; }
+.b2b-section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--b2b-ink-faint); }
+.b2b-section-hint { font-size: 12.5px; color: var(--b2b-ink-faint); }
+
+/* ---- Kafelki marek ---- */
+.b2b-brand-grid {
+  max-width: 900px;
+  margin: 0 auto 60px;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.b2b-brand-tile {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background: var(--b2b-surface);
+  border: 1px solid var(--b2b-line);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.b2b-brand-tile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -12px rgba(15,23,48,0.18); }
+
+.b2b-tile-art { height: 120px; background: var(--tile-bg); }
+
+.b2b-tile-info { padding: 14px 16px 16px; }
+.b2b-tile-name-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.b2b-tile-name { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--b2b-ink); }
+.b2b-tile-count { font-size: 12.5px; color: var(--b2b-ink-faint); }
+.b2b-tile-price { font-size: 12.5px; color: var(--b2b-ink-soft); }
+.b2b-tile-price strong { font-family: 'JetBrains Mono', monospace; color: var(--b2b-green); font-weight: 700; }
+
+/* ---- Widok jednej marki ---- */
+.b2b-brand-header { max-width: 900px; margin: 28px auto 16px; padding: 0 20px; display: flex; align-items: baseline; gap: 16px; }
+.b2b-back { font-size: 13px; font-weight: 600; color: var(--b2b-ink-soft); background: none; }
+.b2b-back:hover { color: var(--b2b-accent-b); }
+.b2b-brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; margin: 0; color: var(--b2b-ink); }
+
+.b2b-input {
+  display: block;
+  width: calc(100% - 40px);
+  max-width: 860px;
+  margin: 0 auto 16px;
+  border: 1px solid var(--b2b-line);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  background: var(--b2b-surface);
+  color: var(--b2b-ink);
+}
+.b2b-input::placeholder { color: var(--b2b-ink-faint); }
+.b2b-input:focus { outline: none; border-color: var(--b2b-accent-a); }
+
+/* ---- Karty telefonów ---- */
+.b2b-items { max-width: 900px; margin: 0 auto 60px; padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.b2b-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: var(--b2b-surface);
+  border: 1px solid var(--b2b-line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.b2b-item-card:hover { box-shadow: 0 10px 24px -14px rgba(15,23,48,0.2); border-color: #D8C9A3; }
+
+.b2b-item-left { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.b2b-item-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.b2b-item-model { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px; color: var(--b2b-ink); }
+
+.b2b-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: rgba(201,161,74,0.12);
+  color: var(--b2b-accent-b);
+  border: 1px solid rgba(201,161,74,0.3);
+}
+.b2b-pill-new { background: var(--b2b-green-soft); color: #14833B; border-color: #BFE7CC; }
+
+.b2b-item-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--b2b-ink-faint); flex-wrap: wrap; }
+.b2b-color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--b2b-line); }
+
+.b2b-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.b2b-item-price { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; color: var(--b2b-ink); letter-spacing: -0.01em; }
+.b2b-reserve { font-size: 12.5px; font-weight: 600; color: var(--b2b-accent-b); text-decoration: none; }
+.b2b-reserve:hover { color: var(--b2b-ink); }
+
+.b2b-flag {
+  display: inline-block;
+  font-size: 10.5px;
+  background: var(--b2b-warn-soft);
+  color: var(--b2b-warn);
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-right: 4px;
+}
+
+@media (max-width: 600px) {
+  .b2b-title { font-size: 28px; }
+  .b2b-stats-grid { grid-template-columns: 1fr; }
+  .b2b-brand-grid { grid-template-columns: 1fr 1fr; }
+  .b2b-item-card { flex-wrap: wrap; }
+  .b2b-item-right { align-items: flex-start; flex-direction: row; justify-content: space-between; width: 100%; }
+}
