@@ -6,7 +6,9 @@ import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
 import { printPurchaseAgreement } from '../utils/printPurchaseAgreement';
 import { printWarrantyCard } from '../utils/printWarrantyCard';
-import { uploadTradePhotoWeb } from '../firebase/photoUpload';
+import { uploadTradePhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUpload';
+import CameraButton from '../components/CameraButton';
+import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { printConsignmentAgreement } from '../utils/printConsignmentAgreement';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import './TradeDetailPage.css';
@@ -185,6 +187,22 @@ export default function TradeDetailPage() {
     setEditingUsedParts(false);
   };
 
+
+  // Wspólne dla obu źródeł: pliku z <input> i zdjęcia z natywnego aparatu.
+  // Przy podmianie kasuje stare zdjęcie ze Storage (jak dotąd).
+  const uploadPhonePhoto = async (file) => {
+    setPhotoUploading(true);
+    try {
+      const oldUrl = phone.photo;
+      const url = await uploadTradePhotoWeb(id, file);
+      await updatePhone(id, { photo: url });
+      if (oldUrl) await deletePhotoByUrlWeb(oldUrl);
+    } catch (err) {
+      alert('Nie udało się wgrać zdjęcia: ' + err.message);
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
   return (
     <div className="td-page">
       <button className="td-btn-ghost" onClick={() => navigate('/skup')}>← Skup telefonów</button>
@@ -323,29 +341,47 @@ export default function TradeDetailPage() {
               <p className="td-empty-hint">Brak zdjęcia.</p>
             )}
             {isAdmin && (
-              <label className="td-photo-upload-btn">
-                {photoUploading ? 'Wgrywam…' : phone.photo ? 'Podmień zdjęcie' : '+ Dodaj zdjęcie'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
+              <div className="td-photo-actions">
+                <CameraButton
+                  className="td-photo-upload-btn"
+                  label={phone.photo ? '📷 Zrób nowe zdjęcie' : '📷 Zrób zdjęcie'}
                   disabled={photoUploading}
-                  onChange={async (e) => {
-                    const file = e.target.files && e.target.files[0];
-                    if (!file) return;
-                    setPhotoUploading(true);
-                    try {
-                      const url = await uploadTradePhotoWeb(id, file);
-                      await updatePhone(id, { photo: url });
-                    } catch (err) {
-                      alert('Nie udało się wgrać zdjęcia: ' + err.message);
-                    } finally {
-                      setPhotoUploading(false);
-                      e.target.value = '';
-                    }
-                  }}
+                  onPhoto={uploadPhonePhoto}
                 />
-              </label>
+                <label className="td-photo-upload-btn">
+                  {photoUploading
+                    ? 'Wgrywam…'
+                    : isNativeCameraAvailable()
+                      ? '🖼️ Z galerii / plików'
+                      : phone.photo ? 'Podmień zdjęcie' : '+ Dodaj zdjęcie'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    disabled={photoUploading}
+                    onChange={async (e) => {
+                      const file = e.target.files && e.target.files[0];
+                      e.target.value = '';
+                      if (file) await uploadPhonePhoto(file);
+                    }}
+                  />
+                </label>
+                {phone.photo && (
+                  <button
+                    type="button"
+                    className="td-photo-remove-btn"
+                    disabled={photoUploading}
+                    onClick={async () => {
+                      if (!window.confirm('Usunąć zdjęcie?')) return;
+                      const oldUrl = phone.photo;
+                      await updatePhone(id, { photo: null });
+                      await deletePhotoByUrlWeb(oldUrl);
+                    }}
+                  >
+                    Usuń zdjęcie
+                  </button>
+                )}
+              </div>
             )}
           </div>
 

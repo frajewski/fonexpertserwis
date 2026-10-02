@@ -223,3 +223,19 @@
   .b2b-item-card { flex-wrap: wrap; }
   .b2b-item-right { align-items: flex-start; flex-direction: row; justify-content: space-between; width: 100%; }
 }
+
+/* Duży inicjał marki zamiast gradientu/logo - domyślny wygląd kafelka,
+   dopóki nie wgrasz prawdziwego zdjęcia konkretnego telefonu tej marki */
+.b2b-tile-art {
+  background: #EFEAE0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.b2b-tile-initial {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--b2b-accent-a);
+  opacity: 0.85;
+}

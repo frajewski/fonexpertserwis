@@ -7,9 +7,12 @@
 //  szczególnie przy kilku podobnych modelach naraz.
 // ============================================================
 
+import { blockPrintInNativeApp } from './platform';
+
 const fmtDateShort = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
 
 export function printDeviceLabel(repair) {
+  if (blockPrintInNativeApp()) return;
   const html = `
     <html>
       <head>

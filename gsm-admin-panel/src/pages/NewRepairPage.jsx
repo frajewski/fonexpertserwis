@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import brands from '../constants/brands';
 import { DOCUMENT_TYPE, documentTypeList } from '../constants/documentTypes';
 import STATUS from '../constants/statuses';
 import { uploadRepairPhotoWeb } from '../firebase/photoUpload';
+import CameraButton from '../components/CameraButton';
 import './NewRepairPage.css';
 
 const normalizePhone = (v) => (v || '').replace(/\D/g, '').replace(/^48/, '');
@@ -27,6 +28,23 @@ export default function NewRepairPage() {
   // (np. klient przyszedł kilka dni temu, a wpisujemy to do systemu teraz)
   const [acceptedDate, setAcceptedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [photoFiles, setPhotoFiles] = useState([]); // File[] wybrane, jeszcze niewgrane
+  // Zdjęcia z natywnego aparatu (tylko aplikacja mobilna): { file, url } –
+  // url to podgląd (object URL), zwalniany przy usunięciu / wyjściu z ekranu
+  const [cameraPhotos, setCameraPhotos] = useState([]);
+  const cameraPhotosRef = useRef(cameraPhotos);
+  cameraPhotosRef.current = cameraPhotos;
+  useEffect(() => () => cameraPhotosRef.current.forEach((p) => URL.revokeObjectURL(p.url)), []);
+  const totalPhotos = photoFiles.length + cameraPhotos.length;
+
+  const handleCameraPhoto = (file) => {
+    setCameraPhotos((prev) => (prev.length + photoFiles.length >= 5 ? prev : [...prev, { file, url: URL.createObjectURL(file) }]));
+  };
+  const removeCameraPhoto = (index) => {
+    setCameraPhotos((prev) => {
+      URL.revokeObjectURL(prev[index].url);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
 
   const [documentType, setDocumentType] = useState(DOCUMENT_TYPE.RECEIPT);
   const [customerNip, setCustomerNip] = useState('');
@@ -127,9 +145,10 @@ export default function NewRepairPage() {
       });
 
       // Krok 2: jeśli wybrano zdjęcia, wgraj je teraz (mamy już id zlecenia)
-      if (photoFiles.length > 0) {
+      const allPhotoFiles = [...photoFiles, ...cameraPhotos.map((p) => p.file)].slice(0, 5);
+      if (allPhotoFiles.length > 0) {
         const uploadedUrls = await Promise.all(
-          photoFiles.map((file) => uploadRepairPhotoWeb(newRepair.id, file))
+          allPhotoFiles.map((file) => uploadRepairPhotoWeb(newRepair.id, file))
         );
         await useStore.getState().updateRepair(newRepair.id, { repairPhotos: uploadedUrls });
       }
@@ -253,12 +272,24 @@ export default function NewRepairPage() {
               type="file"
               accept="image/*"
               multiple
-              onChange={(e) => setPhotoFiles(Array.from(e.target.files).slice(0, 5))}
+              onChange={(e) => setPhotoFiles(Array.from(e.target.files).slice(0, 5 - cameraPhotos.length))}
             />
-            {photoFiles.length > 0 && (
+            <CameraButton
+              className="nr-camera-btn"
+              disabled={totalPhotos >= 5}
+              label={totalPhotos >= 5 ? 'Limit 5 zdjęć' : '📷 Zrób zdjęcie'}
+              onPhoto={handleCameraPhoto}
+            />
+            {totalPhotos > 0 && (
               <div className="nr-photo-preview">
                 {photoFiles.map((f, i) => (
                   <img key={i} src={URL.createObjectURL(f)} alt={`Zdjęcie ${i + 1}`} className="nr-photo-thumb" />
+                ))}
+                {cameraPhotos.map((p, i) => (
+                  <div key={p.url} className="nr-photo-thumb-wrap">
+                    <img src={p.url} alt={`Zdjęcie z aparatu ${i + 1}`} className="nr-photo-thumb" />
+                    <button type="button" className="nr-photo-remove" onClick={(e) => { e.preventDefault(); removeCameraPhoto(i); }} aria-label="Usuń zdjęcie">✕</button>
+                  </div>
                 ))}
               </div>
             )}

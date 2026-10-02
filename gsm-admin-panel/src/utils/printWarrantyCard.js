@@ -9,6 +9,8 @@
 //  które obowiązują NIEZALEŻNIE od tej karty.
 // ============================================================
 
+import { blockPrintInNativeApp } from './platform';
+
 const SHOP = {
   name: 'Fonexpert Filip Rajewski',
   address: 'Bogusławice 29A, 09-100 Płońsk',
@@ -19,6 +21,7 @@ const SHOP = {
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 
 export function printWarrantyCard(phone) {
+  if (blockPrintInNativeApp()) return;
   const html = `
     <html>
       <head>

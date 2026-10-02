@@ -11,9 +11,12 @@
 //  przeglądarki, otwieranego w nowym oknie z wygenerowanym HTML-em.
 // ============================================================
 
+import { blockPrintInNativeApp } from './platform';
+
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 
 export function printRepairConfirmation(repair, customer, shopSettings) {
+  if (blockPrintInNativeApp()) return;
   const total = (repair.partsCost || 0) + (repair.serviceCost || 0);
   const trackingUrl = repair.trackingToken
     ? `https://gsm-serwis-klient.web.app/?token=${repair.trackingToken}`

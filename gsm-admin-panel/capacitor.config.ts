@@ -1,14 +1,14 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'pl.fonexpert.panel',
-  appName: 'Fonexpert',
+  appId: 'pl.fonexpert.serwis',
+  appName: 'FonExpert Serwis',
+  // Output `vite build` (ten sam folder, który idzie na Firebase Hosting)
   webDir: 'dist',
   server: {
-    // Podczas developmentu (npm run dev + cap run) Capacitor może ładować
-    // stronę bezpośrednio z Vite dev servera zamiast zbudowanej wersji –
-    // szybszy cykl "zmień kod → zobacz na telefonie" bez każdorazowego builda.
-    // Dla produkcyjnego APK ta sekcja jest ignorowana (używane jest webDir).
+    // Panel w aplikacji działa pod https://localhost. To domyślna wartość
+    // w Capacitorze, ale trzymamy ją jawnie: zmiana schematu = inny origin
+    // = utrata zapisanej sesji Firebase Auth i localStorage na telefonach.
     androidScheme: 'https',
   },
 };

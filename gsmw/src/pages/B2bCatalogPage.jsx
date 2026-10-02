@@ -31,17 +31,6 @@ const COLOR_MAP = {
 };
 const colorToHex = (name) => COLOR_MAP[(name || '').toLowerCase().trim()] || '#5B6273';
 
-// Cykl gradientów dla kafelków marek - brak prawdziwych zdjęć produktowych
-// (licencje), więc każda marka dostaje inny, stonowany gradient zamiast
-const TILE_GRADIENTS = [
-  'linear-gradient(135deg, #DCE4F7 0%, #B9C7EC 100%)',
-  'linear-gradient(135deg, #E7E4DF 0%, #D2CCC2 100%)',
-  'linear-gradient(135deg, #D7EFE6 0%, #AEDDC9 100%)',
-  'linear-gradient(135deg, #E2DEF5 0%, #C7BEE8 100%)',
-  'linear-gradient(135deg, #D8EEEC 0%, #ACD9D4 100%)',
-  'linear-gradient(135deg, #F3E3D3 0%, #E3C19B 100%)',
-];
-
 export default function B2bCatalogPage() {
   const { token } = useParams();
   const [items, setItems] = useState(null);
@@ -185,10 +174,12 @@ export default function B2bCatalogPage() {
                 style={
                   g.photo
                     ? { backgroundImage: `url(${g.photo})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                    : { '--tile-bg': TILE_GRADIENTS[idx % TILE_GRADIENTS.length] }
+                    : undefined
                 }
               >
-                <div className="b2b-tile-art" style={g.photo ? { background: 'transparent' } : undefined} />
+                <div className="b2b-tile-art" style={g.photo ? { background: 'transparent' } : undefined}>
+                  {!g.photo && <span className="b2b-tile-initial">{g.brand.charAt(0).toUpperCase()}</span>}
+                </div>
                 <div className="b2b-tile-info">
                   <div className="b2b-tile-name-row">
                     <span className="b2b-tile-name">{g.brand}</span>

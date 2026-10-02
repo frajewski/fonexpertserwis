@@ -5,10 +5,11 @@
 // ============================================================
 
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, initializeAuth, indexedDBLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import { getStorage } from 'firebase/storage';
+import { isNativeApp } from '../utils/platform';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyDtDMY65scKHqjWDHXa_FbcgTT55nmXOFA",
@@ -20,7 +21,13 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// W aplikacji natywnej (Capacitor) używamy initializeAuth z IndexedDB:
+// zwykłe getAuth() potrafi się zawiesić w WKWebView na iOS (onAuthStateChanged
+// nigdy nie odpowiada). Logowanie email+hasło działa identycznie.
+// W przeglądarce/PWA bez zmian – getAuth().
+export const auth = isNativeApp()
+  ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
+  : getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 export const storage = getStorage(app);

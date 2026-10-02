@@ -14,6 +14,9 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
 }
 
 .sidebar-brand {
@@ -162,6 +165,9 @@
   flex: 1;
   min-width: 0;
   overflow-x: hidden;
+  padding-top: var(--safe-top);
+  padding-right: var(--safe-right);
+  padding-bottom: var(--safe-bottom);
 }
 
 .verify-banner {
@@ -195,8 +201,8 @@
   z-index: 30;
   background: var(--navy-gradient);
   color: #fff;
-  padding: 0 14px;
-  height: 52px;
+  padding: var(--safe-top) calc(14px + var(--safe-right)) 0 calc(14px + var(--safe-left));
+  height: calc(52px + var(--safe-top));
 }
 .mobile-menu-btn {
   background: none;

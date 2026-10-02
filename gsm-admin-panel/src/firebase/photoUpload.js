@@ -46,21 +46,23 @@ const compressImageFile = (file) => new Promise((resolve, reject) => {
   reader.readAsDataURL(file);
 });
 
-export const uploadRepairPhotoWeb = async (repairId, file) => {
+// Wspólna ścieżka uploadu dla KAŻDEGO źródła zdjęcia: pliku z <input
+// type="file"> (przeglądarka/PWA) i zdjęcia z natywnego aparatu (Capacitor,
+// zamieniane wcześniej na File w utils/nativeCamera.js). Kompresja → Storage
+// → URL; do Firestore trafia wyłącznie zwrócony URL, nigdy sam obraz.
+export const uploadImageToStorage = async (folderPath, file) => {
   const compressedBlob = await compressImageFile(file);
   const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-  const storageRef = ref(storage, `repairs/${repairId}/${fileName}`);
-  await uploadBytes(storageRef, compressedBlob);
+  const storageRef = ref(storage, `${folderPath}/${fileName}`);
+  await uploadBytes(storageRef, compressedBlob, { contentType: 'image/jpeg' });
   return getDownloadURL(storageRef);
 };
 
-export const uploadTradePhotoWeb = async (phoneId, file) => {
-  const compressedBlob = await compressImageFile(file);
-  const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-  const storageRef = ref(storage, `trade/${phoneId}/${fileName}`);
-  await uploadBytes(storageRef, compressedBlob);
-  return getDownloadURL(storageRef);
-};
+export const uploadRepairPhotoWeb = (repairId, file) =>
+  uploadImageToStorage(`repairs/${repairId}`, file);
+
+export const uploadTradePhotoWeb = (phoneId, file) =>
+  uploadImageToStorage(`trade/${phoneId}`, file);
 
 export const deletePhotoByUrlWeb = async (url) => {
   try {

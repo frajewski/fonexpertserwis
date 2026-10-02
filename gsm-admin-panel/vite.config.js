@@ -9,6 +9,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
 
+      // Rejestracja SW jest w src/registerServiceWorker.js – pomijana
+      // w aplikacji Android (Capacitor), bez zmian w przeglądarce/PWA.
+      injectRegister: false,
+
       includeAssets: [
         'apple-touch-icon.png',
         'pwa-192x192.png',

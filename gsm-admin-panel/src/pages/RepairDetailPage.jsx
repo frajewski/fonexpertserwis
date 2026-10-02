@@ -4,6 +4,8 @@ import useStore from '../store/useStore';
 import STATUS, { statusList, statusIcons, terminalStatuses } from '../constants/statuses';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import { uploadRepairPhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUpload';
+import CameraButton from '../components/CameraButton';
+import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { printRepairConfirmation } from '../utils/printConfirmation';
 import { printPickupConfirmation } from '../utils/printPickupConfirmation';
 import { printDeviceLabel } from '../utils/printDeviceLabel';
@@ -253,21 +255,29 @@ export default function RepairDetailPage() {
     setEditingWork(false);
   };
 
-  const handleAddPhotos = async (e) => {
-    const files = Array.from(e.target.files || []).slice(0, 5 - (repair.repairPhotos?.length || 0));
+  // Wspólne dla obu źródeł: plików z <input> i zdjęcia z natywnego aparatu
+  const addPhotoFiles = async (selectedFiles) => {
+    const files = selectedFiles.slice(0, 5 - (repair.repairPhotos?.length || 0));
     if (files.length === 0) return;
 
     setUploadingPhoto(true);
     try {
       const uploadedUrls = await Promise.all(files.map((file) => uploadRepairPhotoWeb(id, file)));
-      const updated = [...(repair.repairPhotos || []), ...uploadedUrls].slice(0, 5);
+      // Najświeższa lista ze store – między zdjęciami z aparatu mogła się zmienić
+      const current = useStore.getState().getRepairById(id)?.repairPhotos || [];
+      const updated = [...current, ...uploadedUrls].slice(0, 5);
       await updateRepair(id, { repairPhotos: updated });
     } catch (error) {
       alert('Nie udało się wgrać zdjęć: ' + error.message);
     } finally {
       setUploadingPhoto(false);
-      e.target.value = ''; // pozwala wybrać te same pliki jeszcze raz, jeśli trzeba
     }
+  };
+
+  const handleAddPhotos = async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = ''; // pozwala wybrać te same pliki jeszcze raz, jeśli trzeba
+    await addPhotoFiles(files);
   };
 
   const handleRemovePhoto = async (index, url) => {
@@ -674,10 +684,17 @@ export default function RepairDetailPage() {
               </div>
             )}
             {(repair.repairPhotos?.length || 0) < 5 && (
-              <label className="rd-photo-add">
-                {uploadingPhoto ? 'Wgrywam…' : '+ Dodaj zdjęcie'}
-                <input type="file" accept="image/*" multiple hidden onChange={handleAddPhotos} disabled={uploadingPhoto} />
-              </label>
+              <div className="rd-photo-actions">
+                <CameraButton
+                  className="rd-photo-add"
+                  disabled={uploadingPhoto}
+                  onPhoto={(file) => addPhotoFiles([file])}
+                />
+                <label className="rd-photo-add">
+                  {uploadingPhoto ? 'Wgrywam…' : isNativeCameraAvailable() ? '🖼️ Z galerii / plików' : '+ Dodaj zdjęcie'}
+                  <input type="file" accept="image/*" multiple hidden onChange={handleAddPhotos} disabled={uploadingPhoto} />
+                </label>
+              </div>
             )}
           </div>
 

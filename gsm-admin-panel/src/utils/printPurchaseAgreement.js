@@ -10,6 +10,8 @@
 //  dane rejestrowe, nie zmieniają się między transakcjami.
 // ============================================================
 
+import { blockPrintInNativeApp } from './platform';
+
 const BUYER = {
   name: 'Fonexpert Filip Rajewski',
   address: 'Bogusławice 29A, 09-100 Płońsk',
@@ -20,6 +22,7 @@ const BUYER = {
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : new Date().toLocaleDateString('pl-PL');
 
 export function printPurchaseAgreement(phone) {
+  if (blockPrintInNativeApp()) return;
   const html = `
     <html>
       <head>

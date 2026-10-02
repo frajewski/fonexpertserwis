@@ -10,9 +10,12 @@
 //  warunki gwarancji/rękojmi z osobą uprawnioną.
 // ============================================================
 
+import { blockPrintInNativeApp } from './platform';
+
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : new Date().toLocaleDateString('pl-PL');
 
 export function printPickupConfirmation(repair, customer, shopSettings) {
+  if (blockPrintInNativeApp()) return;
   const html = `
     <html>
       <head>

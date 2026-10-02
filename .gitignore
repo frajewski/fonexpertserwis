@@ -10,3 +10,8 @@ ios/
 .env.local
 firebase-debug.log
 .firebase/
+
+# Projekt natywny Capacitora (gsm-admin-panel) MA być w repo –
+# reguła "android/" powyżej pochodzi z dawnej apki Expo
+!gsm-admin-panel/android/
+!gsm-admin-panel/ios/
