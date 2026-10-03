@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/firebaseConfig';
 import useStore from './store/useStore';
 import useSettings from './store/useSettings';
+import { useNetworkStatus, isOnlineNow } from './network/networkStatus';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import RepairsPage from './pages/RepairsPage';
@@ -43,6 +44,28 @@ export default function App() {
   const startSettingsListener = useSettings((s) => s.startSettingsListener);
   const stopSettingsListener  = useSettings((s) => s.stopSettingsListener);
   const [checking, setChecking] = useState(true);
+  // Błąd wczytania konta (np. start bez sieci) – zamiast wiecznego
+  // „Wczytywanie…” pokazujemy komunikat i ponawiamy po powrocie sieci.
+  const [sessionError, setSessionError] = useState(null);
+  const lastFirebaseUserRef = useRef(null);
+  const isOnline = useNetworkStatus((s) => s.isOnline);
+
+  const runRestore = async (firebaseUser) => {
+    if (firebaseUser && !isOnlineNow()) {
+      setSessionError('offline');
+      setChecking(false);
+      return;
+    }
+    try {
+      await restoreSession(firebaseUser);
+      setSessionError(null);
+    } catch (err) {
+      console.error('Nie udało się wczytać konta:', err);
+      setSessionError(isOnlineNow() ? 'error' : 'offline');
+    } finally {
+      setChecking(false);
+    }
+  };
 
   useEffect(() => {
     startSettingsListener();
@@ -50,17 +73,48 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      await restoreSession(firebaseUser);
-      setChecking(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      lastFirebaseUserRef.current = firebaseUser;
+      runRestore(firebaseUser);
     });
     return unsubscribe;
   }, []);
+
+  // Sieć wróciła, a konto nie zostało wczytane → spróbuj ponownie
+  useEffect(() => {
+    if (isOnline && sessionError) {
+      setChecking(true);
+      runRestore(lastFirebaseUserRef.current);
+    }
+  }, [isOnline]);
+
+  const retryRestore = () => {
+    setChecking(true);
+    runRestore(lastFirebaseUserRef.current);
+  };
 
   if (checking) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#5B6178' }}>
         Wczytywanie…
+      </div>
+    );
+  }
+
+  if (sessionError) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 24, textAlign: 'center', color: '#5B6178' }}>
+        <div style={{ fontWeight: 700, color: '#14192B' }}>
+          {sessionError === 'offline' ? 'Brak połączenia z Internetem' : 'Nie udało się wczytać konta'}
+        </div>
+        <div style={{ fontSize: 14, maxWidth: 320 }}>
+          {sessionError === 'offline'
+            ? 'Panel wczyta się automatycznie, gdy połączenie wróci.'
+            : 'Sprawdź połączenie i spróbuj ponownie.'}
+        </div>
+        <button type="button" onClick={retryRestore} style={{ padding: '8px 16px', borderRadius: 8, background: '#14192B', color: '#fff', fontWeight: 600 }}>
+          Spróbuj ponownie
+        </button>
       </div>
     );
   }

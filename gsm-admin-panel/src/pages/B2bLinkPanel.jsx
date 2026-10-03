@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase/firebaseConfig';
+import { isOnlineNow, OFFLINE_MESSAGE } from '../network/networkStatus';
 
 const CLIENT_BASE = 'https://gsm-serwis-klient.web.app';
 
@@ -14,6 +15,8 @@ export default function B2bLinkPanel() {
   const link = token ? `${CLIENT_BASE}/oferta/${token}` : '';
 
   const callFn = async (name) => {
+    // Cloud Function – bez sieci od razu czytelny komunikat
+    if (!isOnlineNow()) { setError(OFFLINE_MESSAGE); return; }
     setBusy(true);
     setError('');
     try {

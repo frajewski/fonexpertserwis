@@ -8,8 +8,10 @@
 
 import { useState } from 'react';
 import { isNativeCameraAvailable, takePhotoAsFile } from '../utils/nativeCamera';
+import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 
-export default function CameraButton({ onPhoto, className, disabled, label = '📷 Zrób zdjęcie' }) {
+// requireOnline – zdjęcie od razu idzie do Storage, więc bez sieci nie otwieramy aparatu
+export default function CameraButton({ onPhoto, className, disabled, requireOnline = false, label = '📷 Zrób zdjęcie' }) {
   const [busy, setBusy] = useState(false);
 
   if (!isNativeCameraAvailable()) return null;
@@ -18,6 +20,7 @@ export default function CameraButton({ onPhoto, className, disabled, label = '�
     e.preventDefault();
     e.stopPropagation();
     if (busy || disabled) return;
+    if (requireOnline && !isOnlineNow()) { alert(PHOTO_OFFLINE_MESSAGE); return; }
     setBusy(true);
     try {
       const file = await takePhotoAsFile();

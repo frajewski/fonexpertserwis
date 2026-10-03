@@ -13,6 +13,7 @@
 
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './firebaseConfig';
+import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 
 // Kompresuje i skaluje zdjęcie w przeglądarce PRZED wgraniem do Storage,
 // używając natywnego Canvas API (brak potrzeby dodatkowej biblioteki).
@@ -50,12 +51,25 @@ const compressImageFile = (file) => new Promise((resolve, reject) => {
 // type="file"> (przeglądarka/PWA) i zdjęcia z natywnego aparatu (Capacitor,
 // zamieniane wcześniej na File w utils/nativeCamera.js). Kompresja → Storage
 // → URL; do Firestore trafia wyłącznie zwrócony URL, nigdy sam obraz.
+//
+// Bez sieci upload w ogóle nie startuje (czytelny komunikat zamiast
+// kilkuminutowego „Wgrywam…”). Kolejki offline celowo nie ma – w przyszłości
+// można ją dodać właśnie tutaj, w jednym miejscu.
 export const uploadImageToStorage = async (folderPath, file) => {
+  if (!isOnlineNow()) throw new Error(PHOTO_OFFLINE_MESSAGE);
   const compressedBlob = await compressImageFile(file);
   const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
   const storageRef = ref(storage, `${folderPath}/${fileName}`);
-  await uploadBytes(storageRef, compressedBlob, { contentType: 'image/jpeg' });
-  return getDownloadURL(storageRef);
+  try {
+    await uploadBytes(storageRef, compressedBlob, { contentType: 'image/jpeg' });
+    return await getDownloadURL(storageRef);
+  } catch (err) {
+    // Połączenie zerwane w trakcie wysyłania → zrozumiały komunikat zamiast kodu Firebase
+    if (!isOnlineNow() || err?.code === 'storage/retry-limit-exceeded') {
+      throw new Error(PHOTO_OFFLINE_MESSAGE);
+    }
+    throw err;
+  }
 };
 
 export const uploadRepairPhotoWeb = (repairId, file) =>

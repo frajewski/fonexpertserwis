@@ -4,13 +4,16 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './styles/tokens.css';
 import { registerServiceWorker } from './registerServiceWorker';
+import NetworkProvider from './network/NetworkProvider';
 
 registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <NetworkProvider>
+        <App />
+      </NetworkProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

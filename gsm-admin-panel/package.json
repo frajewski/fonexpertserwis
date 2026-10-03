@@ -16,6 +16,7 @@
     "@capacitor/camera": "^8.2.5",
     "@capacitor/core": "^8.5.2",
     "@capacitor/ios": "^8.5.2",
+    "@capacitor/network": "^8.0.1",
     "@gsm/shared-core": "*",
     "firebase": "^10.14.1",
     "react": "^18.3.1",

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useStore from '../store/useStore';
+import { useNetworkStatus, CONNECTION_TYPE_LABELS } from '../network/networkStatus';
 import './AccountPage.css';
 
 export default function AccountPage() {
@@ -46,6 +47,8 @@ export default function AccountPage() {
     setConfirmPassword('');
   };
 
+  const network = useNetworkStatus();
+
   return (
     <div className="ac-page">
       <h1 className="ac-title">Moje konto</h1>
@@ -55,6 +58,22 @@ export default function AccountPage() {
         <div className="ac-info-row"><span>Imię</span><span>{currentUser?.name || '—'}</span></div>
         <div className="ac-info-row"><span>Email</span><span>{currentUser?.email || '—'}</span></div>
         <div className="ac-info-row"><span>Rola</span><span>{currentUser?.role === 'admin' ? 'Administrator' : 'Pracownik'}</span></div>
+      </div>
+
+      <div className="ac-card">
+        <h2 className="ac-section-title">Połączenie</h2>
+        <div className="ac-info-row">
+          <span>Status</span>
+          <span style={{ fontWeight: 700, color: network.isOnline ? '#12805C' : '#B42318' }}>
+            {network.isOnline ? '● Online' : '● Offline'}
+          </span>
+        </div>
+        <div className="ac-info-row"><span>Typ połączenia</span><span>{CONNECTION_TYPE_LABELS[network.connectionType] || 'Nieznany'}</span></div>
+        <div className="ac-info-row"><span>Źródło informacji</span><span>{network.source === 'native' ? 'Capacitor Network (aplikacja)' : 'Przeglądarka (navigator.onLine)'}</span></div>
+        <div className="ac-info-row">
+          <span>Ostatnia zmiana</span>
+          <span>{network.lastChangedAt ? new Date(network.lastChangedAt).toLocaleTimeString('pl-PL') : '—'}</span>
+        </div>
       </div>
 
       <div className="ac-card">

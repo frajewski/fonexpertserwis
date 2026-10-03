@@ -31,3 +31,7 @@ export const auth = isNativeApp()
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 export const storage = getStorage(app);
+// Domyślnie SDK ponawia upload przy zerwanym połączeniu aż do 10 minut –
+// skracamy do 1 minuty, żeby utrata sieci kończyła się komunikatem,
+// a nie wiecznym „Wgrywam…”.
+storage.maxUploadRetryTime = 60 * 1000;

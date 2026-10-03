@@ -5,6 +5,7 @@ import STATUS, { statusList, statusIcons, terminalStatuses } from '../constants/
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import { uploadRepairPhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUpload';
 import CameraButton from '../components/CameraButton';
+import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { printRepairConfirmation } from '../utils/printConfirmation';
 import { printPickupConfirmation } from '../utils/printPickupConfirmation';
@@ -259,6 +260,7 @@ export default function RepairDetailPage() {
   const addPhotoFiles = async (selectedFiles) => {
     const files = selectedFiles.slice(0, 5 - (repair.repairPhotos?.length || 0));
     if (files.length === 0) return;
+    if (!isOnlineNow()) { alert(PHOTO_OFFLINE_MESSAGE); return; }
 
     setUploadingPhoto(true);
     try {
@@ -687,6 +689,7 @@ export default function RepairDetailPage() {
               <div className="rd-photo-actions">
                 <CameraButton
                   className="rd-photo-add"
+                  requireOnline
                   disabled={uploadingPhoto}
                   onPhoto={(file) => addPhotoFiles([file])}
                 />

@@ -6,6 +6,7 @@ import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
 import { storageOptions } from '../constants/storageOptions';
 import TRADE_STATUS from '../constants/tradeStatuses';
+import { isOnlineNow } from '../network/networkStatus';
 import './NewTradePage.css';
 
 export default function NewTradePage() {
@@ -105,6 +106,11 @@ export default function NewTradePage() {
         );
         if (!proceed) return;
       }
+    }
+
+    if (!isOnlineNow()) {
+      setError('Brak połączenia z Internetem. Telefon nie został zapisany — dane zostają w formularzu.');
+      return;
     }
 
     setLoading(true);

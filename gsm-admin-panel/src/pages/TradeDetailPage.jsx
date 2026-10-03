@@ -8,6 +8,7 @@ import { printPurchaseAgreement } from '../utils/printPurchaseAgreement';
 import { printWarrantyCard } from '../utils/printWarrantyCard';
 import { uploadTradePhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUpload';
 import CameraButton from '../components/CameraButton';
+import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { printConsignmentAgreement } from '../utils/printConsignmentAgreement';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
@@ -191,6 +192,7 @@ export default function TradeDetailPage() {
   // Wspólne dla obu źródeł: pliku z <input> i zdjęcia z natywnego aparatu.
   // Przy podmianie kasuje stare zdjęcie ze Storage (jak dotąd).
   const uploadPhonePhoto = async (file) => {
+    if (!isOnlineNow()) { alert(PHOTO_OFFLINE_MESSAGE); return; }
     setPhotoUploading(true);
     try {
       const oldUrl = phone.photo;
@@ -344,6 +346,7 @@ export default function TradeDetailPage() {
               <div className="td-photo-actions">
                 <CameraButton
                   className="td-photo-upload-btn"
+                  requireOnline
                   label={phone.photo ? '📷 Zrób nowe zdjęcie' : '📷 Zrób zdjęcie'}
                   disabled={photoUploading}
                   onPhoto={uploadPhonePhoto}

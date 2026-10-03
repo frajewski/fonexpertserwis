@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useStore from '../store/useStore';
+import { isOnlineNow, OFFLINE_MESSAGE } from '../network/networkStatus';
 import { ROLES } from '../constants/roles';
 import './UsersPage.css';
 
@@ -15,8 +16,14 @@ export default function UsersPage() {
 
   const handleRoleChange = async (user, newRole) => {
     if (newRole === user.role) return;
+    // Zmiana roli wywołuje Cloud Function (custom claims) – wymaga sieci
+    if (!isOnlineNow()) { alert(OFFLINE_MESSAGE + ' Rola nie została zmieniona.'); return; }
     if (!confirm(`Zmienić rolę ${user.name} na "${ROLE_LABELS[newRole]}"?`)) return;
-    await updateUserRole(user.id, newRole);
+    try {
+      await updateUserRole(user.id, newRole);
+    } catch (err) {
+      alert('Nie udało się zmienić roli: ' + (isOnlineNow() ? err.message : OFFLINE_MESSAGE));
+    }
   };
 
   return (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
+import { isOnlineNow } from '../network/networkStatus';
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -29,8 +30,25 @@ export default function LoginPage() {
       return;
     }
 
+    if (!isOnlineNow()) {
+      setError('Brak połączenia z Internetem. Zaloguj się po odzyskaniu sieci.');
+      return;
+    }
+
     setLoading(true);
-    const result = await login(email.trim(), password);
+    let result;
+    try {
+      result = await login(email.trim(), password);
+    } catch (err) {
+      // np. sieć zniknęła w trakcie wczytywania profilu po zalogowaniu
+      console.error('Logowanie przerwane:', err);
+      result = {
+        success: false,
+        error: isOnlineNow()
+          ? 'Nie udało się zalogować. Spróbuj ponownie.'
+          : 'Brak połączenia z Internetem. Zaloguj się po odzyskaniu sieci.',
+      };
+    }
     setLoading(false);
 
     if (!result.success) {

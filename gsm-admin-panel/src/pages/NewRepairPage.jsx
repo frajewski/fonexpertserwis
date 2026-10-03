@@ -6,6 +6,7 @@ import { DOCUMENT_TYPE, documentTypeList } from '../constants/documentTypes';
 import STATUS from '../constants/statuses';
 import { uploadRepairPhotoWeb } from '../firebase/photoUpload';
 import CameraButton from '../components/CameraButton';
+import { isOnlineNow } from '../network/networkStatus';
 import './NewRepairPage.css';
 
 const normalizePhone = (v) => (v || '').replace(/\D/g, '').replace(/^48/, '');
@@ -115,6 +116,12 @@ export default function NewRepairPage() {
     if (!selectedCustomerId) { setError('Wybierz klienta.'); return; }
     if (documentType === DOCUMENT_TYPE.INVOICE && !customerNip.trim()) {
       setError('Faktura wymaga podania NIP klienta.');
+      return;
+    }
+    // Bez sieci nie zaczynamy zapisu (inaczej „Zapisywanie…” czekałoby na sieć,
+    // a zdjęcia i tak nie mogłyby zostać wysłane). Formularz i podgląd zostają.
+    if (!isOnlineNow()) {
+      setError('Brak połączenia z Internetem. Zlecenie nie zostało zapisane — dane i zdjęcia zostają w formularzu.');
       return;
     }
 
