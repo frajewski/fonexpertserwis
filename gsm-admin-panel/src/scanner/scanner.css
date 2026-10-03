@@ -1,0 +1,21 @@
+/* Pole + przycisk „Skanuj” w jednym wierszu (ręczne wpisywanie zostaje) */
+.scan-row { display: flex; gap: 8px; align-items: stretch; }
+.scan-row > input { flex: 1; min-width: 0; }
+
+.scan-btn {
+  flex-shrink: 0;
+  padding: 0 14px;
+  min-height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--line);
+  background: var(--surface, #fff);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.scan-btn:hover { border-color: var(--accent); color: var(--accent); }
+.scan-btn:disabled { opacity: 0.6; }
+
+/* Wersja w polu wyszukiwania (bez ramki, w środku pola) */
+.scan-btn-inline { border: none; background: none; color: var(--accent); min-height: 30px; padding: 0 6px; }

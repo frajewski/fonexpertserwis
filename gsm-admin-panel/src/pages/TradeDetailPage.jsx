@@ -10,6 +10,7 @@ import DocumentShareButtons from '../components/DocumentShareButtons';
 import { safeFileName } from '../documents/shareDocument';
 import { uploadTradePhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUpload';
 import CameraButton from '../components/CameraButton';
+import { ScanImeiButton } from '../scanner/ScanButtons';
 import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { printConsignmentAgreement, buildConsignmentAgreementHtml } from '../utils/printConsignmentAgreement';
@@ -260,7 +261,10 @@ export default function TradeDetailPage() {
                 <div className="td-edit-row">
                   <label className="td-edit-field">
                     <span>IMEI</span>
-                    <input className="td-input" value={editImei} onChange={(e) => setEditImei(e.target.value)} />
+                    <div className="scan-row">
+                      <input className="td-input" value={editImei} onChange={(e) => setEditImei(e.target.value)} />
+                      <ScanImeiButton onImei={setEditImei} />
+                    </div>
                   </label>
                   <label className="td-edit-field">
                     <span>Kolor</span>

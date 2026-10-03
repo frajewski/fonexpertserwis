@@ -6,6 +6,7 @@ import { DOCUMENT_TYPE, documentTypeList } from '../constants/documentTypes';
 import STATUS from '../constants/statuses';
 import { uploadRepairPhotoWeb } from '../firebase/photoUpload';
 import CameraButton from '../components/CameraButton';
+import { ScanImeiButton } from '../scanner/ScanButtons';
 import { isOnlineNow } from '../network/networkStatus';
 import './NewRepairPage.css';
 
@@ -258,7 +259,10 @@ export default function NewRepairPage() {
           </div>
           <label className="nr-field">
             <span className="nr-label">IMEI (opcjonalnie)</span>
-            <input className="nr-input" value={imei} onChange={(e) => setImei(e.target.value)} placeholder="15 cyfr" maxLength={15} />
+            <div className="scan-row">
+              <input className="nr-input" value={imei} onChange={(e) => setImei(e.target.value)} placeholder="15 cyfr" maxLength={15} />
+              <ScanImeiButton onImei={setImei} />
+            </div>
           </label>
           <label className="nr-field">
             <span className="nr-label">Data przyjęcia</span>

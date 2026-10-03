@@ -6,6 +6,7 @@ import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
 import { storageOptions } from '../constants/storageOptions';
 import TRADE_STATUS from '../constants/tradeStatuses';
+import { ScanImeiButton } from '../scanner/ScanButtons';
 import { isOnlineNow } from '../network/networkStatus';
 import './NewTradePage.css';
 
@@ -188,7 +189,10 @@ export default function NewTradePage() {
           <div className="nt-row">
             <label className="nt-field">
               <span className="nt-label">IMEI</span>
-              <input className="nt-input" value={imei} onChange={(e) => setImei(e.target.value)} maxLength={15} />
+              <div className="scan-row">
+                <input className="nt-input" value={imei} onChange={(e) => setImei(e.target.value)} maxLength={15} />
+                <ScanImeiButton onImei={setImei} />
+              </div>
             </label>
             <label className="nt-field">
               <span className="nt-label">Kolor</span>

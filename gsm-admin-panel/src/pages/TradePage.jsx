@@ -5,6 +5,7 @@ import TRADE_STATUS, { tradeStatusIcons } from '../constants/tradeStatuses';
 import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
 import B2bLinkPanel from './B2bLinkPanel';
+import { ScanImeiButton } from '../scanner/ScanButtons';
 import './TradePage.css';
 
 const TONE = {
@@ -186,6 +187,7 @@ export default function TradePage() {
         <div className="tr-search">
           <span className="tr-search-icon">⌕</span>
           <input className="tr-search-input" placeholder="Szukaj: marka, model, IMEI…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <ScanImeiButton className="scan-btn scan-btn-inline" onImei={setSearch} />
         </div>
         <div className="tr-chips">
           <button className={`tr-chip ${!statusFilter ? 'tr-chip-active' : ''}`} onClick={() => setStatusFilter(null)}>Wszystkie</button>

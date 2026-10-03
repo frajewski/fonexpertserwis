@@ -4,6 +4,7 @@ import useStore from '../store/useStore';
 import STATUS, { terminalStatuses } from '../constants/statuses';
 import { DOCUMENT_TYPE, documentTypeList } from '../constants/documentTypes';
 import { getStaleRepairs } from '../utils/calcProfit';
+import { ScanCodeButton } from '../scanner/ScanButtons';
 import './RepairsPage.css';
 
 const STATUS_TONE = {
@@ -257,6 +258,8 @@ export default function RepairsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+            {/* IMEI → wpisuje do wyszukiwarki, QR zlecenia → otwiera zlecenie */}
+            <ScanCodeButton className="scan-btn scan-btn-inline" onImei={setSearch} />
           </div>
 
           <button className="rp-filters-btn" onClick={openFilterModal}>
