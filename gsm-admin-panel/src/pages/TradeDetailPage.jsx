@@ -4,13 +4,15 @@ import useStore from '../store/useStore';
 import TRADE_STATUS, { tradeStatusIcons, tradeStatusList } from '../constants/tradeStatuses';
 import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
-import { printPurchaseAgreement } from '../utils/printPurchaseAgreement';
-import { printWarrantyCard } from '../utils/printWarrantyCard';
+import { printPurchaseAgreement, buildPurchaseAgreementHtml } from '../utils/printPurchaseAgreement';
+import { printWarrantyCard, buildWarrantyCardHtml } from '../utils/printWarrantyCard';
+import DocumentShareButtons from '../components/DocumentShareButtons';
+import { safeFileName } from '../documents/shareDocument';
 import { uploadTradePhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUpload';
 import CameraButton from '../components/CameraButton';
 import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
-import { printConsignmentAgreement } from '../utils/printConsignmentAgreement';
+import { printConsignmentAgreement, buildConsignmentAgreementHtml } from '../utils/printConsignmentAgreement';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import './TradeDetailPage.css';
 
@@ -224,10 +226,28 @@ export default function TradeDetailPage() {
                     📄 Drukuj umowę
                   </button>
                 )}
+                {isAdmin && (
+                  <DocumentShareButtons
+                    className="td-btn-ghost"
+                    docLabel="umowę"
+                    buildHtml={() => (phone.transactionType === 'consignment' ? buildConsignmentAgreementHtml(phone) : buildPurchaseAgreementHtml(phone))}
+                    fileName={`${safeFileName(phone.transactionType === 'consignment' ? 'FonExpert_Umowa_komisu' : 'FonExpert_Umowa', phone.brand, phone.model, phone.imei ? phone.imei.slice(-4) : phone.id.slice(0, 6))}.pdf`}
+                    title={`FonExpert — ${phone.transactionType === 'consignment' ? 'umowa komisu' : 'umowa kupna-sprzedaży'}: ${phone.brand} ${phone.model}`}
+                  />
+                )}
                 {isAdmin && phone.status === TRADE_STATUS.SOLD && (
                   <button className="td-btn-ghost" onClick={() => printWarrantyCard(phone)}>
                     🛡️ Drukuj kartę gwarancyjną
                   </button>
+                )}
+                {isAdmin && phone.status === TRADE_STATUS.SOLD && (
+                  <DocumentShareButtons
+                    className="td-btn-ghost"
+                    docLabel="kartę"
+                    buildHtml={() => buildWarrantyCardHtml(phone)}
+                    fileName={`${safeFileName('FonExpert_Karta_gwarancyjna', phone.brand, phone.model, phone.imei ? phone.imei.slice(-4) : phone.id.slice(0, 6))}.pdf`}
+                    title={`FonExpert — karta gwarancyjna: ${phone.brand} ${phone.model}`}
+                  />
                 )}
                 {isAdmin && !editing && (
                   <button className="td-btn-ghost td-btn-edit" onClick={handleStartEdit}>Edytuj</button>

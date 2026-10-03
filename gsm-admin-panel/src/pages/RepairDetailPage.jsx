@@ -7,8 +7,10 @@ import { uploadRepairPhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUplo
 import CameraButton from '../components/CameraButton';
 import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
-import { printRepairConfirmation } from '../utils/printConfirmation';
-import { printPickupConfirmation } from '../utils/printPickupConfirmation';
+import { printRepairConfirmation, buildRepairConfirmationHtml } from '../utils/printConfirmation';
+import { printPickupConfirmation, buildPickupConfirmationHtml } from '../utils/printPickupConfirmation';
+import DocumentShareButtons from '../components/DocumentShareButtons';
+import { canShareText, shareText, safeFileName } from '../documents/shareDocument';
 import { printDeviceLabel } from '../utils/printDeviceLabel';
 import { messageTemplates } from '../utils/messageTemplates';
 import useSettings from '../store/useSettings';
@@ -522,6 +524,16 @@ export default function RepairDetailPage() {
                       ✉️ Otwórz e-mail
                     </button>
                   )}
+                  {canShareText() && (
+                    <button
+                      type="button"
+                      className="rd-btn-ghost"
+                      onClick={() => shareText({ title: `FonExpert — zlecenie nr ${repair.displayNumber || repair.id}`, text: currentBody })
+                        .catch((err) => alert(err.message))}
+                    >
+                      📤 Udostępnij
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -717,13 +729,33 @@ export default function RepairDetailPage() {
             <button className="rd-btn-primary" onClick={handlePrint}>
               🖨️ Drukuj potwierdzenie
             </button>
+            <div className="rd-doc-actions">
+              <DocumentShareButtons
+                className="rd-btn-ghost"
+                buildHtml={() => buildRepairConfirmationHtml(repair, customer, shopSettings)}
+                fileName={`${safeFileName('FonExpert_Zlecenie', repair.displayNumber || repair.id)}.pdf`}
+                title={`FonExpert — potwierdzenie przyjęcia, zlecenie nr ${repair.displayNumber || repair.id}`}
+                text={`FonExpert — potwierdzenie przyjęcia urządzenia ${repair.brand} ${repair.model}, zlecenie nr ${repair.displayNumber || repair.id}.`}
+              />
+            </div>
             <button className="rd-btn-ghost rd-btn-label" onClick={() => printDeviceLabel(repair)}>
               🏷️ Drukuj naklejkę na sprzęt
             </button>
             {repair.status === STATUS.DELIVERED && (
-              <button className="rd-btn-ghost rd-btn-label" onClick={() => printPickupConfirmation(repair, customer, shopSettings)}>
-                📄 Drukuj potwierdzenie wydania
-              </button>
+              <>
+                <button className="rd-btn-ghost rd-btn-label" onClick={() => printPickupConfirmation(repair, customer, shopSettings)}>
+                  📄 Drukuj potwierdzenie wydania
+                </button>
+                <div className="rd-doc-actions">
+                  <DocumentShareButtons
+                    className="rd-btn-ghost"
+                    buildHtml={() => buildPickupConfirmationHtml(repair, customer, shopSettings)}
+                    fileName={`${safeFileName('FonExpert_Wydanie', repair.displayNumber || repair.id)}.pdf`}
+                    title={`FonExpert — potwierdzenie wydania, zlecenie nr ${repair.displayNumber || repair.id}`}
+                    text={`FonExpert — potwierdzenie wydania urządzenia ${repair.brand} ${repair.model}, zlecenie nr ${repair.displayNumber || repair.id}.`}
+                  />
+                </div>
+              </>
             )}
           </div>
 

@@ -46,7 +46,7 @@
   margin-bottom: 8px;
 }
 
-.td-header-actions { display: flex; align-items: center; gap: 10px; }
+.td-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .td-btn-edit { padding: 6px 12px; font-size: 12px; }
 
 .td-dates { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; }

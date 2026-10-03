@@ -16,6 +16,6 @@ export const isNativeApp = () => Capacitor.isNativePlatform();
 // Do czasu wdrożenia natywnego drukowania blokujemy tę ścieżkę w aplikacji.
 export const blockPrintInNativeApp = () => {
   if (!isNativeApp()) return false;
-  alert('Drukowanie nie jest jeszcze dostępne w aplikacji Android. Użyj panelu w przeglądarce.');
+  alert('Drukowanie nie jest dostępne w aplikacji. Użyj „Udostępnij”, żeby wysłać lub zapisać PDF (np. na Dysku Google), albo drukuj z panelu w przeglądarce.');
   return true;
 };

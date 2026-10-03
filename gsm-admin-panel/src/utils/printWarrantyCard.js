@@ -20,8 +20,8 @@ const SHOP = {
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 
-export function printWarrantyCard(phone) {
-  if (blockPrintInNativeApp()) return;
+// Treść dokumentu jako HTML – wspólna dla drukowania i udostępniania (PDF)
+export function buildWarrantyCardHtml(phone) {
   const html = `
     <html>
       <head>
@@ -104,6 +104,12 @@ export function printWarrantyCard(phone) {
       </body>
     </html>
   `;
+  return html;
+}
+
+export function printWarrantyCard(phone) {
+  if (blockPrintInNativeApp()) return;
+  const html = buildWarrantyCardHtml(phone);
 
   const printWindow = window.open('', '_blank', 'width=720,height=900');
   if (!printWindow) {

@@ -14,8 +14,8 @@ import { blockPrintInNativeApp } from './platform';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : new Date().toLocaleDateString('pl-PL');
 
-export function printPickupConfirmation(repair, customer, shopSettings) {
-  if (blockPrintInNativeApp()) return;
+// Treść dokumentu jako HTML – wspólna dla drukowania i udostępniania (PDF)
+export function buildPickupConfirmationHtml(repair, customer, shopSettings) {
   const html = `
     <html>
       <head>
@@ -90,6 +90,12 @@ export function printPickupConfirmation(repair, customer, shopSettings) {
       </body>
     </html>
   `;
+  return html;
+}
+
+export function printPickupConfirmation(repair, customer, shopSettings) {
+  if (blockPrintInNativeApp()) return;
+  const html = buildPickupConfirmationHtml(repair, customer, shopSettings);
 
   const printWindow = window.open('', '_blank', 'width=720,height=900');
   if (!printWindow) {

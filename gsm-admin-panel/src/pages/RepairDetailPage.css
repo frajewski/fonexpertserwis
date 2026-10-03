@@ -78,6 +78,8 @@
 .rd-priority-toggle:hover { border-color: #F97316; color: #F97316; }
 .rd-priority-toggle-active { background: #FFF1E8; border: 1.5px solid #F97316; color: #F97316; }
 .rd-btn-label { width: 100%; margin-top: 8px; }
+.rd-doc-actions { display: flex; gap: 8px; margin-top: 8px; }
+.rd-doc-actions > button { flex: 1; }
 
 
 

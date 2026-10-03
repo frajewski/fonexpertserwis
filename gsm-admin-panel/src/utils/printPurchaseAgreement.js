@@ -21,8 +21,8 @@ const BUYER = {
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : new Date().toLocaleDateString('pl-PL');
 
-export function printPurchaseAgreement(phone) {
-  if (blockPrintInNativeApp()) return;
+// Treść dokumentu jako HTML – wspólna dla drukowania i udostępniania (PDF)
+export function buildPurchaseAgreementHtml(phone) {
   const html = `
     <html>
       <head>
@@ -113,6 +113,12 @@ export function printPurchaseAgreement(phone) {
       </body>
     </html>
   `;
+  return html;
+}
+
+export function printPurchaseAgreement(phone) {
+  if (blockPrintInNativeApp()) return;
+  const html = buildPurchaseAgreementHtml(phone);
 
   const printWindow = window.open('', '_blank', 'width=800,height=1000');
   if (!printWindow) {

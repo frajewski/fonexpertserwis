@@ -15,8 +15,8 @@ import { blockPrintInNativeApp } from './platform';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 
-export function printRepairConfirmation(repair, customer, shopSettings) {
-  if (blockPrintInNativeApp()) return;
+// Treść dokumentu jako HTML – wspólna dla drukowania i udostępniania (PDF)
+export function buildRepairConfirmationHtml(repair, customer, shopSettings) {
   const total = (repair.partsCost || 0) + (repair.serviceCost || 0);
   const trackingUrl = repair.trackingToken
     ? `https://gsm-serwis-klient.web.app/?token=${repair.trackingToken}`
@@ -119,6 +119,12 @@ export function printRepairConfirmation(repair, customer, shopSettings) {
       </body>
     </html>
   `;
+  return html;
+}
+
+export function printRepairConfirmation(repair, customer, shopSettings) {
+  if (blockPrintInNativeApp()) return;
+  const html = buildRepairConfirmationHtml(repair, customer, shopSettings);
 
   // Otwiera nowe okno z dokumentem i wywołuje natywny dialog drukowania
   // przeglądarki – stamtąd użytkownik może wydrukować na drukarce albo
