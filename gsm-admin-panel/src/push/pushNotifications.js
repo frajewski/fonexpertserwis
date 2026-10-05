@@ -139,7 +139,6 @@ export async function initPushNotifications() {
     await Push.addListener('registration', ({ value }) => {
       clearRegisterPending();
       currentToken = value;
-      usePushState.setState({ tokenPreview: value ? `${value.slice(0, 10)}…` : '' });
       syncToken();
     });
     await Push.addListener('registrationError', (err) => {
@@ -215,7 +214,7 @@ export async function onPushLogout() {
   try { await Push.unregister(); } catch { /* ignorujemy */ }
   currentToken = null;
   syncedFor = null;
-  usePushState.setState({ registered: false, tokenPreview: '' });
+  usePushState.setState({ registered: false });
 }
 
 /**

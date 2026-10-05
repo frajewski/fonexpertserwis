@@ -96,7 +96,6 @@ export default function AccountPage() {
             <div className="ac-info-row"><span>Zgoda na powiadomienia</span><span>{PERMISSION_LABELS[push.permission] || push.permission}</span></div>
             <div className="ac-info-row"><span>Urządzenie zarejestrowane</span><span>{push.registered ? 'Tak' : 'Nie'}</span></div>
             <div className="ac-info-row"><span>Platforma</span><span>{Capacitor.getPlatform()}</span></div>
-            <div className="ac-info-row"><span>Token (fragment)</span><span style={{ fontFamily: 'var(--font-mono, monospace)' }}>{push.tokenPreview || '—'}</span></div>
             {push.lastError && <div className="ac-error">{push.lastError}</div>}
             {push.registerBlocked && (
               <button className="ac-submit" type="button" disabled={pushBusy} onClick={() => runPush(retryPushRegistration)}>Spróbuj ponownie</button>

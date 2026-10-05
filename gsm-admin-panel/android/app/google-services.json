@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "870825632751",
+    "project_id": "gsmserviceapp-ff8f6",
+    "storage_bucket": "gsmserviceapp-ff8f6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870825632751:android:4ebc20d6539f09be498c1a",
+        "android_client_info": {
+          "package_name": "pl.fonexpert.serwis"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "870825632751-fnvctvggqkvecr1m7viidpjsu551921b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtDMY65scKHqjWDHXa_FbcgTT55nmXOFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "870825632751-fnvctvggqkvecr1m7viidpjsu551921b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870825632751:android:6438990ae94e9511498c1a",
+        "android_client_info": {
+          "package_name": "pl.gsmserwis.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "870825632751-fnvctvggqkvecr1m7viidpjsu551921b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtDMY65scKHqjWDHXa_FbcgTT55nmXOFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "870825632751-fnvctvggqkvecr1m7viidpjsu551921b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,8 @@ Kompletny system do zarządzania serwisem napraw telefonów, skupem/komisem uży
 
 Repo: **github.com/frajewski/fonexpertserwis**
 
+> 📱 Panel admina jako **PWA i aplikacja hybrydowa Android (Capacitor)**: architektura, pluginy, build APK/AAB, testy i scenariusz prezentacji są w [`gsm-admin-panel/HYBRID_APP.md`](gsm-admin-panel/HYBRID_APP.md).
+
 ```
 ┌──────────────────────┐     ┌─────────────────────────┐
 │  🖥️ Panel admina       │     │  🌐 Panel klienta         │

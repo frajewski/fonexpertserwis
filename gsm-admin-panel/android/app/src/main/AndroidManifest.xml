@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -44,13 +44,16 @@
             android:value="fonexpert_general" />
     </application>
 
-    <!-- Permissions -->
+    <!-- Uprawnienia – tylko wymagane. Pluginy dokładają przy scalaniu manifestu:
+         ACCESS_NETWORK_STATE (Network), VIBRATE (Haptics), a Firebase Messaging
+         własne uprawnienia FCM. Brak dostępu do pamięci/galerii (PDF idzie
+         przez katalog cache aplikacji + FileProvider). -->
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Aparat (Capacitor Camera): runtime permission pytany przy pierwszym
-         "Zrób zdjęcie". required=false – apka instaluje się też na
-         urządzeniach bez aparatu (przycisk wtedy zwróci komunikat). -->
+    <!-- Aparat (Camera + skaner kodów): runtime permission pytany przy pierwszym
+         „Zrób zdjęcie” / „Skanuj”. uses-feature required=false – aplikacja
+         instaluje się też na urządzeniach bez aparatu. -->
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Powiadomienia push – Android 13+ pyta o zgodę (prośba dopiero po akcji użytkownika) -->

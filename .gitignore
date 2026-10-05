@@ -15,3 +15,6 @@ firebase-debug.log
 # reguła "android/" powyżej pochodzi z dawnej apki Expo
 !gsm-admin-panel/android/
 !gsm-admin-panel/ios/
+
+# Pobrane pliki z sesji Claude (Cowork) – nie należą do repo
+Claude outputs/

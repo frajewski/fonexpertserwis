@@ -7,6 +7,20 @@ def appVersionName = new groovy.json.JsonSlurper().parse(file('../../package.jso
 def appVersionParts = appVersionName.tokenize('.-+')
 def appVersionCode = appVersionParts[0].toInteger() * 10000 + appVersionParts[1].toInteger() * 100 + appVersionParts[2].toInteger()
 
+// Podpis release – dane NIGDY w repo. Źródła (pierwsze znalezione wygrywa):
+//   1) android/keystore.properties (ignorowany przez git; wzór: keystore.properties.example)
+//   2) zmienne środowiskowe FX_KEYSTORE_FILE, FX_KEYSTORE_PASSWORD, FX_KEY_ALIAS, FX_KEY_PASSWORD
+// Bez nich release buduje się niepodpisany (debug działa zawsze).
+def signingProps = new Properties()
+def signingPropsFile = rootProject.file('keystore.properties')
+if (signingPropsFile.exists()) {
+    signingPropsFile.withInputStream { signingProps.load(it) }
+}
+def signingValue = { String key, String envName -> signingProps.getProperty(key) ?: System.getenv(envName) }
+def releaseStoreFile = signingValue('storeFile', 'FX_KEYSTORE_FILE')
+def hasReleaseSigning = releaseStoreFile && signingValue('storePassword', 'FX_KEYSTORE_PASSWORD') &&
+        signingValue('keyAlias', 'FX_KEY_ALIAS') && signingValue('keyPassword', 'FX_KEY_PASSWORD')
+
 android {
     namespace = "pl.fonexpert.serwis"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -23,8 +37,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(releaseStoreFile)
+                storePassword signingValue('storePassword', 'FX_KEYSTORE_PASSWORD')
+                keyAlias signingValue('keyAlias', 'FX_KEY_ALIAS')
+                keyPassword signingValue('keyPassword', 'FX_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -9,7 +9,6 @@ export const usePushState = create(() => ({
   supported: false,     // aplikacja Android z pluginem
   permission: 'unknown', // 'prompt' | 'granted' | 'denied' | 'unsupported'
   registered: false,     // token zapisany w backendzie dla bieżącego konta
-  tokenPreview: '',      // pierwsze znaki tokenu (nigdy cały token w UI)
   lastError: '',
   registerBlocked: false, // bezpiecznik po awarii rejestracji
   notice: null,          // { title, body, data? } – powiadomienie in-app
