@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { isNativeCameraAvailable, takePhotoAsFile } from '../utils/nativeCamera';
 import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
+import { triggerHaptic } from '../native/haptics';
 
 // requireOnline – zdjęcie od razu idzie do Storage, więc bez sieci nie otwieramy aparatu
 export default function CameraButton({ onPhoto, className, disabled, requireOnline = false, label = '📷 Zrób zdjęcie' }) {
@@ -20,12 +21,13 @@ export default function CameraButton({ onPhoto, className, disabled, requireOnli
     e.preventDefault();
     e.stopPropagation();
     if (busy || disabled) return;
-    if (requireOnline && !isOnlineNow()) { alert(PHOTO_OFFLINE_MESSAGE); return; }
+    if (requireOnline && !isOnlineNow()) { triggerHaptic('warning'); alert(PHOTO_OFFLINE_MESSAGE); return; }
     setBusy(true);
     try {
       const file = await takePhotoAsFile();
       if (file) await onPhoto(file); // null = użytkownik anulował, nic nie robimy
     } catch (err) {
+      triggerHaptic('error');
       alert(err?.message || 'Nie udało się zrobić zdjęcia.');
     } finally {
       setBusy(false);

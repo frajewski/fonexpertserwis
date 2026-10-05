@@ -292,7 +292,7 @@ export default function RepairsPage() {
       </div>
 
       {showFilterModal && (
-        <div className="rp-modal-backdrop" onClick={() => setShowFilterModal(false)}>
+        <div className="rp-modal-backdrop" data-back-close onClick={() => setShowFilterModal(false)}>
           <div className="rp-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="rp-modal-title">Filtry</h2>
 

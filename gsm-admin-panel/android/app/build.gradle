@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+// Wersja aplikacji = "version" z gsm-admin-panel/package.json (jedno źródło
+// prawdy dla PWA i Androida). versionCode liczony z semver: 1.2.3 → 10203,
+// więc każda wyższa wersja daje wyższy kod (wymóg aktualizacji na telefonie).
+def appVersionName = new groovy.json.JsonSlurper().parse(file('../../package.json')).version
+def appVersionParts = appVersionName.tokenize('.-+')
+def appVersionCode = appVersionParts[0].toInteger() * 10000 + appVersionParts[1].toInteger() * 100 + appVersionParts[2].toInteger()
+
 android {
     namespace = "pl.fonexpert.serwis"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +14,8 @@ android {
         applicationId "pl.fonexpert.serwis"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

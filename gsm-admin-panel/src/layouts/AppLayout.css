@@ -55,6 +55,14 @@
   gap: 2px;
   padding: 8px 12px;
   overflow-y: auto;
+  min-height: 0; /* bez tego flex nie pozwala liście się przewijać (telefon w poziomie) */
+}
+
+/* Niski ekran (telefon w poziomie): ciaśniejszy nagłówek i stopka menu,
+   żeby zmieściło się więcej pozycji; reszta przewija się w samej liście */
+@media (max-height: 500px) {
+  .sidebar-brand { padding: 12px 20px 10px; }
+  .sidebar-footer { padding: 8px 16px; }
 }
 
 .sidebar-link {

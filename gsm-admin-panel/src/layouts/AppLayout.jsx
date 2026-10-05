@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
+import { onPushLogout } from '../push/pushNotifications';
 import './AppLayout.css';
 
 const NAV_ITEMS = [
@@ -29,6 +30,9 @@ export default function AppLayout({ children }) {
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
 
   const handleLogout = async () => {
+    // Odpięcie telefonu od konta PRZED wylogowaniem (potrzebna jeszcze sesja),
+    // żeby kolejny użytkownik tego telefonu nie dostawał pushy poprzedniego
+    await onPushLogout();
     await logout();
     navigate('/logowanie');
   };
@@ -53,7 +57,7 @@ export default function AppLayout({ children }) {
       </header>
 
       {mobileMenuOpen && (
-        <div className="sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />
+        <div className="sidebar-backdrop" data-back-close onClick={() => setMobileMenuOpen(false)} />
       )}
 
       <aside className={`sidebar ${mobileMenuOpen ? 'sidebar-mobile-open' : ''}`}>

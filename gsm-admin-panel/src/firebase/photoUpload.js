@@ -14,6 +14,7 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './firebaseConfig';
 import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
+import { devWarn } from '../utils/devLog';
 
 // Kompresuje i skaluje zdjęcie w przeglądarce PRZED wgraniem do Storage,
 // używając natywnego Canvas API (brak potrzeby dodatkowej biblioteki).
@@ -83,6 +84,6 @@ export const deletePhotoByUrlWeb = async (url) => {
     const storageRef = ref(storage, url);
     await deleteObject(storageRef);
   } catch (error) {
-    console.warn('Nie udało się usunąć zdjęcia ze Storage:', error.message);
+    devWarn('Nie udało się usunąć zdjęcia ze Storage:', error);
   }
 };

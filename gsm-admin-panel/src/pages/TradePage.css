@@ -51,7 +51,7 @@
 .tr-device { font-weight: 600; font-size: 14px; color: var(--ink); }
 
 .tr-bulk-bar {
-  position: sticky; bottom: 16px; margin-top: 20px;
+  position: sticky; bottom: calc(16px + var(--safe-bottom)); margin-top: 20px;
   background: var(--ink); color: #fff; border-radius: var(--radius-md);
   padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
   gap: 14px; flex-wrap: wrap; box-shadow: var(--shadow-lift);
@@ -90,13 +90,15 @@
 .tr-modal-backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
   display: flex; align-items: center; justify-content: center;
-  z-index: 100; padding: 20px;
+  z-index: 100;
+  /* + paski systemowe (aplikacja Android edge-to-edge, notch, poziom) */
+  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right)) calc(20px + var(--safe-bottom)) calc(20px + var(--safe-left));
 }
 
 .tr-modal {
   background: var(--surface); border-radius: var(--radius-md);
   box-shadow: var(--shadow-modal); padding: 24px;
-  width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto;
+  width: 100%; max-width: 560px; max-height: 85vh; max-height: 100%; overflow-y: auto;
 }
 
 .tr-modal-title {

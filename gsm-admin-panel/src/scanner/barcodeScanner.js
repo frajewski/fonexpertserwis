@@ -13,6 +13,7 @@
 // ============================================================
 
 import { Capacitor } from '@capacitor/core';
+import { devError } from '../utils/devLog';
 
 // Kody błędów pluginu (identyczne na Androidzie i iOS)
 const ERR_CANCELLED = 'OS-PLUG-BARC-0006';
@@ -68,7 +69,7 @@ export async function scanCode(purpose = 'any') {
     const msg = String(err?.message || '');
     if (code === ERR_CANCELLED || /cancel/i.test(msg)) return null;
     if (code === ERR_CAMERA_DENIED || /camera access|permission/i.test(msg)) throw new Error(CAMERA_DENIED_MESSAGE);
-    console.error('[scanner]', err);
+    devError('[scanner]', err);
     throw new Error('Nie udało się uruchomić skanera. Spróbuj ponownie albo wpisz numer ręcznie.');
   } finally {
     scanning = false;

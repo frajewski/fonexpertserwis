@@ -4,6 +4,7 @@ import useStore from '../store/useStore';
 import { calcRevenue } from '../utils/calcProfit';
 import { formatDateShort } from '../utils/formatDate';
 import STATUS, { statusIcons } from '../constants/statuses';
+import { failMessage } from '../utils/friendlyError';
 import './CustomerCardPage.css';
 
 const STATUS_TONE = {
@@ -50,7 +51,7 @@ export default function CustomerCardPage() {
       await deleteUser(id);
       navigate('/klienci');
     } catch (error) {
-      alert('Nie udało się usunąć klienta: ' + error.message);
+      alert(failMessage('Nie udało się usunąć klienta', error));
     }
   };
 

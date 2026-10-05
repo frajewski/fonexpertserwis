@@ -12,6 +12,7 @@
 
 import { Capacitor } from '@capacitor/core';
 import { Camera } from '@capacitor/camera';
+import { devError } from './devLog';
 
 // Kody błędów pluginu (README @capacitor/camera, sekcja "Errors")
 const ERR_CAMERA_ACCESS = 'OS-PLUG-CAMR-0003';
@@ -62,7 +63,8 @@ export const takePhotoAsFile = async () => {
     if (code === ERR_CANCELLED || msg.includes('cancel')) return null;
     if (code === ERR_CAMERA_ACCESS) throw new Error(PERMISSION_DENIED_MESSAGE);
     if (code === ERR_NO_CAMERA) throw new Error('To urządzenie nie ma dostępnego aparatu.');
-    throw new Error('Nie udało się zrobić zdjęcia' + (err?.message ? `: ${err.message}` : '.'));
+    devError('[camera]', err);
+    throw new Error('Nie udało się zrobić zdjęcia. Spróbuj ponownie.');
   }
 
   if (!result?.webPath) throw new Error('Aparat nie zwrócił zdjęcia.');

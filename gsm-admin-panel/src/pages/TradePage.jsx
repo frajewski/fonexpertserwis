@@ -6,6 +6,7 @@ import grades from '../constants/grades';
 import tradeSources from '../constants/tradeSources';
 import B2bLinkPanel from './B2bLinkPanel';
 import { ScanImeiButton } from '../scanner/ScanButtons';
+import { failMessage } from '../utils/friendlyError';
 import './TradePage.css';
 
 const TONE = {
@@ -147,7 +148,7 @@ export default function TradePage() {
       await Promise.all([...selectedIds].map((id) => updatePhone(id, { status: newStatus })));
       clearSelection();
     } catch (err) {
-      alert('Nie udało się zmienić statusu części telefonów: ' + err.message);
+      alert(failMessage('Nie udało się zmienić statusu części telefonów', err));
     } finally {
       setBulkBusy(false);
     }
@@ -220,7 +221,7 @@ export default function TradePage() {
       </div>
 
       {showFilterModal && (
-        <div className="tr-modal-backdrop" onClick={() => setShowFilterModal(false)}>
+        <div className="tr-modal-backdrop" data-back-close onClick={() => setShowFilterModal(false)}>
           <div className="tr-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="tr-modal-title">Filtry</h2>
 

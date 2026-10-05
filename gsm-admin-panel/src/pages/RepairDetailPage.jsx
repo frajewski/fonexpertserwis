@@ -7,6 +7,8 @@ import { uploadRepairPhotoWeb, deletePhotoByUrlWeb } from '../firebase/photoUplo
 import CameraButton from '../components/CameraButton';
 import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
+import { triggerHaptic } from '../native/haptics';
+import { failMessage } from '../utils/friendlyError';
 import { printRepairConfirmation, buildRepairConfirmationHtml } from '../utils/printConfirmation';
 import { printPickupConfirmation, buildPickupConfirmationHtml } from '../utils/printPickupConfirmation';
 import DocumentShareButtons from '../components/DocumentShareButtons';
@@ -75,6 +77,9 @@ export default function RepairDetailPage() {
   const [pickPartId, setPickPartId] = useState('');
   const [pickQuantity, setPickQuantity] = useState('1');
   const [freeTextPartName, setFreeTextPartName] = useState('');
+  // Musi być przed `if (!repair) return` – inaczej liczba hooków zmienia się,
+  // gdy zlecenie dociera ze store po pierwszym renderze (crash „Rendered more hooks”).
+  const [depositEditInput, setDepositEditInput] = useState('');
 
   if (!repair) {
     return (
@@ -92,6 +97,7 @@ export default function RepairDetailPage() {
   const tone = STATUS_TONE[repair.status] || 'neutral';
 
   const handleStatusChange = async (newStatus) => {
+    triggerHaptic('light'); // ważna akcja – zmiana statusu zlecenia
     if (newStatus === STATUS.DELIVERED) {
       setShowWarrantyForm(true);
       return;
@@ -114,6 +120,7 @@ export default function RepairDetailPage() {
       warrantyEndDate: calcWarrantyEndDate(issuedAt, selectedWarranty.months),
       issuedAt,
     });
+    triggerHaptic('success');
     setShowWarrantyForm(false);
   };
 
@@ -122,11 +129,10 @@ export default function RepairDetailPage() {
       await deleteRepair(id);
       navigate('/');
     } catch (error) {
-      alert('Nie udało się usunąć zlecenia: ' + error.message);
+      alert(failMessage('Nie udało się usunąć zlecenia', error));
     }
   };
 
-  const [depositEditInput, setDepositEditInput] = useState('');
 
   const handleStartEditCost = () => {
     setPartsCostInput(String(repair.partsCost || 0));
@@ -262,7 +268,7 @@ export default function RepairDetailPage() {
   const addPhotoFiles = async (selectedFiles) => {
     const files = selectedFiles.slice(0, 5 - (repair.repairPhotos?.length || 0));
     if (files.length === 0) return;
-    if (!isOnlineNow()) { alert(PHOTO_OFFLINE_MESSAGE); return; }
+    if (!isOnlineNow()) { triggerHaptic('warning'); alert(PHOTO_OFFLINE_MESSAGE); return; }
 
     setUploadingPhoto(true);
     try {
@@ -272,7 +278,7 @@ export default function RepairDetailPage() {
       const updated = [...current, ...uploadedUrls].slice(0, 5);
       await updateRepair(id, { repairPhotos: updated });
     } catch (error) {
-      alert('Nie udało się wgrać zdjęć: ' + error.message);
+      alert(failMessage('Nie udało się wgrać zdjęć', error));
     } finally {
       setUploadingPhoto(false);
     }

@@ -178,6 +178,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ---------- PUSH: URZĄDZENIA ----------
+    // Tokeny FCM zapisuje i dezaktywuje wyłącznie backend (Cloud Functions:
+    // registerPushDevice / unregisterPushDevice / sendPushToUsers).
+    // Użytkownik może tylko odczytać listę SWOICH urządzeń.
+    match /users/{userId}/devices/{deviceId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+    // pushEvents (deduplikacja wysyłek) – tylko backend, objęte regułą domyślną na końcu
+
     match /tasks/{taskId} {
       allow read, create, update, delete: if isStaff();
     }

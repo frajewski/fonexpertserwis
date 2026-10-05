@@ -8,6 +8,8 @@ import { uploadRepairPhotoWeb } from '../firebase/photoUpload';
 import CameraButton from '../components/CameraButton';
 import { ScanImeiButton } from '../scanner/ScanButtons';
 import { isOnlineNow } from '../network/networkStatus';
+import { triggerHaptic } from '../native/haptics';
+import { failMessage } from '../utils/friendlyError';
 import './NewRepairPage.css';
 
 const normalizePhone = (v) => (v || '').replace(/\D/g, '').replace(/^48/, '');
@@ -103,7 +105,7 @@ export default function NewRepairPage() {
       setNewCustomerEmail('');
       setError('');
     } catch (err) {
-      setError('Nie udało się dodać klienta: ' + err.message);
+      setError(failMessage('Nie udało się dodać klienta', err));
     }
   };
 
@@ -123,6 +125,7 @@ export default function NewRepairPage() {
     // a zdjęcia i tak nie mogłyby zostać wysłane). Formularz i podgląd zostają.
     if (!isOnlineNow()) {
       setError('Brak połączenia z Internetem. Zlecenie nie zostało zapisane — dane i zdjęcia zostają w formularzu.');
+      triggerHaptic('warning');
       return;
     }
 
@@ -161,10 +164,12 @@ export default function NewRepairPage() {
         await useStore.getState().updateRepair(newRepair.id, { repairPhotos: uploadedUrls });
       }
 
+      triggerHaptic('success');
       navigate(`/zlecenia/${newRepair.id}`);
     } catch (err) {
       setLoading(false);
-      setError('Nie udało się dodać zlecenia: ' + err.message);
+      setError(failMessage('Nie udało się dodać zlecenia', err));
+      triggerHaptic('error');
     }
   };
 

@@ -22,6 +22,7 @@
 import { create } from 'zustand';
 import { Capacitor } from '@capacitor/core';
 import { Network } from '@capacitor/network';
+import { devWarn } from '../utils/devLog';
 
 const useNativePlugin = () =>
   Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Network');
@@ -65,7 +66,7 @@ const startNative = () => {
   Network.getStatus()
     .then((s) => { if (!cancelled && !gotEvent) applyStatus(s.connected, s.connectionType); })
     .catch((err) => {
-      console.warn('[network] getStatus nie powiódł się – używam navigator.onLine', err);
+      devWarn('[network] getStatus nie powiódł się – używam navigator.onLine', err);
       if (!cancelled) applyStatus(browserOnline(), 'unknown');
     });
 
@@ -74,7 +75,7 @@ const startNative = () => {
     applyStatus(s.connected, s.connectionType);
   })
     .then((h) => { if (cancelled) h.remove(); else handle = h; })
-    .catch((err) => console.warn('[network] nie udało się dodać listenera', err));
+    .catch((err) => devWarn('[network] nie udało się dodać listenera', err));
 
   return () => {
     cancelled = true;
@@ -105,8 +106,22 @@ export const startNetworkMonitoring = () => {
   try {
     return useNativePlugin() ? startNative() : startWeb();
   } catch (err) {
-    console.warn('[network] monitoring niedostępny', err);
+    devWarn('[network] monitoring niedostępny', err);
     return () => {};
+  }
+};
+
+/** Ponowne sprawdzenie stanu (np. po powrocie aplikacji z tła). */
+export const refreshNetworkStatus = async () => {
+  try {
+    if (useNativePlugin()) {
+      const s = await Network.getStatus();
+      applyStatus(s.connected, s.connectionType);
+    } else {
+      applyStatus(browserOnline(), browserConnectionType());
+    }
+  } catch (err) {
+    devWarn('[network] odświeżenie stanu', err);
   }
 };
 

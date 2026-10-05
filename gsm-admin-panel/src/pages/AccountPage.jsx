@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import useStore from '../store/useStore';
 import { useNetworkStatus, CONNECTION_TYPE_LABELS } from '../network/networkStatus';
+import { usePushState } from '../push/pushState';
+import { enablePushNotifications, sendTestPush, retryPushRegistration } from '../push/pushNotifications';
+import { Capacitor } from '@capacitor/core';
+import DiagnosticsCard from '../components/DiagnosticsCard';
 import './AccountPage.css';
 
 export default function AccountPage() {
@@ -48,6 +52,13 @@ export default function AccountPage() {
   };
 
   const network = useNetworkStatus();
+  const push = usePushState();
+  const [pushBusy, setPushBusy] = useState(false);
+  const PERMISSION_LABELS = { granted: 'Przyznana', denied: 'Odmówiona', prompt: 'Jeszcze nie pytano', unsupported: 'Niedostępne', unknown: '—' };
+  const runPush = async (fn) => {
+    setPushBusy(true);
+    try { await fn(); } catch (err) { alert(err?.message || 'Nie udało się.'); } finally { setPushBusy(false); }
+  };
 
   return (
     <div className="ac-page">
@@ -74,6 +85,43 @@ export default function AccountPage() {
           <span>Ostatnia zmiana</span>
           <span>{network.lastChangedAt ? new Date(network.lastChangedAt).toLocaleTimeString('pl-PL') : '—'}</span>
         </div>
+      </div>
+
+      <div className="ac-card">
+        <h2 className="ac-section-title">Powiadomienia push</h2>
+        {!push.supported ? (
+          <p className="ac-push-hint">Powiadomienia działają w aplikacji Android. W przeglądarce nie są jeszcze dostępne.</p>
+        ) : (
+          <>
+            <div className="ac-info-row"><span>Zgoda na powiadomienia</span><span>{PERMISSION_LABELS[push.permission] || push.permission}</span></div>
+            <div className="ac-info-row"><span>Urządzenie zarejestrowane</span><span>{push.registered ? 'Tak' : 'Nie'}</span></div>
+            <div className="ac-info-row"><span>Platforma</span><span>{Capacitor.getPlatform()}</span></div>
+            <div className="ac-info-row"><span>Token (fragment)</span><span style={{ fontFamily: 'var(--font-mono, monospace)' }}>{push.tokenPreview || '—'}</span></div>
+            {push.lastError && <div className="ac-error">{push.lastError}</div>}
+            {push.registerBlocked && (
+              <button className="ac-submit" type="button" disabled={pushBusy} onClick={() => runPush(retryPushRegistration)}>Spróbuj ponownie</button>
+            )}
+            {push.permission === 'prompt' && (
+              <button className="ac-submit" type="button" disabled={pushBusy} onClick={() => runPush(enablePushNotifications)}>🔔 Włącz powiadomienia</button>
+            )}
+            {push.permission === 'denied' && (
+              <p className="ac-push-hint">Powiadomienia są wyłączone. Włącz je w ustawieniach telefonu: Aplikacje → FonExpert Serwis → Powiadomienia.</p>
+            )}
+            {currentUser?.role === 'admin' && push.registered && (
+              <button
+                className="ac-submit"
+                type="button"
+                disabled={pushBusy}
+                onClick={() => runPush(async () => {
+                  const r = await sendTestPush();
+                  alert(`Wysłano testowe powiadomienie na ${r?.sent ?? 0} urządzeń.`);
+                })}
+              >
+                Wyślij testowe powiadomienie
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       <div className="ac-card">
@@ -119,6 +167,7 @@ export default function AccountPage() {
           </button>
         </form>
       </div>
+      <DiagnosticsCard />
     </div>
   );
 }

@@ -8,6 +8,8 @@ import { storageOptions } from '../constants/storageOptions';
 import TRADE_STATUS from '../constants/tradeStatuses';
 import { ScanImeiButton } from '../scanner/ScanButtons';
 import { isOnlineNow } from '../network/networkStatus';
+import { triggerHaptic } from '../native/haptics';
+import { failMessage } from '../utils/friendlyError';
 import './NewTradePage.css';
 
 export default function NewTradePage() {
@@ -111,6 +113,7 @@ export default function NewTradePage() {
 
     if (!isOnlineNow()) {
       setError('Brak połączenia z Internetem. Telefon nie został zapisany — dane zostają w formularzu.');
+      triggerHaptic('warning');
       return;
     }
 
@@ -141,10 +144,13 @@ export default function NewTradePage() {
       for (const p of usedPartsInput) {
         if (p.partId) await adjustPartQuantity(p.partId, -p.quantity);
       }
+      // Sukces – skup i komis (transactionType) zapisują się tą samą ścieżką
+      triggerHaptic('success');
       navigate(`/skup/${phone.id}`);
     } catch (err) {
       setLoading(false);
-      setError('Nie udało się dodać telefonu: ' + err.message);
+      setError(failMessage('Nie udało się dodać telefonu', err));
+      triggerHaptic('error');
     }
   };
 

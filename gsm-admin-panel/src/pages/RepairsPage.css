@@ -194,13 +194,15 @@
 .rp-modal-backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
   display: flex; align-items: center; justify-content: center;
-  z-index: 100; padding: 20px;
+  z-index: 100;
+  /* + paski systemowe (aplikacja Android edge-to-edge, notch, poziom) */
+  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right)) calc(20px + var(--safe-bottom)) calc(20px + var(--safe-left));
 }
 
 .rp-modal {
   background: var(--surface); border-radius: var(--radius-md);
   box-shadow: var(--shadow-modal); padding: 24px;
-  width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto;
+  width: 100%; max-width: 560px; max-height: 85vh; max-height: 100%; overflow-y: auto;
 }
 
 .rp-modal-title {

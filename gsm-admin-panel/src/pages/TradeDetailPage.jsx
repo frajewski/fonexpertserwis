@@ -13,6 +13,8 @@ import CameraButton from '../components/CameraButton';
 import { ScanImeiButton } from '../scanner/ScanButtons';
 import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
+import { triggerHaptic } from '../native/haptics';
+import { failMessage } from '../utils/friendlyError';
 import { printConsignmentAgreement, buildConsignmentAgreementHtml } from '../utils/printConsignmentAgreement';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import './TradeDetailPage.css';
@@ -119,6 +121,7 @@ export default function TradeDetailPage() {
       b2bListed: editB2bListed,
       b2bPrice: parseFloat(editB2bPrice) || 0,
     });
+    triggerHaptic('success');
     setEditing(false);
   };
 
@@ -195,7 +198,7 @@ export default function TradeDetailPage() {
   // Wspólne dla obu źródeł: pliku z <input> i zdjęcia z natywnego aparatu.
   // Przy podmianie kasuje stare zdjęcie ze Storage (jak dotąd).
   const uploadPhonePhoto = async (file) => {
-    if (!isOnlineNow()) { alert(PHOTO_OFFLINE_MESSAGE); return; }
+    if (!isOnlineNow()) { triggerHaptic('warning'); alert(PHOTO_OFFLINE_MESSAGE); return; }
     setPhotoUploading(true);
     try {
       const oldUrl = phone.photo;
@@ -203,7 +206,7 @@ export default function TradeDetailPage() {
       await updatePhone(id, { photo: url });
       if (oldUrl) await deletePhotoByUrlWeb(oldUrl);
     } catch (err) {
-      alert('Nie udało się wgrać zdjęcia: ' + err.message);
+      alert(failMessage('Nie udało się wgrać zdjęcia', err));
     } finally {
       setPhotoUploading(false);
     }

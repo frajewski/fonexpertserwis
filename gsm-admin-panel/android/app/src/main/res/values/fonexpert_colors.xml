@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wygenerowano: scripts/generate-android-assets.mjs – kolory marki (tokens.css) -->
+<resources>
+    <color name="fx_splash_background">#11172B</color>
+    <color name="fx_brand_accent">#6465FF</color>
+</resources>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import useStore from '../store/useStore';
 import { isOnlineNow, OFFLINE_MESSAGE } from '../network/networkStatus';
 import { ROLES } from '../constants/roles';
+import { failMessage } from '../utils/friendlyError';
 import './UsersPage.css';
 
 const ROLE_LABELS = { [ROLES.ADMIN]: 'Administrator', [ROLES.WORKER]: 'Pracownik', [ROLES.CUSTOMER]: 'Klient' };
@@ -22,7 +23,7 @@ export default function UsersPage() {
     try {
       await updateUserRole(user.id, newRole);
     } catch (err) {
-      alert('Nie udało się zmienić roli: ' + (isOnlineNow() ? err.message : OFFLINE_MESSAGE));
+      alert(failMessage('Nie udało się zmienić roli', err));
     }
   };
 

@@ -33,6 +33,15 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Push (FCM): ikona i kanał dla powiadomień wyświetlanych przez
+             system, gdy aplikacja jest w tle albo zamknięta -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_fonexpert" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="fonexpert_general" />
     </application>
 
     <!-- Permissions -->
@@ -43,5 +52,8 @@
          "Zrób zdjęcie". required=false – apka instaluje się też na
          urządzeniach bez aparatu (przycisk wtedy zwróci komunikat). -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Powiadomienia push – Android 13+ pyta o zgodę (prośba dopiero po akcji użytkownika) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

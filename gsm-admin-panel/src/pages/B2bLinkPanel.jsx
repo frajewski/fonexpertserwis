@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase/firebaseConfig';
 import { isOnlineNow, OFFLINE_MESSAGE } from '../network/networkStatus';
+import { failMessage } from '../utils/friendlyError';
 
 const CLIENT_BASE = 'https://gsm-serwis-klient.web.app';
 
@@ -23,7 +24,7 @@ export default function B2bLinkPanel() {
       const res = await httpsCallable(functions, name)();
       setToken(res.data.token);
     } catch (e) {
-      setError('Nie udało się: ' + (e.message || e));
+      setError(failMessage('Nie udało się', e));
     } finally {
       setBusy(false);
     }
@@ -53,7 +54,7 @@ export default function B2bLinkPanel() {
       <button className="tr-import-btn" onClick={handleOpen}>🔗 Link B2B</button>
 
       {open && (
-        <div className="tr-modal-backdrop" onClick={() => setOpen(false)}>
+        <div className="tr-modal-backdrop" data-back-close onClick={() => setOpen(false)}>
           <div className="tr-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="tr-modal-title">Katalog dla klienta B2B</h2>
             <p style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.5, margin: '0 0 14px' }}>

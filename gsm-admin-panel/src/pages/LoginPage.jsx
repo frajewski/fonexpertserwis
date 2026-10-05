@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { isOnlineNow } from '../network/networkStatus';
+import { devError } from '../utils/devLog';
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -41,7 +42,7 @@ export default function LoginPage() {
       result = await login(email.trim(), password);
     } catch (err) {
       // np. sieć zniknęła w trakcie wczytywania profilu po zalogowaniu
-      console.error('Logowanie przerwane:', err);
+      devError('Logowanie przerwane:', err);
       result = {
         success: false,
         error: isOnlineNow()

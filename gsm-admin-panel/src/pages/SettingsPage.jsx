@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useSettings from '../store/useSettings';
+import { devError } from '../utils/devLog';
 import './SettingsPage.css';
 
 export default function SettingsPage() {
@@ -35,7 +36,7 @@ export default function SettingsPage() {
       // konta nie jest zsynchronizowana, albo reguły nie zostały wdrożone
       // po zmianie w kodzie) – pokazujemy to wprost, zamiast cichego
       // niepowodzenia, które wygląda jak zapisany, ale znika po odświeżeniu.
-      console.error('Błąd zapisu ustawień:', err);
+      devError('Błąd zapisu ustawień:', err);
       setSaveError(
         err?.code === 'permission-denied'
           ? 'Brak uprawnień do zapisu (sprawdź rolę konta i reguły Firestore).'

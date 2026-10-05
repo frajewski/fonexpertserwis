@@ -6,6 +6,8 @@ import useStore from './store/useStore';
 import useSettings from './store/useSettings';
 import { useNetworkStatus, isOnlineNow } from './network/networkStatus';
 import AppLayout from './layouts/AppLayout';
+import { hideSplash } from './native/splash';
+import { devError } from './utils/devLog';
 import LoginPage from './pages/LoginPage';
 import RepairsPage from './pages/RepairsPage';
 import RepairDetailPage from './pages/RepairDetailPage';
@@ -60,7 +62,7 @@ export default function App() {
       await restoreSession(firebaseUser);
       setSessionError(null);
     } catch (err) {
-      console.error('Nie udało się wczytać konta:', err);
+      devError('Nie udało się wczytać konta:', err);
       setSessionError(isOnlineNow() ? 'error' : 'offline');
     } finally {
       setChecking(false);
@@ -87,6 +89,12 @@ export default function App() {
       runRestore(lastFirebaseUserRef.current);
     }
   }, [isOnline]);
+
+  // Sesja sprawdzona (zalogowany, niezalogowany albo komunikat o błędzie)
+  // → chowamy natywny splash; bez sztucznego opóźnienia
+  useEffect(() => {
+    if (!checking) hideSplash();
+  }, [checking]);
 
   const retryRestore = () => {
     setChecking(true);

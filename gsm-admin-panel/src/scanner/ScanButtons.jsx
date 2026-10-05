@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { isScannerAvailable, scanCode } from './barcodeScanner';
 import { extractImei, parseRepairQr } from './codeParsers';
 import { findRepairByTrackingToken, REPAIR_NOT_FOUND_MESSAGE } from './repairLookup';
+import { triggerHaptic } from '../native/haptics';
 import './scanner.css';
 
 // Stan „busy” bezpieczny przy odmontowaniu komponentu w trakcie skanowania
@@ -36,9 +37,15 @@ export function ScanImeiButton({ onImei, className = 'scan-btn' }) {
       const raw = await scanCode('imei');
       if (raw === null) return; // anulowano – pole bez zmian
       const res = extractImei(raw);
-      if (res.ok) onImei(res.imei);
-      else alert(res.message); // pole zostaje bez zmian
+      if (res.ok) {
+        triggerHaptic('success');
+        onImei(res.imei);
+      } else {
+        triggerHaptic('warning');
+        alert(res.message); // pole zostaje bez zmian
+      }
     } catch (err) {
+      triggerHaptic('error');
       alert(err.message);
     } finally {
       setBusy(false);
@@ -68,16 +75,23 @@ export function ScanCodeButton({ onImei, className = 'scan-btn' }) {
       const qr = parseRepairQr(raw);
       if (qr) {
         const repair = await findRepairByTrackingToken(qr.token);
-        if (repair) navigate(`/zlecenia/${repair.id}`);
-        else alert(REPAIR_NOT_FOUND_MESSAGE);
+        if (repair) {
+          triggerHaptic('success');
+          navigate(`/zlecenia/${repair.id}`);
+        } else {
+          triggerHaptic('warning');
+          alert(REPAIR_NOT_FOUND_MESSAGE);
+        }
         return;
       }
 
       const imei = extractImei(raw);
-      if (imei.ok) { onImei?.(imei.imei); return; }
+      if (imei.ok) { triggerHaptic('success'); onImei?.(imei.imei); return; }
 
+      triggerHaptic('warning');
       alert('Nie rozpoznano kodu. Skanuj IMEI urządzenia albo kod QR z potwierdzenia przyjęcia FonExpert.');
     } catch (err) {
+      triggerHaptic('error');
       alert(err.message || 'Nie udało się odczytać kodu.');
     } finally {
       setBusy(false);

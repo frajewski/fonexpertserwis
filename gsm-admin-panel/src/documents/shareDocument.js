@@ -20,6 +20,7 @@ import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { htmlToPdfBlob } from './htmlToPdf';
+import { devError, devWarn } from '../utils/devLog';
 
 const SHARE_DIR = 'share';
 
@@ -81,7 +82,7 @@ export async function shareFile({ fileName, blob, mimeType, title, text }) {
         recursive: true,
       }));
     } catch (err) {
-      console.error('[share] zapis pliku nie powiódł się', err);
+      devError('[share] zapis pliku nie powiódł się', err);
       throw new Error('Nie udało się zapisać pliku tymczasowego na urządzeniu.');
     }
 
@@ -90,8 +91,8 @@ export async function shareFile({ fileName, blob, mimeType, title, text }) {
       return 'shared';
     } catch (err) {
       if (isCancel(err)) return 'cancelled';
-      console.error('[share] Share Sheet', err);
-      throw new Error('Nie udało się otworzyć udostępniania' + (err?.message ? `: ${err.message}` : '.'));
+      devError('[share] Share Sheet', err);
+      throw new Error('Nie udało się otworzyć udostępniania. Spróbuj ponownie.');
     }
   }
 
@@ -103,7 +104,7 @@ export async function shareFile({ fileName, blob, mimeType, title, text }) {
       return 'shared';
     } catch (err) {
       if (isCancel(err)) return 'cancelled';
-      console.warn('[share] Web Share nie powiódł się – pobieram plik', err);
+      devWarn('[share] Web Share nie powiódł się – pobieram plik', err);
     }
   }
   downloadBlob(typedBlob, fileName);
@@ -117,7 +118,7 @@ export async function htmlDocumentToPdf(html) {
     if (!blob || !blob.size) throw new Error('pusty plik');
     return blob;
   } catch (err) {
-    console.error('[share] generowanie PDF', err);
+    devError('[share] generowanie PDF', err);
     throw new Error('Nie udało się wygenerować PDF.');
   }
 }
@@ -151,6 +152,7 @@ export async function shareText({ title, text }) {
     return 'shared';
   } catch (err) {
     if (isCancel(err)) return 'cancelled';
-    throw new Error('Nie udało się udostępnić' + (err?.message ? `: ${err.message}` : '.'));
+    devError('[share] tekst', err);
+    throw new Error('Nie udało się udostępnić. Spróbuj ponownie.');
   }
 }

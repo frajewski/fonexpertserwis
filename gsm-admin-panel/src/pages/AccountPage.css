@@ -4,10 +4,11 @@
 .ac-card { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 20px 22px; margin-bottom: 16px; }
 .ac-section-title { font-size: 13px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; margin: 0 0 14px; }
 
-.ac-info-row { display: flex; justify-content: space-between; font-size: 13.5px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.ac-info-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; padding: 7px 0; border-bottom: 1px solid var(--line); }
 .ac-info-row:last-child { border-bottom: none; }
 .ac-info-row span:first-child { color: var(--ink-soft); }
-.ac-info-row span:last-child { color: var(--ink); font-weight: 600; }
+.ac-info-row span:first-child { flex-shrink: 0; }
+.ac-info-row span:last-child { color: var(--ink); font-weight: 600; text-align: right; overflow-wrap: anywhere; }
 
 .ac-form { display: flex; flex-direction: column; gap: 14px; }
 .ac-field { display: flex; flex-direction: column; gap: 6px; }
@@ -21,3 +22,13 @@
 .ac-submit { background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; padding: 11px; border-radius: var(--radius-sm); }
 .ac-submit:hover { background: var(--accent-deep); }
 .ac-submit:disabled { opacity: 0.6; cursor: wait; }
+
+.ac-submit-secondary { background: var(--accent-soft); color: var(--accent-deep); }
+.ac-submit-secondary:hover { background: var(--accent-soft); filter: brightness(0.96); }
+
+@media (max-width: 480px) {
+  .ac-page { padding: 20px 16px 48px; }
+}
+
+.ac-push-hint { font-size: 13px; color: var(--ink-soft); margin: 4px 0 0; }
+.ac-card .ac-submit + .ac-submit { margin-top: 8px; }
