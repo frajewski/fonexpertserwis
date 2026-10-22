@@ -158,7 +158,7 @@ Rola (`admin`/`worker`/`customer`) żyje jako custom claim w tokenie Firebase Au
 | Rola | Dostęp |
 |---|---|
 | 👑 **Admin** | Wszystko — finanse, Magazyn, Koszty, Statystyki, Użytkownicy, link B2B |
-| 🔧 **Pracownik** | Pulpit, Zlecenia, Magazyn, Klienci, Zadania, wysyłka SMS — **bez** Skupu, U komisantów, Kosztów, Statystyk, Użytkowników, Ustawień i B2B (ukryte w menu; ograniczenia dotyczą interfejsu, reguły Firestore dają pracownikowi odczyt wszystkich telefonów, więc ceny zakupu nie są ukryte po stronie bazy) |
+| 🔧 **Pracownik** | Pulpit, Zlecenia, Magazyn, Klienci, Zadania, wysyłka SMS — **bez** Skupu, U komisantów, Kosztów, Statystyk, Użytkowników, Ustawień i B2B |
 | 👤 **Klient** | Tylko panel klienta (`gsmw`) — status, kosztorys, historia |
 | — **Klient B2B** | Bez konta — token w linku, dostęp tylko do `b2bCatalog` tej jednej instancji |
 
@@ -176,7 +176,6 @@ cd gsm-admin-panel
 npm install
 npm run dev
 ```
-`http://localhost:5174`
 
 ### 🌐 Panel klienta
 
@@ -185,7 +184,6 @@ cd gsmw
 npm install
 npm run dev
 ```
-`http://localhost:5173`
 
 ---
 
@@ -242,4 +240,3 @@ pro/
 - **iOS PWA** ma ograniczenia względem Androida (brak powiadomień push).
 - **Backup bazy** — brak jeszcze jednoprzyciskowego eksportu całej bazy.
 - **Bramka SMS zależy od telefonu** — gdy Android uśpi aplikację lub telefon straci internet, wiadomości czekają w kolejce („Pending”) i wychodzą z opóźnieniem. Nie obsługuje odpowiedzi „STOP”; rezygnację z SMS-a o opinię ustawia się ręcznie w zleceniu.
-- **Brak podziału uprawnień do cen zakupu na poziomie bazy** — pracownik z dostępem do Firestore mógłby odczytać `buyPrice` (patrz Role i uprawnienia).
