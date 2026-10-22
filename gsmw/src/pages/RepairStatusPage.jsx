@@ -106,18 +106,20 @@ export default function RepairStatusPage() {
 
   const total = (repair.partsCost || 0) + (repair.serviceCost || 0);
 
+  const canDecide = !!phone || !!token;
+
   const needsDecision =
-    !!phone &&
+    canDecide &&
     repair.estimateAccepted === null &&
     total > 0 &&
     repair.status !== STATUS.CANCELLED;
 
   const handleAccept = async () => {
-    if (!phone) return;
+    if (!canDecide) return;
 
     setActionLoading(true);
     try {
-      await acceptEstimate(repair.id, phone);
+      await acceptEstimate(repair.id, phone, token);
       setDecision('accepted');
       setRepair((r) => ({ ...r, estimateAccepted: true }));
     } catch (err) {
@@ -128,11 +130,11 @@ export default function RepairStatusPage() {
   };
 
   const handleReject = async () => {
-    if (!phone) return;
+    if (!canDecide) return;
 
     setActionLoading(true);
     try {
-      await rejectEstimate(repair.id, phone);
+      await rejectEstimate(repair.id, phone, token);
       setDecision('rejected');
       setRepair((r) => ({
         ...r,
@@ -207,13 +209,6 @@ export default function RepairStatusPage() {
                   </button>
                 </div>
               </>
-            )}
-
-            {token && !phone && repair.estimateAccepted === null && total > 0 && (
-              <p className="rs-estimate-note">
-                Kosztorys jest widoczny pod tym linkiem. Akceptacja lub odrzucenie
-                kosztorysu wymaga wyszukania zlecenia numerem telefonu.
-              </p>
             )}
 
             {(repair.estimateAccepted === true || decision === 'accepted') && (

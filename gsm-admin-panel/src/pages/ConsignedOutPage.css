@@ -1,0 +1,60 @@
+.co-page { padding: 28px 32px 60px; max-width: 1100px; }
+.co-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
+.co-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+.co-sub { font-size: 13px; color: var(--ink-soft); margin: 0; }
+
+.co-btn-primary { background: var(--accent); color: #fff; font-weight: 600; font-size: 13.5px; padding: 10px 18px; border-radius: var(--radius-sm); }
+.co-btn-primary:hover { background: var(--accent-deep); }
+.co-btn-primary:disabled { opacity: .6; }
+.co-btn-ghost { background: transparent; border: 1.5px solid var(--line); color: var(--ink-soft); font-weight: 600; font-size: 13px; padding: 9px 14px; border-radius: var(--radius-sm); }
+.co-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.co-btn-sm { padding: 8px 12px; font-size: 12.5px; white-space: nowrap; }
+
+.co-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.co-sum-card { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.co-sum-value { font-size: 20px; font-weight: 700; color: var(--ink); }
+.co-sum-label { font-size: 12px; color: var(--ink-soft); }
+.co-good { color: #1DB954; }
+.co-bad { color: #DC2626; }
+
+.co-card { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 18px; margin-bottom: 16px; }
+.co-card-title { font-size: 16px; font-weight: 700; margin: 0 0 12px; color: var(--ink); }
+.co-form-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.co-input { flex: 1; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13.5px; background: var(--paper); color: var(--ink); width: 100%; box-sizing: border-box; }
+.co-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.co-input-amount { max-width: 150px; flex: none; }
+
+.co-pick-list { max-height: 320px; overflow: auto; margin: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+.co-pick-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; }
+.co-pick-on { border-color: var(--accent); background: var(--paper); }
+.co-pick-main { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; }
+.co-pick-meta { color: var(--ink-soft); font-size: 12px; font-weight: 400; }
+.co-hint { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 12px; }
+.co-empty, .co-empty-big { color: var(--ink-soft); font-size: 13.5px; }
+.co-empty-big { padding: 40px 0; text-align: center; }
+
+.co-group-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.co-group-phone { font-size: 12.5px; color: var(--ink-soft); }
+.co-group-right { display: flex; align-items: center; gap: 12px; }
+.co-group-total { font-weight: 700; font-size: 14px; color: var(--ink); }
+
+.co-phone { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.co-phone-stale { background: rgba(220, 38, 38, 0.04); }
+.co-phone-info { cursor: pointer; flex: 1; min-width: 0; }
+.co-phone-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+.co-phone-meta { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.co-phone-actions { display: flex; gap: 8px; align-items: center; }
+
+.co-group-edit { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+.co-group-edit .co-input { flex: 1; min-width: 160px; }
+.co-select-move { flex: none; width: auto; max-width: 150px; padding: 7px 8px; font-size: 12.5px; }
+
+@media (max-width: 768px) {
+  .co-page { padding: 20px 16px 60px; }
+  .co-summary { grid-template-columns: 1fr; }
+  .co-form-row { flex-direction: column; }
+  .co-phone { flex-direction: column; align-items: stretch; }
+  .co-phone-actions { flex-wrap: wrap; }
+  .co-input-amount { max-width: none; flex: 1; }
+  .co-group-head { flex-direction: column; }
+}

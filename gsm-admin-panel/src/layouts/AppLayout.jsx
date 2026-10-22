@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: '/',          label: 'Zlecenia',     icon: '◆', roles: ['admin', 'worker'] },
   { to: '/magazyn',    label: 'Magazyn',      icon: '▤', roles: ['admin', 'worker'] },
   { to: '/skup',       label: 'Skup',         icon: '◈', roles: ['admin'] },
+  { to: '/komisanci',  label: 'U komisantów', icon: '🤝', roles: ['admin'] },
   { to: '/klienci',    label: 'Klienci',      icon: '◎', roles: ['admin', 'worker'] },
   { to: '/statystyki', label: 'Statystyki',   icon: '◬', roles: ['admin'] },
   { to: '/koszty',     label: 'Koszty firmy', icon: '💸', roles: ['admin'] },

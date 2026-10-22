@@ -106,15 +106,15 @@ export async function findRepairsByPhone(phone) {
   }
 }
 
-export async function acceptEstimate(repairId, phone) {
+export async function acceptEstimate(repairId, phone, token) {
   await ensureAnonymousAuth();
-  await acceptEstimateWebFn({ repairId, phone: normalizePhone(phone) });
+  await acceptEstimateWebFn({ repairId, phone: normalizePhone(phone), token: token || undefined });
   return { id: repairId, estimateAccepted: true };
 }
 
-export async function rejectEstimate(repairId, phone) {
+export async function rejectEstimate(repairId, phone, token) {
   await ensureAnonymousAuth();
-  await rejectEstimateWebFn({ repairId, phone: normalizePhone(phone) });
+  await rejectEstimateWebFn({ repairId, phone: normalizePhone(phone), token: token || undefined });
   return { id: repairId, estimateAccepted: false, status: 'Odwołane' };
 }
 
@@ -132,6 +132,7 @@ export const STATUS = {
   DIAGNOSIS:  'W diagnozie',
   REPAIR:     'W naprawie',
   PARTS:      'Oczekuje na części',
+  CUSTOMER_WAIT: 'Czeka na klienta',
   READY:      'Gotowe do odbioru',
   DELIVERED:  'Odebrane',
   CANCELLED:  'Odwołane',

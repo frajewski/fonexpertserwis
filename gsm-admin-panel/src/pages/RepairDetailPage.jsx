@@ -9,6 +9,8 @@ import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { triggerHaptic } from '../native/haptics';
 import { failMessage } from '../utils/friendlyError';
+import SignatureField from '../signature/SignaturePad';
+import { stampSignature } from '../signature/signatureData';
 import { printRepairConfirmation, buildRepairConfirmationHtml } from '../utils/printConfirmation';
 import { printPickupConfirmation, buildPickupConfirmationHtml } from '../utils/printPickupConfirmation';
 import DocumentShareButtons from '../components/DocumentShareButtons';
@@ -16,6 +18,8 @@ import { canShareText, shareText, safeFileName } from '../documents/shareDocumen
 import { printDeviceLabel } from '../utils/printDeviceLabel';
 import { messageTemplates } from '../utils/messageTemplates';
 import useSettings from '../store/useSettings';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../firebase/firebaseConfig';
 import './RepairDetailPage.css';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
@@ -23,7 +27,7 @@ const toDateInputValue = (iso) => iso ? iso.slice(0, 10) : '';
 
 const STATUS_TONE = {
   [STATUS.ACCEPTED]: 'wait', [STATUS.DIAGNOSIS]: 'wait', [STATUS.REPAIR]: 'info',
-  [STATUS.PARTS]: 'info', [STATUS.READY]: 'good', [STATUS.DELIVERED]: 'neutral', [STATUS.CANCELLED]: 'warn',
+  [STATUS.PARTS]: 'info', [STATUS.CUSTOMER_WAIT]: 'wait', [STATUS.READY]: 'good', [STATUS.DELIVERED]: 'neutral', [STATUS.CANCELLED]: 'warn',
 };
 
 export default function RepairDetailPage() {
@@ -54,6 +58,7 @@ export default function RepairDetailPage() {
     updateRepair(repair.id, { estimateAccepted: accepted });
   };
 
+  const [smsState, setSmsState] = useState(''); // '' | 'sending' | 'sent' | 'error'
   const [showWarrantyForm, setShowWarrantyForm] = useState(false);
   const [selectedWarranty, setSelectedWarranty] = useState(warrantyPeriods[2]);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -77,6 +82,8 @@ export default function RepairDetailPage() {
   const [pickPartId, setPickPartId] = useState('');
   const [pickQuantity, setPickQuantity] = useState('1');
   const [freeTextPartName, setFreeTextPartName] = useState('');
+  const [pickupSignature, setPickupSignature] = useState(null); // podpis przy wydaniu (w formularzu wydania)
+  const [savingSignature, setSavingSignature] = useState(false);
   // Musi być przed `if (!repair) return` – inaczej liczba hooków zmienia się,
   // gdy zlecenie dociera ze store po pierwszym renderze (crash „Rendered more hooks”).
   const [depositEditInput, setDepositEditInput] = useState('');
@@ -109,6 +116,22 @@ export default function RepairDetailPage() {
       // daty wydania (kiedy klient faktycznie odebrał, co bywa dużo później)
       ...(newStatus === STATUS.READY && !repair.readyAt ? { readyAt: new Date().toISOString() } : {}),
     });
+
+    // „Czeka na klienta” = części dotarły → od razu proponujemy SMS do klienta
+    // (raz na zlecenie; pytamy o potwierdzenie, żeby przypadkowe kliknięcie
+    // statusu nie wysłało wiadomości).
+    if (newStatus === STATUS.CUSTOMER_WAIT && customer?.phone && !repair.partsSmsSentAt) {
+      if (window.confirm(`Wysłać klientowi SMS „części dotarły” na numer ${customer.phone}?`)) {
+        try {
+          const body = messageTemplates(repair, customer.name || 'Kliencie').find((t) => t.id === 'partsArrived')?.body;
+          await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: body });
+          await updateRepair(id, { partsSmsSentAt: new Date().toISOString() });
+        } catch (e) {
+          console.error(e);
+          alert(e?.message || 'Nie udało się wysłać SMS. Status został zmieniony.');
+        }
+      }
+    }
   };
 
   const handleConfirmDelivery = async () => {
@@ -119,9 +142,27 @@ export default function RepairDetailPage() {
       warrantyMonths: selectedWarranty.months,
       warrantyEndDate: calcWarrantyEndDate(issuedAt, selectedWarranty.months),
       issuedAt,
+      ...(pickupSignature ? { signatures: { ...(repair.signatures || {}), pickup: stampSignature(pickupSignature, currentUser?.name) } } : {}),
     });
+    setPickupSignature(null);
     triggerHaptic('success');
     setShowWarrantyForm(false);
+  };
+
+  // Podpis złożony / usunięty już po zapisaniu zlecenia (np. klient podpisuje później)
+  const saveSignature = async (kind, sig) => {
+    setSavingSignature(true);
+    try {
+      const next = { ...(repair.signatures || {}) };
+      if (sig) next[kind] = stampSignature(sig, currentUser?.name);
+      else delete next[kind];
+      await updateRepair(id, { signatures: next });
+    } catch (err) {
+      triggerHaptic('error');
+      alert(failMessage('Nie udało się zapisać podpisu', err));
+    } finally {
+      setSavingSignature(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -316,6 +357,13 @@ export default function RepairDetailPage() {
             </div>
             {repair.imei && <div className="rd-imei">IMEI: {repair.imei}</div>}
             <p className="rd-desc">{repair.description}</p>
+            {(repair.documentType || repair.customerNip || repair.screenLock) && (
+              <div className="rd-chips">
+                {repair.documentType && <span className="rd-chip">🧾 {repair.documentType}</span>}
+                {repair.customerNip && <span className="rd-chip">NIP {repair.customerNip}</span>}
+                {repair.screenLock && <span className="rd-chip">🔒 {repair.screenLock}</span>}
+              </div>
+            )}
             {isStaff && !isClosed && (
               <button
                 type="button"
@@ -359,6 +407,28 @@ export default function RepairDetailPage() {
                 <div className="rd-cost-row"><span>Przyjęcia</span><span>{fmtDate(repair.createdAt)}</span></div>
                 <div className="rd-cost-row"><span>Wykonania</span><span>{fmtDate(repair.readyAt)}</span></div>
                 <div className="rd-cost-row"><span>Wydania</span><span>{fmtDate(repair.issuedAt)}</span></div>
+                {repair.issuedAt && (
+                  <div className="rd-cost-row">
+                    <span>SMS z prośbą o opinię</span>
+                    <span>
+                      {repair.reviewRequestSentAt
+                        ? `✅ wysłano ${fmtDate(repair.reviewRequestSentAt)}`
+                        : repair.noReviewSms
+                          ? '🚫 wyłączony'
+                          : '⏳ zaplanowany (3–6 dni po wydaniu)'}
+                    </span>
+                  </div>
+                )}
+                {repair.issuedAt && !repair.reviewRequestSentAt && (
+                  <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, marginTop: 6 }}>
+                    <input
+                      type="checkbox"
+                      checked={!!repair.noReviewSms}
+                      onChange={(e) => updateRepair(id, { noReviewSms: e.target.checked })}
+                    />
+                    Nie wysyłaj temu klientowi SMS z prośbą o opinię
+                  </label>
+                )}
                 {repair.readyAt && repair.issuedAt && (
                   (() => {
                     const days = Math.round((new Date(repair.issuedAt) - new Date(repair.readyAt)) / (24 * 60 * 60 * 1000));
@@ -454,21 +524,6 @@ export default function RepairDetailPage() {
             )}
           </div>
 
-          {(repair.screenLock || repair.customerNip || repair.documentType) && (
-            <div className="rd-card">
-              <h2 className="rd-section-title">Dodatkowe informacje</h2>
-              {repair.screenLock && (
-                <div className="rd-cost-row"><span>PIN / wzór blokady</span><span>{repair.screenLock}</span></div>
-              )}
-              {repair.documentType && (
-                <div className="rd-cost-row"><span>Typ dokumentu</span><span>{repair.documentType}</span></div>
-              )}
-              {repair.customerNip && (
-                <div className="rd-cost-row"><span>NIP</span><span>{repair.customerNip}</span></div>
-              )}
-            </div>
-          )}
-
           <div className="rd-card">
             <h2 className="rd-section-title">Klient</h2>
             <div className="rd-customer-row">
@@ -496,9 +551,23 @@ export default function RepairDetailPage() {
                 .catch(() => alert('Nie udało się skopiować.'));
             };
 
+            const handleGatewaySend = async () => {
+              if (!currentBody.trim() || smsState === 'sending') return;
+              setSmsState('sending');
+              try {
+                await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: currentBody });
+                setSmsState('sent');
+              } catch (e) {
+                console.error(e);
+                alert(e?.message || 'Nie udało się wysłać SMS.');
+                setSmsState('error');
+              }
+              setTimeout(() => setSmsState(''), 3000);
+            };
+
             return (
-              <div className="rd-card">
-                <h2 className="rd-section-title">Powiadom klienta</h2>
+              <details className="rd-card rd-fold">
+                <summary className="rd-section-title">Powiadom klienta</summary>
                 <select
                   className="rd-notify-select"
                   value={selectedTemplateId}
@@ -513,10 +582,15 @@ export default function RepairDetailPage() {
                   rows={4}
                 />
                 <p className="rd-notify-hint">
-                  Panel webowy nie wysyła SMS-ów automatycznie (wymaga płatnej bramki SMS) —
-                  skopiuj treść albo otwórz w aplikacji SMS/e-mail na telefonie.
+                  „Wyślij SMS” wysyła wiadomość przez telefon z bramką SMS (Pixel musi mieć internet).
+                  Możesz też skopiować treść albo otworzyć ją w aplikacji SMS/e-mail.
                 </p>
                 <div className="rd-notify-actions">
+                  {customer.phone && (
+                    <button type="button" className="rd-btn-ghost" onClick={handleGatewaySend} disabled={smsState === 'sending'}>
+                      {smsState === 'sending' ? '⏳ Wysyłam…' : smsState === 'sent' ? '✓ Wysłano' : '📲 Wyślij SMS'}
+                    </button>
+                  )}
                   <button type="button" className="rd-btn-ghost" onClick={handleCopyMessage}>
                     {messageCopied ? '✓ Skopiowano' : '📋 Kopiuj treść'}
                   </button>
@@ -541,7 +615,7 @@ export default function RepairDetailPage() {
                     </button>
                   )}
                 </div>
-              </div>
+              </details>
             );
           })()}
           <div className="rd-card">
@@ -691,8 +765,8 @@ export default function RepairDetailPage() {
             )}
           </div>
 
-          <div className="rd-card">
-            <h2 className="rd-section-title">Zdjęcia ({repair.repairPhotos?.length || 0}/5)</h2>
+          <details className="rd-card rd-fold" open={(repair.repairPhotos?.length || 0) > 0}>
+            <summary className="rd-section-title">Zdjęcia ({repair.repairPhotos?.length || 0}/5)</summary>
             {repair.repairPhotos?.length > 0 && (
               <div className="rd-photos">
                 {repair.repairPhotos.map((url, i) => (
@@ -717,7 +791,7 @@ export default function RepairDetailPage() {
                 </label>
               </div>
             )}
-          </div>
+          </details>
 
           {repair.warrantyMonths > 0 && (
             <div className="rd-card">
@@ -731,6 +805,48 @@ export default function RepairDetailPage() {
 
         {/* ===== PANEL AKCJI (boczny) ===== */}
         <div className="rd-side">
+          <div className="rd-card">
+            <h2 className="rd-section-title">Zmień status</h2>
+            <div className="rd-status-options">
+              {statusList.map((st) => (
+                <button
+                  key={st}
+                  className={`rd-status-option ${repair.status === st ? 'rd-status-option-active' : ''}`}
+                  onClick={() => handleStatusChange(st)}
+                  disabled={repair.status === st}
+                >
+                  {statusIcons[st]} {st}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <details className="rd-card rd-fold">
+            <summary className="rd-section-title">Podpisy klienta</summary>
+            <div className="rd-sign-label">Przyjęcie</div>
+            <SignatureField
+              value={repair.signatures?.intake || null}
+              onChange={(sig) => saveSignature('intake', sig)}
+              label="Podpis klienta – przyjęcie"
+              hint="Klient potwierdza przekazanie urządzenia, opis usterki i wstępny kosztorys."
+              disabled={savingSignature}
+              compact
+            />
+            {repair.status === STATUS.DELIVERED && (
+              <>
+                <div className="rd-sign-label" style={{ marginTop: 12 }}>Odbiór</div>
+                <SignatureField
+                  value={repair.signatures?.pickup || null}
+                  onChange={(sig) => saveSignature('pickup', sig)}
+                  label="Podpis klienta – odbiór"
+                  hint="Klient potwierdza odbiór sprawnego urządzenia i warunki gwarancji."
+                  disabled={savingSignature}
+                  compact
+                />
+              </>
+            )}
+          </details>
+
           <div className="rd-card">
             <button className="rd-btn-primary" onClick={handlePrint}>
               🖨️ Drukuj potwierdzenie
@@ -749,7 +865,7 @@ export default function RepairDetailPage() {
             </button>
             {repair.status === STATUS.DELIVERED && (
               <>
-                <button className="rd-btn-ghost rd-btn-label" onClick={() => printPickupConfirmation(repair, customer, shopSettings)}>
+                <button className="rd-btn-ghost rd-btn-label rd-btn-pickup" onClick={() => printPickupConfirmation(repair, customer, shopSettings)}>
                   📄 Drukuj potwierdzenie wydania
                 </button>
                 <div className="rd-doc-actions">
@@ -763,22 +879,6 @@ export default function RepairDetailPage() {
                 </div>
               </>
             )}
-          </div>
-
-          <div className="rd-card">
-            <h2 className="rd-section-title">Zmień status</h2>
-            <div className="rd-status-options">
-              {statusList.map((st) => (
-                <button
-                  key={st}
-                  className={`rd-status-option ${repair.status === st ? 'rd-status-option-active' : ''}`}
-                  onClick={() => handleStatusChange(st)}
-                  disabled={repair.status === st}
-                >
-                  {statusIcons[st]} {st}
-                </button>
-              ))}
-            </div>
           </div>
 
           {showWarrantyForm && (
@@ -795,7 +895,15 @@ export default function RepairDetailPage() {
                   </button>
                 ))}
               </div>
-              <button className="rd-btn-primary" onClick={handleConfirmDelivery}>
+              <h2 className="rd-section-title" style={{ marginTop: 16 }}>Podpis klienta przy odbiorze</h2>
+              <SignatureField
+                value={pickupSignature}
+                onChange={setPickupSignature}
+                label="Podpis klienta – odbiór"
+                hint="Klient potwierdza odbiór sprawnego urządzenia i warunki gwarancji."
+                compact
+              />
+              <button className="rd-btn-primary" style={{ marginTop: 12 }} onClick={handleConfirmDelivery}>
                 Potwierdź wydanie
               </button>
             </div>

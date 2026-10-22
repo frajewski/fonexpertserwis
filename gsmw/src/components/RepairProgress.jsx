@@ -26,7 +26,7 @@ export default function RepairProgress({ status }) {
   }
 
   // "Oczekuje na części" wizualnie traktujemy jako część etapu Naprawa
-  const effectiveStatus = status === STATUS.PARTS ? STATUS.REPAIR : status;
+  const effectiveStatus = (status === STATUS.PARTS || status === STATUS.CUSTOMER_WAIT) ? STATUS.REPAIR : status;
   const activeIndex = STEPS.findIndex((s) => s.key === effectiveStatus);
 
   return (
@@ -58,6 +58,9 @@ export default function RepairProgress({ status }) {
             </span>
             {isActive && status === STATUS.PARTS && (
               <span className="rp-sublabel">czeka na części</span>
+            )}
+            {isActive && status === STATUS.CUSTOMER_WAIT && (
+              <span className="rp-sublabel">części dotarły – zapraszamy</span>
             )}
           </div>
         );

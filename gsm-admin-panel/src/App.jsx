@@ -16,6 +16,7 @@ import CustomersPage from './pages/CustomersPage';
 import CustomerCardPage from './pages/CustomerCardPage';
 import BookingsPage from './pages/BookingsPage';
 import TradePage from './pages/TradePage';
+import ConsignedOutPage from './pages/ConsignedOutPage';
 import NewTradePage from './pages/NewTradePage';
 import ImportPhonesPage from './pages/ImportPhonesPage';
 import CalculatorPage from './pages/CalculatorPage';
@@ -137,6 +138,7 @@ export default function App() {
       <Route path="/klienci/:id" element={<ProtectedRoute><CustomerCardPage /></ProtectedRoute>} />
       <Route path="/rezerwacje" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
       <Route path="/skup" element={<AdminOnlyRoute><TradePage /></AdminOnlyRoute>} />
+      <Route path="/komisanci" element={<AdminOnlyRoute><ConsignedOutPage /></AdminOnlyRoute>} />
       <Route path="/skup/nowy" element={<AdminOnlyRoute><NewTradePage /></AdminOnlyRoute>} />
       <Route path="/skup/import" element={<AdminOnlyRoute><ImportPhonesPage /></AdminOnlyRoute>} />
       <Route path="/skup/kalkulator" element={<AdminOnlyRoute><CalculatorPage /></AdminOnlyRoute>} />

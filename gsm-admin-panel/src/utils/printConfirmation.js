@@ -12,6 +12,7 @@
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';
+import { signatureBlockHtml } from '../signature/signatureData';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 
@@ -51,7 +52,7 @@ export function buildRepairConfirmationHtml(repair, customer, shopSettings) {
           .rowValue { color: #111; }
           .totalRow { display: flex; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ccc; }
           .totalLabel, .totalValue { font-size: 16px; font-weight: 800; }
-          .signRow { display: flex; justify-content: space-around; margin-top: 32px; }
+          .signRow { display: flex; justify-content: space-around; margin-top: 56px; }
           .sign { text-align: center; width: 40%; }
           .signLine { border-top: 1px solid #999; margin-bottom: 6px; }
           .signLabel { font-size: 11px; color: #777; }
@@ -111,7 +112,7 @@ export function buildRepairConfirmationHtml(repair, customer, shopSettings) {
 
         <div class="divider"></div>
         <div class="signRow">
-          <div class="sign"><div class="signLine"></div><p class="signLabel">Podpis klienta</p></div>
+          ${signatureBlockHtml(repair.signatures?.intake, 'Podpis klienta')}
           <div class="sign"><div class="signLine"></div><p class="signLabel">Podpis serwisanta</p></div>
         </div>
 

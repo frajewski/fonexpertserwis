@@ -15,6 +15,8 @@ import { isOnlineNow, PHOTO_OFFLINE_MESSAGE } from '../network/networkStatus';
 import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { triggerHaptic } from '../native/haptics';
 import { failMessage } from '../utils/friendlyError';
+import SignatureField from '../signature/SignaturePad';
+import { stampSignature } from '../signature/signatureData';
 import { printConsignmentAgreement, buildConsignmentAgreementHtml } from '../utils/printConsignmentAgreement';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import './TradeDetailPage.css';
@@ -35,6 +37,7 @@ export default function TradeDetailPage() {
   const isAdmin = currentUser?.role === 'admin';
   const [sellPriceInput, setSellPriceInput] = useState('');
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [savingSignature, setSavingSignature] = useState(false); // podpis sprzedającego/komitenta
   const [selectedSaleWarranty, setSelectedSaleWarranty] = useState(warrantyPeriods[2]);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -50,6 +53,7 @@ export default function TradeDetailPage() {
   const [editNotes, setEditNotes] = useState('');
   const [editB2bListed, setEditB2bListed] = useState(false);
   const [editB2bPrice, setEditB2bPrice] = useState('');
+  const [editConsignPrice, setEditConsignPrice] = useState('');
   const [editingUsedParts, setEditingUsedParts] = useState(false);
   const [usedPartsInput, setUsedPartsInput] = useState([]);
   const [pickPartId, setPickPartId] = useState('');
@@ -70,6 +74,22 @@ export default function TradeDetailPage() {
 
   const handleStatusChange = async (newStatus) => {
     await updatePhone(id, { status: newStatus });
+  };
+
+  // Podpis sprzedającego (skup) / komitenta (komis) – trafia na umowę
+  const saveSellerSignature = async (sig) => {
+    setSavingSignature(true);
+    try {
+      const next = { ...(phone.signatures || {}) };
+      if (sig) next.seller = stampSignature(sig, currentUser?.name);
+      else delete next.seller;
+      await updatePhone(id, { signatures: next });
+    } catch (err) {
+      triggerHaptic('error');
+      alert(failMessage('Nie udało się zapisać podpisu', err));
+    } finally {
+      setSavingSignature(false);
+    }
   };
 
   const handleSetSellPrice = async () => {
@@ -102,6 +122,7 @@ export default function TradeDetailPage() {
     setEditWarranty(phone.warranty || '');
     setEditB2bListed(!!phone.b2bListed);
     setEditB2bPrice(phone.b2bPrice ? String(phone.b2bPrice) : '');
+    setEditConsignPrice(phone.consignPrice ? String(phone.consignPrice) : '');
     setEditNotes(phone.notes || '');
     setEditing(true);
   };
@@ -120,6 +141,7 @@ export default function TradeDetailPage() {
       notes: editNotes.trim(),
       b2bListed: editB2bListed,
       b2bPrice: parseFloat(editB2bPrice) || 0,
+      consignPrice: parseFloat(String(editConsignPrice).replace(',', '.')) || 0,
     });
     triggerHaptic('success');
     setEditing(false);
@@ -323,6 +345,10 @@ export default function TradeDetailPage() {
                   </label>
                 )}
                 <label className="td-edit-field">
+                  <span>Cena dla komisanta (zł) — kwota, którą chcę uzyskać; nadwyżka jest jego</span>
+                  <input className="td-input" inputMode="decimal" value={editConsignPrice} onChange={(e) => setEditConsignPrice(e.target.value)} placeholder="0.00" />
+                </label>
+                <label className="td-edit-field">
                   <span>Notatki</span>
                   <textarea className="td-input td-textarea" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} />
                 </label>
@@ -352,6 +378,7 @@ export default function TradeDetailPage() {
                   <span>Kupiony: {fmtDate(phone.boughtAt)}</span>
                   {phone.status === TRADE_STATUS.SOLD && <span>Sprzedany: {fmtDate(phone.soldAt)}</span>}
                   {phone.b2bListed && <span>🏷️ B2B: {phone.b2bPrice || 0} zł</span>}
+                  {phone.consignPrice > 0 && <span>🤝 Cena dla komisanta: {phone.consignPrice} zł{phone.consignedTo ? ` (${phone.consignedTo})` : ''}</span>}
                   {phone.warrantyMonths > 0 ? (
                     <span>🛡️ Gwarancja: {phone.warrantyMonths} mies. — do {fmtDate(phone.warrantyEndDate)}</span>
                   ) : phone.warranty ? (
@@ -485,6 +512,12 @@ export default function TradeDetailPage() {
             <div className="td-card">
               <h2 className="td-section-title">Finanse</h2>
               <div className="td-cost-row"><span>Cena zakupu</span><span>{phone.buyPrice || 0} zł</span></div>
+              {phone.consignPrice > 0 && phone.status !== TRADE_STATUS.SOLD && (
+                <div className="td-cost-row">
+                  <span>Cena dla komisanta{phone.consignedTo ? ` (${phone.consignedTo})` : ''}</span>
+                  <span>{phone.consignPrice} zł · zysk {phone.consignPrice - (phone.buyPrice || 0)} zł</span>
+                </div>
+              )}
               {phone.status === TRADE_STATUS.SOLD ? (
                 <>
                   <div className="td-cost-row"><span>Cena sprzedaży</span><span>{phone.sellPrice || 0} zł</span></div>
@@ -525,6 +558,22 @@ export default function TradeDetailPage() {
         </div>
 
         <div className="td-side">
+          <div className="td-card">
+            <h2 className="td-section-title">
+              Podpis {phone.transactionType === 'consignment' ? 'komitenta' : 'sprzedającego'}
+            </h2>
+            <SignatureField
+              value={phone.signatures?.seller || null}
+              onChange={saveSellerSignature}
+              label={phone.transactionType === 'consignment' ? 'Podpis komitenta' : 'Podpis sprzedającego'}
+              hint={phone.transactionType === 'consignment'
+                ? 'Komitent potwierdza warunki umowy komisu. Podpis trafi na umowę (PDF / wydruk).'
+                : 'Sprzedający potwierdza umowę kupna-sprzedaży i oświadczenie o własności telefonu. Podpis trafi na umowę (PDF / wydruk).'}
+              disabled={savingSignature}
+              compact
+            />
+          </div>
+
           <div className="td-card">
             <h2 className="td-section-title">Zmień status</h2>
             <div className="td-status-options">

@@ -190,7 +190,7 @@
 .rd-badge-neutral { background: var(--paper); color: var(--ink-soft); }
 
 /* Panel akcji */
-.rd-status-options { display: flex; flex-direction: column; gap: 6px; }
+.rd-status-options { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .rd-status-option {
   display: flex;
@@ -297,3 +297,24 @@
 .rd-btn-accept:hover { background: var(--good); color: #fff; }
 .rd-btn-reject { background: var(--warn-soft); color: var(--warn); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: var(--radius-sm); }
 .rd-btn-reject:hover { background: var(--warn); color: #fff; }
+
+/* Podpisy klienta (przyjęcie / odbiór) */
+.rd-sign-label { font-size: 12px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px; }
+
+/* Zwijane karty (powiadomienia, zdjęcia, podpisy) */
+.rd-fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; user-select: none; }
+.rd-fold > summary::-webkit-details-marker { display: none; }
+.rd-fold > summary::after { content: '▾'; color: var(--ink-soft); font-size: 14px; }
+.rd-fold:not([open]) > summary::after { content: '▸'; }
+.rd-fold[open] > summary { margin-bottom: 12px; }
+
+/* Statusy jako kompaktowe „pigułki” */
+.rd-status-option { padding: 6px 11px; border-radius: 999px; font-size: 12px; gap: 5px; }
+
+/* Dane dodatkowe (typ dokumentu, NIP, PIN) w nagłówku */
+.rd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.rd-chip { background: var(--paper); color: var(--ink-soft); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+
+/* Potwierdzenie wydania – wyróżniony przycisk */
+.rd-btn-pickup { background: var(--good-soft); border-color: var(--good); color: #12843B; }
+.rd-btn-pickup:hover { background: var(--good); border-color: var(--good); color: #fff; }

@@ -7,6 +7,7 @@
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';
+import { signatureBlockHtml } from '../signature/signatureData';
 
 const BUYER = {
   name: 'Fonexpert Filip Rajewski',
@@ -40,7 +41,7 @@ export function buildConsignmentAgreementHtml(phone) {
           .price-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; padding: 6px 0; border-top: 1px solid #333; margin-top: 4px; }
           ol { padding-left: 16px; margin: 4px 0; }
           ol li { margin-bottom: 3px; }
-          .signRow { display: flex; justify-content: space-around; margin-top: 24px; }
+          .signRow { display: flex; justify-content: space-around; margin-top: 56px; }
           .sign { text-align: center; width: 40%; }
           .signLine { border-top: 1px solid #333; margin-bottom: 4px; }
           @media print { @page { margin: 12mm; size: A4; } }
@@ -106,7 +107,7 @@ export function buildConsignmentAgreementHtml(phone) {
 
         <div class="signRow">
           <div class="sign"><div class="signLine"></div><p>Komisant</p></div>
-          <div class="sign"><div class="signLine"></div><p>Komitent</p></div>
+          ${signatureBlockHtml(phone.signatures?.seller, 'Komitent', '')}
         </div>
       </body>
     </html>

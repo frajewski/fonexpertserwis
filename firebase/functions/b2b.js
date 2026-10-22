@@ -24,7 +24,7 @@ const configRef = () => db.collection("b2bConfig").doc("settings");
 const itemsRef = (token) => db.collection("b2bCatalog").doc(token).collection("items");
 
 const isListable = (p) =>
-  !!p && p.b2bListed === true && p.status !== "Sprzedany" && Number(p.b2bPrice) > 0;
+  !!p && p.b2bListed === true && p.status !== "Sprzedany" && p.status !== "U komisanta" && Number(p.b2bPrice) > 0;
 
 // BIAŁA LISTA pól widocznych dla klienta B2B
 const toCatalogItem = (p) => ({

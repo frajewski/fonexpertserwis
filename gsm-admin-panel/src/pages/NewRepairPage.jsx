@@ -10,6 +10,8 @@ import { ScanImeiButton } from '../scanner/ScanButtons';
 import { isOnlineNow } from '../network/networkStatus';
 import { triggerHaptic } from '../native/haptics';
 import { failMessage } from '../utils/friendlyError';
+import SignatureField from '../signature/SignaturePad';
+import { stampSignature } from '../signature/signatureData';
 import './NewRepairPage.css';
 
 const normalizePhone = (v) => (v || '').replace(/\D/g, '').replace(/^48/, '');
@@ -85,6 +87,7 @@ export default function NewRepairPage() {
   }, [customers, customerSearch]);
 
   const [loading, setLoading] = useState(false);
+  const [intakeSignature, setIntakeSignature] = useState(null); // podpis klienta przy przyjęciu (opcjonalny)
   const [error, setError] = useState('');
 
   const handleAddWalkInCustomer = async () => {
@@ -153,6 +156,7 @@ export default function NewRepairPage() {
         screenLock: screenLock.trim(),
         documentType,
         customerNip: customerNip.trim(),
+        ...(intakeSignature ? { signatures: { intake: stampSignature(intakeSignature, currentUser?.name) } } : {}),
       });
 
       // Krok 2: jeśli wybrano zdjęcia, wgraj je teraz (mamy już id zlecenia)
@@ -377,6 +381,18 @@ export default function NewRepairPage() {
               )}
             </>
           )}
+        </section>
+
+        {/* PODPIS KLIENTA */}
+        <section className="nr-card">
+          <h2 className="nr-section-title">Podpis klienta</h2>
+          <SignatureField
+            value={intakeSignature}
+            onChange={setIntakeSignature}
+            label="Podpis klienta – przyjęcie"
+            hint="Klient potwierdza przekazanie urządzenia, opis usterki i wstępny kosztorys. Podpis trafi na potwierdzenie przyjęcia (PDF / wydruk)."
+            disabled={loading}
+          />
         </section>
 
         {error && <div className="nr-error">{error}</div>}

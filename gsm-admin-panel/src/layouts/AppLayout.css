@@ -234,8 +234,8 @@
 
 .sidebar-close-btn { display: none; }
 
-/* ===== RESPONSIVE — pod ~768px sidebar staje się wysuwaną szufladą ===== */
-@media (max-width: 768px) {
+/* ===== RESPONSIVE — pod ~1024px (tablet) sidebar staje się wysuwaną szufladą ===== */
+@media (max-width: 1024px) {
   .layout { flex-direction: column; }
 
   .mobile-topbar { display: flex; }

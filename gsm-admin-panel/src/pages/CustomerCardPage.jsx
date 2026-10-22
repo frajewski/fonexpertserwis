@@ -9,7 +9,7 @@ import './CustomerCardPage.css';
 
 const STATUS_TONE = {
   [STATUS.ACCEPTED]: 'wait', [STATUS.DIAGNOSIS]: 'wait', [STATUS.REPAIR]: 'info',
-  [STATUS.PARTS]: 'info', [STATUS.READY]: 'good', [STATUS.DELIVERED]: 'neutral', [STATUS.CANCELLED]: 'warn',
+  [STATUS.PARTS]: 'info', [STATUS.CUSTOMER_WAIT]: 'wait', [STATUS.READY]: 'good', [STATUS.DELIVERED]: 'neutral', [STATUS.CANCELLED]: 'warn',
 };
 
 export default function CustomerCardPage() {

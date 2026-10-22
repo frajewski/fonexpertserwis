@@ -92,6 +92,64 @@ async function assertPhoneMatchesRepair(repair, inputPhone) {
   return phoneMatches(inputPhone, userPhone);
 }
 
+
+/**
+ * Znajduje zlecenie do decyzji o kosztorysie: albo po tokenie z linku
+ * śledzenia (klient klika w link z SMS-a), albo po repairId + telefonie
+ * (klient wyszukał zlecenie ręcznie).
+ */
+async function resolveRepairForDecision({ repairId, phone, token }) {
+  if (token) {
+    const cleanToken = String(token).trim();
+    const snap = await db
+      .collection("repairs")
+      .where("trackingToken", "==", cleanToken)
+      .limit(1)
+      .get();
+
+    if (snap.empty) {
+      throw new HttpsError("not-found", "Nie znaleziono zlecenia.");
+    }
+
+    const doc = snap.docs[0];
+
+    if (repairId && doc.id !== repairId) {
+      throw new HttpsError("permission-denied", "Token nie pasuje do zlecenia.");
+    }
+
+    const data = doc.data() || {};
+
+    if (data.estimateAccepted !== null && data.estimateAccepted !== undefined) {
+      throw new HttpsError("failed-precondition", "Decyzja o kosztorysie została już zapisana.");
+    }
+
+    if (data.status === "Odwołane" || data.status === "Odebrane") {
+      throw new HttpsError("failed-precondition", "To zlecenie jest już zamknięte.");
+    }
+
+    return doc.ref;
+  }
+
+  if (!repairId || !phone) {
+    throw new HttpsError("invalid-argument", "Brakuje ID zlecenia albo telefonu.");
+  }
+
+  const ref = db.collection("repairs").doc(repairId);
+  const doc = await ref.get();
+
+  if (!doc.exists) {
+    throw new HttpsError("not-found", "Nie znaleziono zlecenia.");
+  }
+
+  const matches = await assertPhoneMatchesRepair(doc.data() || {}, phone);
+
+  if (!matches) {
+    throw new HttpsError("permission-denied", "Numer telefonu nie pasuje do zlecenia.");
+  }
+
+  return ref;
+}
+
 /**
  * Funkcja używana przez panel webowy:
  * wyszukiwanie jednego zlecenia po numerze zlecenia i telefonie.
@@ -244,35 +302,13 @@ exports.acceptEstimateWeb = onCall(
   },
   async (request) => {
     try {
-      const { repairId, phone } = request.data || {};
+      const { repairId, phone, token } = request.data || {};
 
       if (!request.auth) {
         throw new HttpsError("unauthenticated", "Brak sesji użytkownika.");
       }
 
-      if (!repairId || !phone) {
-        throw new HttpsError(
-          "invalid-argument",
-          "Brakuje ID zlecenia albo telefonu."
-        );
-      }
-
-      const repairRef = db.collection("repairs").doc(repairId);
-      const repairDoc = await repairRef.get();
-
-      if (!repairDoc.exists) {
-        throw new HttpsError("not-found", "Nie znaleziono zlecenia.");
-      }
-
-      const repair = repairDoc.data() || {};
-      const matches = await assertPhoneMatchesRepair(repair, phone);
-
-      if (!matches) {
-        throw new HttpsError(
-          "permission-denied",
-          "Numer telefonu nie pasuje do zlecenia."
-        );
-      }
+      const repairRef = await resolveRepairForDecision({ repairId, phone, token });
 
       await repairRef.update({
         estimateAccepted: true,
@@ -304,35 +340,13 @@ exports.rejectEstimateWeb = onCall(
   },
   async (request) => {
     try {
-      const { repairId, phone } = request.data || {};
+      const { repairId, phone, token } = request.data || {};
 
       if (!request.auth) {
         throw new HttpsError("unauthenticated", "Brak sesji użytkownika.");
       }
 
-      if (!repairId || !phone) {
-        throw new HttpsError(
-          "invalid-argument",
-          "Brakuje ID zlecenia albo telefonu."
-        );
-      }
-
-      const repairRef = db.collection("repairs").doc(repairId);
-      const repairDoc = await repairRef.get();
-
-      if (!repairDoc.exists) {
-        throw new HttpsError("not-found", "Nie znaleziono zlecenia.");
-      }
-
-      const repair = repairDoc.data() || {};
-      const matches = await assertPhoneMatchesRepair(repair, phone);
-
-      if (!matches) {
-        throw new HttpsError(
-          "permission-denied",
-          "Numer telefonu nie pasuje do zlecenia."
-        );
-      }
+      const repairRef = await resolveRepairForDecision({ repairId, phone, token });
 
       await repairRef.update({
         estimateAccepted: false,
@@ -614,3 +628,4 @@ exports.setUserRoleClaim = onCall(
 );
 Object.assign(exports, require("./b2b"));
 Object.assign(exports, require("./push"));
+Object.assign(exports, require("./reviewSms"));

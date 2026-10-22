@@ -13,12 +13,23 @@ const STATUS_TONE = {
   [STATUS.ORDER_PARTS]: 'warn',
   [STATUS.REPAIR]:    'info',
   [STATUS.PARTS]:     'info',
+  [STATUS.CUSTOMER_WAIT]: 'wait',
   [STATUS.READY]:     'good',
   [STATUS.DELIVERED]: 'neutral',
   [STATUS.CANCELLED]: 'warn',
 };
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+
+// Wyszukiwanie po telefonie klienta: ignoruje spacje/myślniki i prefiks 48,
+// żeby "600 123 456", "600123456" i "+48 600-123-456" znajdowały to samo zlecenie
+const phoneDigits = (v) => String(v || '').replace(/\D/g, '').replace(/^48(?=\d{9}$)/, '');
+const phoneMatchesQuery = (phone, q) => {
+  const qd = phoneDigits(q);
+  if (qd.length < 3) return false;
+  const pd = phoneDigits(phone);
+  return !!pd && pd.includes(qd);
+};
 
 const EMPTY_FILTERS = {
   brand: '', model: '', documentType: '', priorityOnly: false,
@@ -123,7 +134,8 @@ export default function RepairsPage() {
           || r.imei?.includes(q)
           || (r.displayNumber || '').includes(q)
           || (r.partsInvoiceNumber || '').toLowerCase().includes(q)
-          || getUserById(r.customerId)?.name?.toLowerCase().includes(q);
+          || getUserById(r.customerId)?.name?.toLowerCase().includes(q)
+          || phoneMatchesQuery(getUserById(r.customerId)?.phone, q);
         const matchStatus = !statusFilter || r.status === statusFilter;
         const matchBrand = !filters.brand || r.brand === filters.brand;
         const matchModel = !filters.model || (r.model || '').toLowerCase().includes(filters.model.toLowerCase());
@@ -171,7 +183,8 @@ export default function RepairsPage() {
         || r.imei?.includes(q)
         || (r.displayNumber || '').includes(q)
         || (r.partsInvoiceNumber || '').toLowerCase().includes(q)
-        || getUserById(r.customerId)?.name?.toLowerCase().includes(q);
+        || getUserById(r.customerId)?.name?.toLowerCase().includes(q)
+          || phoneMatchesQuery(getUserById(r.customerId)?.phone, q);
       const matchBrand = !filters.brand || r.brand === filters.brand;
       const matchModel = !filters.model || (r.model || '').toLowerCase().includes(filters.model.toLowerCase());
       const matchDocType = !filters.documentType || r.documentType === filters.documentType;
@@ -254,7 +267,7 @@ export default function RepairsPage() {
             <span className="rp-search-icon">⌕</span>
             <input
               className="rp-search-input"
-              placeholder="Szukaj: marka, model, IMEI, klient, numer, faktura…"
+              placeholder="Szukaj: marka, model, IMEI, klient, telefon, numer, faktura…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

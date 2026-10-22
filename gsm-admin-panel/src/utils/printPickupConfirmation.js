@@ -11,6 +11,7 @@
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';
+import { signatureBlockHtml } from '../signature/signatureData';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : new Date().toLocaleDateString('pl-PL');
 
@@ -40,7 +41,7 @@ export function buildPickupConfirmationHtml(repair, customer, shopSettings) {
           .terms h3 { font-size: 11.5px; margin: 0 0 6px; }
           .terms ol { padding-left: 16px; margin: 0; }
           .terms li { margin-bottom: 4px; }
-          .signRow { display: flex; justify-content: space-around; margin-top: 32px; }
+          .signRow { display: flex; justify-content: space-around; margin-top: 56px; }
           .sign { text-align: center; width: 40%; }
           .signLine { border-top: 1px solid #999; margin-bottom: 6px; }
           .signLabel { font-size: 10.5px; color: #777; }
@@ -84,7 +85,7 @@ export function buildPickupConfirmationHtml(repair, customer, shopSettings) {
         </div>
 
         <div class="signRow">
-          <div class="sign"><div class="signLine"></div><p class="signLabel">Podpis klienta (odbiór)</p></div>
+          ${signatureBlockHtml(repair.signatures?.pickup, 'Podpis klienta (odbiór)')}
           <div class="sign"><div class="signLine"></div><p class="signLabel">Podpis serwisanta</p></div>
         </div>
       </body>

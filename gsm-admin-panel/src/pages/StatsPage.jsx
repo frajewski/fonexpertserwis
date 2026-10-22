@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import useStore from '../store/useStore';
 import { getStatsByPeriod, getTopBrands, getTopFaults, filterByMonth, filterDeliveredByMonth, calcRevenue, calcProfit } from '../utils/calcProfit';
 import { getTopSellingModels, getAvgProfitByBrand, getStalePhones, getMonthlyTradeData, getTradeStatsForMonth, getTradeProfitToday, getTradeProfitThisMonth, getTradeProfitThisYear } from '../utils/calcTradeStats';
@@ -14,7 +14,44 @@ const MONTH_NAMES_FULL = [
 ];
 
 export default function StatsPage() {
-  const repairs = useStore((s) => s.getVisibleRepairs());
+  const recentRepairs = useStore((s) => s.getVisibleRepairs());
+  const getRepairsHistoryPage = useStore((s) => s.getRepairsHistoryPage);
+
+  // Store trzyma w czasie rzeczywistym tylko ostatnie ~30 dni zleceń. Statystyki
+  // starszych miesięcy (np. sierpnia) muszą więc doczytać historię – jednorazowo,
+  // po wejściu na stronę.
+  const [historyRepairs, setHistoryRepairs] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const all = [];
+        let lastDoc = null;
+        for (let i = 0; i < 40; i++) { // zabezpieczenie: max 20 000 zleceń
+          const page = await getRepairsHistoryPage(500, lastDoc);
+          all.push(...page.repairs);
+          lastDoc = page.lastDoc;
+          if (!page.hasMore) break;
+        }
+        if (!cancelled) setHistoryRepairs(all);
+      } catch (e) {
+        console.error('Nie udało się wczytać historii zleceń do statystyk', e);
+        if (!cancelled) setHistoryError(true);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [getRepairsHistoryPage]);
+
+  const repairs = useMemo(() => {
+    const byId = new Map(historyRepairs.map((r) => [r.id, r]));
+    recentRepairs.forEach((r) => byId.set(r.id, r)); // świeże dane z live mają pierwszeństwo
+    return [...byId.values()];
+  }, [historyRepairs, recentRepairs]);
   const phones = useStore((s) => s.phones);
   const expenses = useStore((s) => s.expenses);
 
@@ -94,6 +131,8 @@ export default function StatsPage() {
           <button className="st-month-nav" onClick={goToNextMonth} disabled={isCurrentMonth}>→</button>
         </div>
 
+        {historyLoading && <p className="st-empty">⏳ Wczytuję starszą historię zleceń…</p>}
+        {historyError && <p className="st-empty">⚠️ Nie udało się wczytać starszych zleceń – dane starszych miesięcy mogą być niepełne.</p>}
         <div className="st-trade-stats st-month-summary">
           <div><span className="st-trade-value">{monthCompleted.length}</span><span className="st-trade-label">Napraw ukończonych</span></div>
           <div><span className="st-trade-value">{monthRevenue} zł</span><span className="st-trade-label">Przychód z napraw</span></div>
