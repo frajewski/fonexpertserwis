@@ -32,6 +32,7 @@ Repo: **github.com/frajewski/fonexpertserwis**
 1. [Dwie aplikacje](#dwie-aplikacje)
 2. [Funkcje panelu admina](#funkcje-panelu-admina)
 3. [Katalog B2B](#katalog-b2b)
+   - [Bramka SMS](#bramka-sms)
 4. [Architektura danych](#architektura-danych)
 5. [Role i uprawnienia](#role-i-uprawnienia)
 6. [Instalacja i uruchomienie](#instalacja-i-uruchomienie)
@@ -50,7 +51,7 @@ Działa jako strona w przeglądarce **oraz** jako instalowalna aplikacja na tele
 ### 🌐 `gsmw/` — Panel klienta (web)
 
 Dwie role w jednym miejscu:
-- **Śledzenie zlecenia** — bez logowania, przez numer zlecenia + telefon albo link/QR z potwierdzenia. Status naprawy, akceptacja kosztorysu, historia.
+- **Śledzenie zlecenia** — bez logowania, przez numer zlecenia + telefon albo link/QR z potwierdzenia. Status naprawy, historia oraz **akceptacja / odrzucenie kosztorysu bezpośrednio z linku** (token w linku wystarcza, bez wpisywania numeru i telefonu).
 - **Katalog B2B** (`/oferta/:token`) — prywatna, niezaindeksowana strona z ofertą hurtową dla stałego klienta biznesowego, patrz niżej.
 
 ---
@@ -61,10 +62,17 @@ Dwie role w jednym miejscu:
 Zysk dzisiaj, wszystkie alerty w jednym miejscu, lista zadań na dziś/jutro (wspólna dla zespołu), szybkie skróty, podgląd bieżącego miesiąca.
 
 ### 🔧 Zlecenia
-Przyjęcie z edytowalną datą, priorytet, zadatek wpłacony z osobną linią "Do zapłaty" w kosztorysie, kosztorys z auto-wyliczaniem usługi (Łącznie − Części), wykonana usługa i zużyte części z Magazynu (automatyczne odjęcie stanu i doliczenie kosztu, blokada przy zerowym stanie), dokument sprzedaży (Paragon/Faktura), zdjęcia, **druk potwierdzenia przyjęcia z kodem QR** do śledzenia statusu online, **druk potwierdzenia wydania** ze skróconymi warunkami gwarancji, druk naklejki na sprzęt, filtry (marka, model, typ dokumentu, priorytet, zakres dat) zapamiętywane między odświeżeniami strony, historia starsza niż 30 dni doładowywana na żądanie, szablony SMS z linkiem śledzenia (w tym przypomnienie o odbiorze i "części dotarły").
+Przyjęcie z edytowalną datą, priorytet, zadatek wpłacony z osobną linią "Do zapłaty" w kosztorysie, kosztorys z auto-wyliczaniem usługi (Łącznie − Części), wykonana usługa i zużyte części z Magazynu (automatyczne odjęcie stanu i doliczenie kosztu, blokada przy zerowym stanie), dokument sprzedaży (Paragon/Faktura), zdjęcia, **druk potwierdzenia przyjęcia z kodem QR** do śledzenia statusu online, **druk potwierdzenia wydania** ze skróconymi warunkami gwarancji, druk naklejki na sprzęt, filtry (marka, model, typ dokumentu, priorytet, zakres dat) zapamiętywane między odświeżeniami strony, historia starsza niż 30 dni doładowywana na żądanie, szablony SMS z linkiem śledzenia (w tym przypomnienie o odbiorze i "części dotarły"), **wysyłka SMS jednym kliknięciem z komputera** przez bramkę SMS (patrz niżej), **wyszukiwanie po numerze telefonu klienta**.
+
+**Statusy:** Przyjęte → W diagnozie → Zamów części → W naprawie → Oczekuje na części → **Czeka na klienta** (części dotarły, klient powiadomiony — zmiana statusu proponuje wysłanie SMS „części dotarły”, raz na zlecenie) → Gotowe do odbioru → Odebrane / Anulowane.
+
+**Karta zlecenia:** zwijane sekcje (Powiadom klienta, Zdjęcia, Podpisy), statusy jako kompaktowe „pigułki”, typ dokumentu / NIP / PIN jako plakietki w nagłówku, w wydanych zleceniach podgląd i przełącznik SMS-a z prośbą o opinię.
 
 ### 📱 Skup / sprzedaż telefonów
 Dwa tryby: **kupno** i **komis**. Skala stanu Grade A+ do D, nowy/używany. Dane sprzedającego (imię, adres, dowód/PESEL) + **generator umów do druku** (kupna-sprzedaży i komisu). Gwarancja wybierana przy oznaczaniu jako sprzedany (te same okresy co w naprawach) + **karta gwarancyjna do druku**, dołączana do paragonu. Zdjęcie telefonu (wgrywane, podmieniane, usuwalne). Filtry (marka, model, pamięć, dostawca, sprzedawca, zakres dat, cena) zapamiętywane między odświeżeniami. Kalkulator wyceny na bazie historii transakcji. Pole "W ofercie B2B" + cena hurtowa, pojedynczo lub hurtem dla zaznaczonych.
+
+### 🤝 U komisantów (`/komisanci`, tylko Admin)
+Własne telefony oddane innym osobom w komis (status `U komisanta`). Komisant zatrzymuje nadwyżkę, a Ty ustalasz kwotę, którą chcesz uzyskać („Cena dla komisanta”, ustawiana też w karcie telefonu). Lista grupowana po komisantach, formularz przekazania z wieloma telefonami, **druk protokołu przekazania**, „💰 Zapłacił” (rejestruje sprzedaż), „↩ Zwrot”, edycja danych komisanta i przenoszenie telefonu między komisantami, alert przy ≥30 dniach. Telefony u komisantów nie trafiają do katalogu B2B.
 
 ### 📦 Magazyn części zamiennych
 Osobna ewidencja od Skupu, alert przy niskim stanie, blokada dodania części jeśli brak na stanie.
@@ -73,7 +81,7 @@ Osobna ewidencja od Skupu, alert przy niskim stanie, blokada dodania części je
 Księgowość, ZUS, VAT, PIT, reklama, materiały eksploatacyjne — odejmowane od zysku w Statystykach ("zysk po kosztach").
 
 ### 📊 Statystyki
-Okresy (dziś/miesiąc/rok) z łącznym zyskiem (naprawy + skup, po kosztach), przychód ze sprzedaży telefonów osobno od zysku, szczegółowy widok dowolnego miesiąca z historii, top marki/modele, marża wg marki, wykres roczny.
+Okresy (dziś/miesiąc/rok) z łącznym zyskiem (naprawy + skup, po kosztach), przychód ze sprzedaży telefonów osobno od zysku, szczegółowy widok dowolnego miesiąca z historii (strona sama doczytuje starsze zlecenia spoza 30-dniowego okna), top marki/modele, marża wg marki, wykres roczny.
 
 ### 👤 Klienci
 Karta z historią zleceń, edycja danych kontaktowych.
@@ -96,6 +104,30 @@ Prywatna, niezaindeksowana (`noindex`) strona ofertowa dla klienta hurtowego —
 
 ---
 
+## Bramka SMS
+
+SMS-y wychodzą z własnego numeru właściciela, przez telefon z Androidem z kartą SIM i aplikacją **SMS Gateway for Android** ([sms-gate.app](https://sms-gate.app)) w trybie **Cloud Server**. Cloud Functions wywołują API bramki (`https://api.sms-gate.app/3rdparty/v1/messages`, Basic Auth), a bramka przekazuje wiadomość do telefonu.
+
+| Funkcja (`firebase/functions/reviewSms.js`) | Do czego |
+|---|---|
+| `sendSmsToCustomer` (callable, tylko Admin/Pracownik) | Przycisk „📲 Wyślij SMS” w karcie zlecenia i SMS „części dotarły” przy statusie „Czeka na klienta” |
+| `sendReviewRequests` (codziennie 11:00, Europa/Warszawa) | Jednorazowa prośba o opinię Google dla zleceń „Odebrane” 3–6 dni po wydaniu |
+
+**Prośba o opinię:** po wysłaniu zapisuje `reviewRequestSentAt` (każde zlecenie dostaje SMS najwyżej raz), pomija zlecenia z `noReviewSms: true` (przełącznik w karcie zlecenia), jeden SMS na numer na przebieg. Treść bez polskich znaków (jeden SMS = 160 znaków). Tryby parametru `REVIEW_SMS_MODE`: `off`, `dry` (tylko log, domyślny), `live`.
+
+**Konfiguracja:**
+```bash
+cd firebase
+printf '%s' 'LOGIN' | firebase functions:secrets:set SMSGATE_USER --data-file -
+printf '%s' 'HASLO'  | firebase functions:secrets:set SMSGATE_PASS --data-file -
+firebase deploy --only functions:sendReviewRequests,functions:sendSmsToCustomer
+```
+Parametry `REVIEW_URL` (link do opinii Google) i `REVIEW_SMS_MODE` Firebase pyta przy deployu albo czyta z `firebase/functions/.env.*`.
+
+**Wymagania po stronie telefonu:** aplikacja musi być uruchomiona z włączonym Cloud Server, internet, bateria ustawiona na „Nieograniczone”, wyłączone „Wstrzymaj aktywność w aplikacji, jeśli nie jest używana”, włączone „Start on boot”. Wysłane SMS-y nie pojawiają się w Wiadomościach Google — status widać w zakładce MESSAGES aplikacji bramki albo przez API (`GET /3rdparty/v1/messages`).
+
+---
+
 ## Architektura danych
 
 ### Współdzielone kolekcje Firestore
@@ -114,7 +146,7 @@ Prywatna, niezaindeksowana (`noindex`) strona ofertowa dla klienta hurtowego —
 | `counters` | Liczniki numerów zleceń (`N/ROK`) |
 
 ### Real-time + historia na żądanie
-Subskrypcja na żywo obejmuje ostatnie 30 dni zleceń — starsze dociągane ręcznie, stronami.
+Subskrypcja na żywo obejmuje ostatnie 30 dni zleceń — starsze dociągane ręcznie, stronami (lista zleceń) albo automatycznie przy wejściu w Statystyki.
 
 ### Custom Claims (role)
 Rola (`admin`/`worker`/`customer`) żyje jako custom claim w tokenie Firebase Auth.
@@ -126,7 +158,7 @@ Rola (`admin`/`worker`/`customer`) żyje jako custom claim w tokenie Firebase Au
 | Rola | Dostęp |
 |---|---|
 | 👑 **Admin** | Wszystko — finanse, Magazyn, Koszty, Statystyki, Użytkownicy, link B2B |
-| 🔧 **Pracownik** | Zlecenia, Skup, Klienci, Magazyn, Pulpit, Zadania — **bez** wglądu w marże/finanse/Koszty/Statystyki/B2B |
+| 🔧 **Pracownik** | Pulpit, Zlecenia, Magazyn, Klienci, Zadania, wysyłka SMS — **bez** Skupu, U komisantów, Kosztów, Statystyk, Użytkowników, Ustawień i B2B (ukryte w menu; ograniczenia dotyczą interfejsu, reguły Firestore dają pracownikowi odczyt wszystkich telefonów, więc ceny zakupu nie są ukryte po stronie bazy) |
 | 👤 **Klient** | Tylko panel klienta (`gsmw`) — status, kosztorys, historia |
 | — **Klient B2B** | Bez konta — token w linku, dostęp tylko do `b2bCatalog` tej jednej instancji |
 
@@ -167,7 +199,7 @@ firebase login
 firebase deploy --only firestore:rules,firestore:indexes,functions,storage --project gsmserviceapp-ff8f6
 ```
 
-Funkcje B2B (`syncB2bCatalog`, `getB2bLink`, `regenerateB2bLink`) mieszkają w `firebase/functions/b2b.js`, dociągane do głównego `index.js` przez `Object.assign(exports, require('./b2b'))`.
+Funkcje B2B (`syncB2bCatalog`, `getB2bLink`, `regenerateB2bLink`) mieszkają w `firebase/functions/b2b.js`, push w `push.js`, a bramka SMS w `reviewSms.js` — wszystkie dociągane do głównego `index.js` przez `Object.assign(exports, require('./…'))`. Projekt Firebase ma dwa hostingi (`admin`, `klient`): `firebase deploy --only hosting:admin` w `gsm-admin-panel/` i `hosting:klient` w `gsmw/`.
 
 ---
 
@@ -178,7 +210,9 @@ pro/
 ├── firebase/                🔥 Backend — reguły, Cloud Functions
 │   ├── functions/
 │   │   ├── index.js
-│   │   └── b2b.js            ← katalog B2B (sync, generowanie linku)
+│   │   ├── b2b.js            ← katalog B2B (sync, generowanie linku)
+│   │   ├── push.js           ← powiadomienia push (FCM)
+│   │   └── reviewSms.js      ← bramka SMS: ręczna wysyłka + prośby o opinię
 │   ├── firestore.rules
 │   ├── storage.rules
 │   └── firebase.json
@@ -207,3 +241,5 @@ pro/
 - **Panel klienta (`gsmw`)** nie ma pola na zdjęcia w formularzu "Umów naprawę".
 - **iOS PWA** ma ograniczenia względem Androida (brak powiadomień push).
 - **Backup bazy** — brak jeszcze jednoprzyciskowego eksportu całej bazy.
+- **Bramka SMS zależy od telefonu** — gdy Android uśpi aplikację lub telefon straci internet, wiadomości czekają w kolejce („Pending”) i wychodzą z opóźnieniem. Nie obsługuje odpowiedzi „STOP”; rezygnację z SMS-a o opinię ustawia się ręcznie w zleceniu.
+- **Brak podziału uprawnień do cen zakupu na poziomie bazy** — pracownik z dostępem do Firestore mógłby odczytać `buyPrice` (patrz Role i uprawnienia).
