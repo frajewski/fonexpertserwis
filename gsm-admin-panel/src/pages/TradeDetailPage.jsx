@@ -18,6 +18,7 @@ import { failMessage } from '../utils/friendlyError';
 import SignatureField from '../signature/SignaturePad';
 import { stampSignature } from '../signature/signatureData';
 import { printConsignmentAgreement, buildConsignmentAgreementHtml } from '../utils/printConsignmentAgreement';
+import PurchaseContractCard from '../components/PurchaseContractCard';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
 import './TradeDetailPage.css';
 
@@ -558,6 +559,13 @@ export default function TradeDetailPage() {
         </div>
 
         <div className="td-side">
+          {isAdmin && phone.transactionType !== 'consignment' && (
+            <PurchaseContractCard
+              phone={phone}
+              onSave={(changes) => updatePhone(id, changes)}
+            />
+          )}
+
           <div className="td-card">
             <h2 className="td-section-title">
               Podpis {phone.transactionType === 'consignment' ? 'komitenta' : 'sprzedającego'}

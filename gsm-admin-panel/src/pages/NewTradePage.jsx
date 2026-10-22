@@ -54,6 +54,7 @@ export default function NewTradePage() {
   const [sellerFullName, setSellerFullName] = useState('');
   const [sellerAddress, setSellerAddress] = useState('');
   const [sellerIdNumber, setSellerIdNumber] = useState('');
+  const [sellerPesel, setSellerPesel] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -140,6 +141,7 @@ export default function NewTradePage() {
         sellerFullName: sellerFullName.trim(),
         sellerAddress: sellerAddress.trim(),
         sellerIdNumber: sellerIdNumber.trim(),
+        sellerPesel: sellerPesel.trim(),
       });
       for (const p of usedPartsInput) {
         if (p.partId) await adjustPartQuantity(p.partId, -p.quantity);
@@ -300,8 +302,12 @@ export default function NewTradePage() {
             <input className="nt-input" value={sellerAddress} onChange={(e) => setSellerAddress(e.target.value)} placeholder="ul., kod pocztowy, miasto" />
           </label>
           <label className="nt-field">
-            <span className="nt-label">Nr dowodu osobistego lub PESEL *</span>
+            <span className="nt-label">Seria i numer dowodu osobistego *</span>
             <input className="nt-input" value={sellerIdNumber} onChange={(e) => setSellerIdNumber(e.target.value)} />
+          </label>
+          <label className="nt-field">
+            <span className="nt-label">PESEL *</span>
+            <input className="nt-input" inputMode="numeric" maxLength={11} value={sellerPesel} onChange={(e) => setSellerPesel(e.target.value.replace(/\D/g, ''))} />
           </label>
         </div>
 
