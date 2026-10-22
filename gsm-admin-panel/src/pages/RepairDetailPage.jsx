@@ -117,15 +117,20 @@ export default function RepairDetailPage() {
       ...(newStatus === STATUS.READY && !repair.readyAt ? { readyAt: new Date().toISOString() } : {}),
     });
 
-    // „Czeka na klienta” = części dotarły → od razu proponujemy SMS do klienta
-    // (raz na zlecenie; pytamy o potwierdzenie, żeby przypadkowe kliknięcie
+    // Statusy, po których proponujemy SMS do klienta (raz na zlecenie dla
+    // każdego rodzaju; pytamy o potwierdzenie, żeby przypadkowe kliknięcie
     // statusu nie wysłało wiadomości).
-    if (newStatus === STATUS.CUSTOMER_WAIT && customer?.phone && !repair.partsSmsSentAt) {
-      if (window.confirm(`Wysłać klientowi SMS „części dotarły” na numer ${customer.phone}?`)) {
+    const AUTO_SMS = {
+      [STATUS.CUSTOMER_WAIT]: { template: 'partsArrived', field: 'partsSmsSentAt', label: 'części dotarły' },
+      [STATUS.READY]: { template: 'ready', field: 'readySmsSentAt', label: 'gotowe do odbioru' },
+    };
+    const auto = AUTO_SMS[newStatus];
+    if (auto && customer?.phone && !repair[auto.field]) {
+      if (window.confirm(`Wysłać klientowi SMS „${auto.label}” na numer ${customer.phone}?`)) {
         try {
-          const body = messageTemplates(repair, customer.name || 'Kliencie').find((t) => t.id === 'partsArrived')?.body;
+          const body = messageTemplates(repair, customer.name || 'Kliencie').find((t) => t.id === auto.template)?.body;
           await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: body });
-          await updateRepair(id, { partsSmsSentAt: new Date().toISOString() });
+          await updateRepair(id, { [auto.field]: new Date().toISOString() });
         } catch (e) {
           console.error(e);
           alert(e?.message || 'Nie udało się wysłać SMS. Status został zmieniony.');
