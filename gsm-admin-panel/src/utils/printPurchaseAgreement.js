@@ -14,7 +14,7 @@
 //  dane rejestrowe, nie zmieniają się między transakcjami.
 // ============================================================
 
-import { blockPrintInNativeApp } from './platform';
+import { blockPrintInNativeApp, isNativeApp } from './platform';
 import { signatureBlockHtml } from '../signature/signatureData';
 
 const BUYER = {
@@ -194,16 +194,30 @@ export function buildPurchaseAgreementHtml(phone) {
 </html>`;
 }
 
-export function printPurchaseAgreement(phone) {
-  if (blockPrintInNativeApp()) return;
-  const html = buildPurchaseAgreementHtml(phone);
-  const printWindow = window.open('', '_blank', 'width=800,height=1000');
-  if (!printWindow) {
-    alert('Przeglądarka zablokowała otwarcie okna wydruku. Zezwól na wyskakujące okna dla tej strony.');
-    return;
-  }
+// Okno wydruku trzeba otworzyć SYNCHRONICZNIE w obsłudze kliknięcia – po
+// await (np. zapis do bazy) Safari/Chrome blokują window.open jako popup.
+// Dlatego: openPrintWindow() na kliknięciu → zapis → writeAndPrint(okno, html).
+export function openPrintWindow() {
+  if (isNativeApp()) return null;
+  return window.open('', '_blank', 'width=800,height=1000');
+}
+
+export function writeAndPrint(printWindow, html) {
+  if (!printWindow || printWindow.closed) return false;
+  printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
   setTimeout(() => printWindow.print(), 250);
+  return true;
+}
+
+export function printPurchaseAgreement(phone) {
+  if (blockPrintInNativeApp()) return;
+  const printWindow = openPrintWindow();
+  if (!printWindow) {
+    alert('Przeglądarka zablokowała otwarcie okna wydruku. Zezwól na wyskakujące okna dla tej strony.');
+    return;
+  }
+  writeAndPrint(printWindow, buildPurchaseAgreementHtml(phone));
 }

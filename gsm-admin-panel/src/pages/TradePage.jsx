@@ -180,6 +180,7 @@ export default function TradePage() {
           )}
           <button className="tr-import-btn" onClick={() => navigate('/skup/import')}>📋 Importuj z arkusza</button>
           {isAdmin && <B2bLinkPanel />}
+          {isAdmin && <button className="tr-import-btn" onClick={() => navigate('/umowa')}>📝 Umowa skupu</button>}
           <button className="tr-new-btn" onClick={() => navigate('/skup/nowy')}>+ Dodaj telefon</button>
         </div>
       </header>

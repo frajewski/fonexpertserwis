@@ -18,6 +18,7 @@ import BookingsPage from './pages/BookingsPage';
 import TradePage from './pages/TradePage';
 import ConsignedOutPage from './pages/ConsignedOutPage';
 import NewTradePage from './pages/NewTradePage';
+import PurchaseContractPage from './pages/PurchaseContractPage';
 import ImportPhonesPage from './pages/ImportPhonesPage';
 import CalculatorPage from './pages/CalculatorPage';
 import PartsPage from './pages/PartsPage';
@@ -140,6 +141,7 @@ export default function App() {
       <Route path="/skup" element={<AdminOnlyRoute><TradePage /></AdminOnlyRoute>} />
       <Route path="/komisanci" element={<AdminOnlyRoute><ConsignedOutPage /></AdminOnlyRoute>} />
       <Route path="/skup/nowy" element={<AdminOnlyRoute><NewTradePage /></AdminOnlyRoute>} />
+      <Route path="/umowa" element={<AdminOnlyRoute><PurchaseContractPage /></AdminOnlyRoute>} />
       <Route path="/skup/import" element={<AdminOnlyRoute><ImportPhonesPage /></AdminOnlyRoute>} />
       <Route path="/skup/kalkulator" element={<AdminOnlyRoute><CalculatorPage /></AdminOnlyRoute>} />
       <Route path="/magazyn" element={<ProtectedRoute><PartsPage /></ProtectedRoute>} />

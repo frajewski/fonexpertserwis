@@ -15,3 +15,7 @@
 .pc-chip-on { background: var(--accent); color: #fff; font-weight: 600; }
 .pc-check { display: flex; gap: 8px; align-items: center; font-size: 13px; cursor: pointer; }
 .pc-save { margin-top: 16px; width: 100%; }
+.pc-input { width: 100%; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; background: var(--paper); color: var(--ink); }
+.pc-input:focus { border-color: var(--accent); background: var(--surface); outline: none; }
+.pc-grid-2 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 560px) { .pc-grid-2 { grid-template-columns: 1fr; } }
