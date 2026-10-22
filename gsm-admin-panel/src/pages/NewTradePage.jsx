@@ -267,7 +267,9 @@ export default function NewTradePage() {
 
         <div className="nt-card">
           <h2 className="nt-section-title">Typ transakcji i dane sprzedającego</h2>
-          <p className="nt-hint">Potrzebne do wydrukowania umowy kupna-sprzedaży / komisu.</p>
+          <p className="nt-hint">{transactionType === 'consignment'
+            ? 'Potrzebne do wydrukowania umowy komisu.'
+            : 'Umowę kupna od osoby prywatnej sporządzisz w zakładce „📝 Umowa skupu” — tam telefon doda się do skupu automatycznie.'}</p>
 
           <div className="nt-condition-toggle">
             <button
@@ -293,6 +295,8 @@ export default function NewTradePage() {
             </label>
           )}
 
+          {transactionType === 'consignment' && (
+            <>
           <label className="nt-field">
             <span className="nt-label">Imię i nazwisko sprzedającego *</span>
             <input className="nt-input" value={sellerFullName} onChange={(e) => setSellerFullName(e.target.value)} />
@@ -309,6 +313,8 @@ export default function NewTradePage() {
             <span className="nt-label">PESEL *</span>
             <input className="nt-input" inputMode="numeric" maxLength={11} value={sellerPesel} onChange={(e) => setSellerPesel(e.target.value.replace(/\D/g, ''))} />
           </label>
+            </>
+          )}
         </div>
 
         <div className="nt-card">
