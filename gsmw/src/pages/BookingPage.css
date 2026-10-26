@@ -181,3 +181,8 @@
 }
 
 .bk-done-btn:hover { background: #5253E8; }
+
+.bk-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.bk-chip { padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line, #E3E5EA); background: #fff; font-size: 13px; color: var(--ink, #14192B); cursor: pointer; }
+.bk-chip-on { background: var(--accent, #6465FF); border-color: var(--accent, #6465FF); color: #fff; font-weight: 600; }
+.bk-chip-diag { margin-top: 8px; align-self: flex-start; }

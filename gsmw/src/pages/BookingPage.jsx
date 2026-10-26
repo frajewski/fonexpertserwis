@@ -3,21 +3,39 @@ import { useNavigate } from 'react-router-dom';
 import { createBookingRequest } from '../firebase/firestoreApi';
 import './BookingPage.css';
 
+// Najczęstsze usterki – klient zaznacza, co wie; „potrzebna diagnoza”, gdy nie wie.
+// Ta sama lista jest na serwerze (createBookingRequestWeb) jako biała lista.
+export const BOOKING_ISSUES = [
+  'Zbity ekran / wyświetlacz', 'Bateria', 'Gniazdo ładowania', 'Aparat', 'Głośnik / mikrofon',
+  'Zalanie', 'Nie włącza się', 'Tylna szybka / obudowa', 'Oprogramowanie / blokada', 'Inne',
+];
+
 export default function BookingPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', phone: '', company: '', brand: '', model: '', description: '', preferredDate: '',
+    issues: [], needsDiagnosis: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const toggleIssue = (issue) => setForm((f) => ({
+    ...f,
+    needsDiagnosis: false,
+    issues: f.issues.includes(issue) ? f.issues.filter((i) => i !== issue) : [...f.issues, issue],
+  }));
+  const toggleDiagnosis = () => setForm((f) => ({ ...f, needsDiagnosis: !f.needsDiagnosis, issues: [] }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.phone.trim() || !form.brand.trim() || !form.description.trim()) {
-      setError('Wypełnij imię i nazwisko, telefon, marką urządzenia i opis usterki.');
+    if (!form.name.trim() || !form.phone.trim() || !form.brand.trim() || !form.model.trim()) {
+      setError('Wypełnij imię i nazwisko, telefon, markę i model urządzenia.');
+      return;
+    }
+    if (form.issues.length === 0 && !form.needsDiagnosis && !form.description.trim()) {
+      setError('Zaznacz, co jest uszkodzone, albo wybierz „Nie wiem — potrzebna diagnoza”.');
       return;
     }
     setError('');
@@ -40,7 +58,8 @@ export default function BookingPage() {
           <span className="bk-done-icon">✓</span>
           <h1 className="bk-done-title">Zgłoszenie wysłane</h1>
           <p className="bk-done-text">
-            Serwis odezwie się telefonicznie lub SMS-em, żeby potwierdzić termin i przybliżoną wycenę.
+            Serwis potwierdzi zgłoszenie SMS-em: dostaniesz numer rezerwacji, termin i wstępną wycenę.
+            Przy poważniejszych naprawach poprosimy o zadatek BLIK-iem — w tytule wpisz wtedy numer rezerwacji.
           </p>
           <button className="bk-done-btn" onClick={() => navigate('/')}>Wróć do strony głównej</button>
         </div>
@@ -73,15 +92,38 @@ export default function BookingPage() {
 
           <div className="bk-row">
             <Field label="Marka urządzenia *" value={form.brand} onChange={set('brand')} placeholder="np. Apple, Samsung" />
-            <Field label="Model" value={form.model} onChange={set('model')} placeholder="np. iPhone 14" />
+            <Field label="Model *" value={form.model} onChange={set('model')} placeholder="np. iPhone 14" />
+          </div>
+
+          <div className="bk-field">
+            <span className="bk-field-label">Co jest uszkodzone? *</span>
+            <div className="bk-chips">
+              {BOOKING_ISSUES.map((issue) => (
+                <button
+                  key={issue}
+                  type="button"
+                  className={`bk-chip ${form.issues.includes(issue) ? 'bk-chip-on' : ''}`}
+                  onClick={() => toggleIssue(issue)}
+                >
+                  {issue}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className={`bk-chip bk-chip-diag ${form.needsDiagnosis ? 'bk-chip-on' : ''}`}
+              onClick={toggleDiagnosis}
+            >
+              🔍 Nie wiem — potrzebna diagnoza
+            </button>
           </div>
 
           <label className="bk-field">
-            <span className="bk-field-label">Opis usterki *</span>
+            <span className="bk-field-label">Opisz problem{form.issues.length || form.needsDiagnosis ? ' (opcjonalnie)' : ''}</span>
             <textarea
               className="bk-textarea"
               rows={4}
-              placeholder="Co się dzieje z urządzeniem?"
+              placeholder="Np. telefon spadł, ekran pęknięty w rogu, dotyk działa"
               value={form.description}
               onChange={set('description')}
             />

@@ -392,12 +392,26 @@ exports.createBookingRequestWeb = onCall(
       const brand = String(data.brand || "").trim();
       const model = String(data.model || "").trim();
       const description = String(data.description || "").trim();
-      const preferredDate = String(data.preferredDate || "").trim();
+      const preferredDate = String(data.preferredDate || "").trim().slice(0, 20);
+      const ALLOWED_ISSUES = [
+        "Zbity ekran / wyświetlacz", "Bateria", "Gniazdo ładowania", "Aparat", "Głośnik / mikrofon",
+        "Zalanie", "Nie włącza się", "Tylna szybka / obudowa", "Oprogramowanie / blokada", "Inne",
+      ];
+      const issues = Array.isArray(data.issues)
+        ? [...new Set(data.issues.filter((i) => ALLOWED_ISSUES.includes(i)))]
+        : [];
+      const needsDiagnosis = data.needsDiagnosis === true && issues.length === 0;
 
-      if (!name || !phone || !brand || !description) {
+      if (!name || !phone || !brand) {
         throw new HttpsError(
           "invalid-argument",
-          "Wypełnij imię i nazwisko, telefon, markę urządzenia i opis usterki."
+          "Wypełnij imię i nazwisko, telefon i markę urządzenia."
+        );
+      }
+      if (!description && issues.length === 0 && !needsDiagnosis) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Zaznacz, co jest uszkodzone, albo wybierz, że potrzebna jest diagnoza."
         );
       }
 
@@ -408,7 +422,9 @@ exports.createBookingRequestWeb = onCall(
         company,
         brand,
         model,
-        description,
+        description: description.slice(0, 2000),
+        issues,
+        needsDiagnosis,
         preferredDate,
         status: "Oczekuje", // BOOKING_STATUS.PENDING – musi się zgadzać z constants/bookingStatuses.js,
         // inaczej panel admina (BookingsPage.jsx) nie rozpoznaje statusu i nie pokazuje
