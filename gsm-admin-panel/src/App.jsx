@@ -139,7 +139,7 @@ export default function App() {
       <Route path="/klienci" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
       <Route path="/klienci/:id" element={<ProtectedRoute><CustomerCardPage /></ProtectedRoute>} />
       <Route path="/rezerwacje" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
-      <Route path="/kasa" element={<ProtectedRoute><CashReportPage /></ProtectedRoute>} />
+      <Route path="/kasa" element={<AdminOnlyRoute><CashReportPage /></AdminOnlyRoute>} />
       <Route path="/skup" element={<AdminOnlyRoute><TradePage /></AdminOnlyRoute>} />
       <Route path="/komisanci" element={<AdminOnlyRoute><ConsignedOutPage /></AdminOnlyRoute>} />
       <Route path="/skup/nowy" element={<AdminOnlyRoute><NewTradePage /></AdminOnlyRoute>} />
