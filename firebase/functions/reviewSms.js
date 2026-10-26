@@ -19,6 +19,7 @@ const admin = require("firebase-admin");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
+const { FieldValue } = require("firebase-admin/firestore");
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -75,6 +76,19 @@ async function sendViaGateway(user, pass, phone, text) {
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`SMS gateway HTTP ${res.status}: ${body.slice(0, 200)}`);
+  }
+}
+
+// Wpis do historii SMS dokumentu (zlecenie / rezerwacja). Błąd zapisu historii
+// nie może zepsuć wysyłki – SMS już poszedł, więc tylko logujemy problem.
+async function logSms(collection, docId, entry) {
+  if (!docId || typeof docId !== "string" || docId.length > 128) return;
+  try {
+    await db.collection(collection).doc(docId).update({
+      smsLog: FieldValue.arrayUnion({ at: new Date().toISOString(), ...entry }),
+    });
+  } catch (err) {
+    console.warn(`smsLog: nie zapisano historii dla ${collection}/${docId}:`, err.message);
   }
 }
 
@@ -141,7 +155,11 @@ exports.sendReviewRequests = onSchedule(
 
       try {
         await sendViaGateway(SMSGATE_USER.value(), SMSGATE_PASS.value(), phone, text);
-        await doc.ref.update({ reviewRequestSentAt: new Date().toISOString() });
+        const sentAt = new Date().toISOString();
+        await doc.ref.update({
+          reviewRequestSentAt: sentAt,
+          smsLog: FieldValue.arrayUnion({ at: sentAt, kind: "review", text, phone, by: "automat" }),
+        });
         sent++;
       } catch (err) {
         failed++;
@@ -166,7 +184,7 @@ exports.sendSmsToCustomer = onCall(
       throw new HttpsError("permission-denied", "Tylko personel może wysyłać SMS-y.");
     }
 
-    const { phone, text } = request.data || {};
+    const { phone, text, repairId, bookingId, kind } = request.data || {};
     const to = toE164PL(phone);
     const body = String(text || "").trim();
 
@@ -181,6 +199,15 @@ exports.sendSmsToCustomer = onCall(
       console.error("sendSmsToCustomer:", err.message);
       throw new HttpsError("unavailable", "Bramka SMS nie przyjęła wiadomości. Sprawdź, czy telefon z bramką ma internet.");
     }
+
+    const entry = {
+      kind: String(kind || "manual").slice(0, 40),
+      text: body,
+      phone: to,
+      by: request.auth.token.name || request.auth.token.email || "personel",
+    };
+    if (repairId) await logSms("repairs", repairId, entry);
+    if (bookingId) await logSms("bookingRequests", bookingId, entry);
     return { ok: true };
   }
 );

@@ -7,6 +7,8 @@ import './AppLayout.css';
 const NAV_ITEMS = [
   { to: '/pulpit',     label: 'Pulpit',       icon: '⌂', roles: ['admin', 'worker'] },
   { to: '/',          label: 'Zlecenia',     icon: '◆', roles: ['admin', 'worker'] },
+  { to: '/rezerwacje', label: 'Rezerwacje',   icon: '📅', roles: ['admin', 'worker'], badge: 'bookings' },
+  { to: '/kasa',       label: 'Kasa',         icon: '💰', roles: ['admin', 'worker'] },
   { to: '/magazyn',    label: 'Magazyn',      icon: '▤', roles: ['admin', 'worker'] },
   { to: '/skup',       label: 'Skup',         icon: '◈', roles: ['admin'] },
   { to: '/umowa',      label: 'Umowa skupu',  icon: '📝', roles: ['admin'] },
@@ -22,6 +24,8 @@ export default function AppLayout({ children }) {
   const currentUser = useStore((s) => s.currentUser);
   const logout = useStore((s) => s.logout);
   const resendVerification = useStore((s) => s.resendVerification);
+  const pendingBookings = useStore((s) => s.getPendingBookingsCount());
+  const badges = { bookings: pendingBookings };
   const navigate = useNavigate();
 
   const [verifySent, setVerifySent] = useState(false);
@@ -79,6 +83,7 @@ export default function AppLayout({ children }) {
             >
               <span className="sidebar-link-icon">{item.icon}</span>
               {item.label}
+              {item.badge && badges[item.badge] > 0 && <span className="sidebar-badge">{badges[item.badge]}</span>}
             </NavLink>
           ))}
         </nav>

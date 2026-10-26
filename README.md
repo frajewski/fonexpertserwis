@@ -62,7 +62,7 @@ Dwie role w jednym miejscu:
 Zysk dzisiaj, wszystkie alerty w jednym miejscu, lista zadań na dziś/jutro (wspólna dla zespołu), szybkie skróty, podgląd bieżącego miesiąca.
 
 ### 🔧 Zlecenia
-Przyjęcie z edytowalną datą, priorytet, zadatek wpłacony z osobną linią "Do zapłaty" w kosztorysie, kosztorys z auto-wyliczaniem usługi (Łącznie − Części), wykonana usługa i zużyte części z Magazynu (automatyczne odjęcie stanu i doliczenie kosztu, blokada przy zerowym stanie), dokument sprzedaży (Paragon/Faktura), zdjęcia, **druk potwierdzenia przyjęcia z kodem QR** do śledzenia statusu online, **druk potwierdzenia wydania** ze skróconymi warunkami gwarancji, druk naklejki na sprzęt, filtry (marka, model, typ dokumentu, priorytet, zakres dat) zapamiętywane między odświeżeniami strony, historia starsza niż 30 dni doładowywana na żądanie, szablony SMS z linkiem śledzenia (w tym przypomnienie o odbiorze i "części dotarły"), **wysyłka SMS jednym kliknięciem z komputera** przez bramkę SMS (patrz niżej), **wyszukiwanie po numerze telefonu klienta**.
+Przyjęcie z edytowalną datą, priorytet, zadatek wpłacony z osobną linią "Do zapłaty" w kosztorysie, kosztorys z auto-wyliczaniem usługi (Łącznie − Części), wykonana usługa i zużyte części z Magazynu (automatyczne odjęcie stanu i doliczenie kosztu, blokada przy zerowym stanie), dokument sprzedaży (Paragon/Faktura), zdjęcia, **druk potwierdzenia przyjęcia z kodem QR** do śledzenia statusu online, **druk potwierdzenia wydania** ze skróconymi warunkami gwarancji, druk naklejki na sprzęt, filtry (marka, model, typ dokumentu, priorytet, zakres dat) zapamiętywane między odświeżeniami strony, historia starsza niż 30 dni doładowywana na żądanie, historia wysłanych SMS-ów w zleceniu (ręczne, automatyczne i prośby o opinię), szablony SMS z linkiem śledzenia (w tym przypomnienie o odbiorze i "części dotarły"), **wysyłka SMS jednym kliknięciem z komputera** przez bramkę SMS (patrz niżej), **wyszukiwanie po numerze telefonu klienta**.
 
 **Statusy:** Przyjęte → W diagnozie → Zamów części → W naprawie → Oczekuje na części → **Czeka na klienta** (części dotarły, klient powiadomiony — zmiana statusu proponuje wysłanie SMS „części dotarły”, raz na zlecenie) → Gotowe do odbioru → Odebrane / Anulowane.
 
@@ -73,6 +73,12 @@ Dwa tryby: **kupno** i **komis**. Skala stanu Grade A+ do D, nowy/używany. Dane
 
 ### 🤝 U komisantów (`/komisanci`, tylko Admin)
 Własne telefony oddane innym osobom w komis (status `U komisanta`). Komisant zatrzymuje nadwyżkę, a Ty ustalasz kwotę, którą chcesz uzyskać („Cena dla komisanta”, ustawiana też w karcie telefonu). Lista grupowana po komisantach, formularz przekazania z wieloma telefonami, **druk protokołu przekazania**, „💰 Zapłacił” (rejestruje sprzedaż), „↩ Zwrot”, edycja danych komisanta i przenoszenie telefonu między komisantami, alert przy ≥30 dniach. Telefony u komisantów nie trafiają do katalogu B2B.
+
+### 📅 Rezerwacje (`/rezerwacje`)
+Zgłoszenia ze strony klienta („Umów naprawę” w `gsmw`) z licznikiem nowych w menu. Akceptacja/odrzucenie z wiadomością dla klienta i propozycją wysłania jej SMS-em przez bramkę, preferowany termin klienta, „Utwórz zlecenie” — dopasowuje klienta po numerze telefonu albo zakłada nowego i tworzy zlecenie. Historia SMS przy zgłoszeniu.
+
+### 💰 Kasa (`/kasa`)
+Raport dowolnego dnia: zlecenia wydane i telefony sprzedane z podziałem na sposób płatności (gotówka/karta/BLIK/przelew — wybierany przy „Potwierdź wydanie” i „Oznacz jako sprzedany”), zadatki przyjęte tego dnia, wydruk raportu na A4. Dane czytane z bazy dla wybranego dnia (nie tylko z 30-dniowego okna).
 
 ### 📦 Magazyn części zamiennych
 Osobna ewidencja od Skupu, alert przy niskim stanie, blokada dodania części jeśli brak na stanie.

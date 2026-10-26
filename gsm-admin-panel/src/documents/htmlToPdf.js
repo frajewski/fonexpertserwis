@@ -24,6 +24,41 @@ const waitForImages = (doc) => Promise.all(
   }))),
 );
 
+// Podpisy są w dokumentach obrazkami SVG (data:image/svg+xml). Safari (iPad,
+// iPhone) przy rysowaniu SVG na canvas potrafi „skazić” płótno i wtedy
+// toDataURL() rzuca SecurityError → PDF się nie generuje. Rysujemy więc ścieżkę
+// podpisu sami (Path2D) i podmieniamy obrazek na PNG, zanim ruszy html2canvas.
+const SVG_PREFIX = 'data:image/svg+xml';
+async function rasterizeSvgImages(doc) {
+  for (const img of Array.from(doc.images)) {
+    const src = img.getAttribute('src') || '';
+    if (!src.startsWith(SVG_PREFIX)) continue;
+    try {
+      const svgText = decodeURIComponent(src.slice(src.indexOf(',') + 1));
+      const vb = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svgText);
+      const d = /<path d="([^"]+)"/.exec(svgText);
+      if (!vb || !d) continue;
+      const w = Number(vb[1]);
+      const h = Number(vb[2]);
+      const scale = 3;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(w * scale);
+      canvas.height = Math.ceil(h * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 2.4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke(new Path2D(d[1]));
+      img.src = canvas.toDataURL('image/png');
+      if (img.decode) await img.decode().catch(() => {});
+    } catch {
+      // pojedynczy podpis nie może zablokować całego PDF – zostaje jak był
+    }
+  }
+}
+
 /** HTML (pełny dokument) → Blob PDF (application/pdf), A4, wiele stron jeśli trzeba. */
 export async function htmlToPdfBlob(html) {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
@@ -45,6 +80,7 @@ export async function htmlToPdfBlob(html) {
     doc.write(html.replace(/<script[\s\S]*?<\/script>/gi, '')); // bez skryptów (np. auto-print)
     doc.close();
     await waitForImages(doc);
+    await rasterizeSvgImages(doc);
     // Niska ramka → scrollHeight = faktyczna wysokość treści (bez pustej strony na końcu)
     const contentHeight = Math.ceil(doc.documentElement.scrollHeight);
     iframe.style.height = `${contentHeight}px`;

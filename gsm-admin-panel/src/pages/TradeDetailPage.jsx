@@ -19,6 +19,7 @@ import SignatureField from '../signature/SignaturePad';
 import { stampSignature } from '../signature/signatureData';
 import { printConsignmentAgreement, buildConsignmentAgreementHtml } from '../utils/printConsignmentAgreement';
 import { warrantyPeriods, calcWarrantyEndDate } from '../constants/warrantyPeriods';
+import { PAYMENT_METHODS, PAYMENT_ICONS } from '../constants/paymentMethods';
 import './TradeDetailPage.css';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
@@ -39,6 +40,7 @@ export default function TradeDetailPage() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const [savingSignature, setSavingSignature] = useState(false); // podpis sprzedającego/komitenta
   const [selectedSaleWarranty, setSelectedSaleWarranty] = useState(warrantyPeriods[2]);
+  const [salePayment, setSalePayment] = useState('gotówka');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editImei, setEditImei] = useState('');
@@ -101,6 +103,7 @@ export default function TradeDetailPage() {
       soldAt,
       warrantyMonths: selectedSaleWarranty.months,
       warrantyEndDate: calcWarrantyEndDate(soldAt, selectedSaleWarranty.months),
+      paymentMethod: salePayment,
     });
     setSellPriceInput('');
   };
@@ -539,6 +542,21 @@ export default function TradeDetailPage() {
                           onClick={() => setSelectedSaleWarranty(w)}
                         >
                           {w.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="td-warranty-picker">
+                    <span className="td-warranty-picker-label">Płatność:</span>
+                    <div className="td-warranty-options">
+                      {PAYMENT_METHODS.map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          className={`td-warranty-option ${salePayment === m ? 'td-warranty-option-active' : ''}`}
+                          onClick={() => setSalePayment(m)}
+                        >
+                          {PAYMENT_ICONS[m]} {m}
                         </button>
                       ))}
                     </div>

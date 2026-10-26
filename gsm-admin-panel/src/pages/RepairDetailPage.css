@@ -318,3 +318,11 @@
 /* Potwierdzenie wydania – wyróżniony przycisk */
 .rd-btn-pickup { background: var(--good-soft); border-color: var(--good); color: #12843B; }
 .rd-btn-pickup:hover { background: var(--good); border-color: var(--good); color: #fff; }
+
+/* Historia SMS w karcie „Powiadom klienta” */
+.rd-sms-log { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.rd-sms-log-title { font-size: 12px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .03em; margin: 0 0 8px; }
+.rd-sms-log-item { background: var(--paper); border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 6px; }
+.rd-sms-log-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink-soft); flex-wrap: wrap; }
+.rd-sms-log-meta strong { color: var(--ink); font-weight: 600; }
+.rd-sms-log-text { font-size: 12.5px; color: var(--ink); margin-top: 4px; white-space: pre-wrap; }

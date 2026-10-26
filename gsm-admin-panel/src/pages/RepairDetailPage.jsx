@@ -18,9 +18,12 @@ import { canShareText, shareText, safeFileName } from '../documents/shareDocumen
 import { printDeviceLabel } from '../utils/printDeviceLabel';
 import { messageTemplates } from '../utils/messageTemplates';
 import useSettings from '../store/useSettings';
+import { PAYMENT_METHODS, PAYMENT_ICONS } from '../constants/paymentMethods';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase/firebaseConfig';
 import './RepairDetailPage.css';
+
+const SMS_KIND_LABELS = { manual: '✏️ Własna treść', review: '⭐ Prośba o opinię' };
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
 const toDateInputValue = (iso) => iso ? iso.slice(0, 10) : '';
@@ -58,6 +61,7 @@ export default function RepairDetailPage() {
     updateRepair(repair.id, { estimateAccepted: accepted });
   };
 
+  const [deliveryPayment, setDeliveryPayment] = useState('gotówka');
   const [smsState, setSmsState] = useState(''); // '' | 'sending' | 'sent' | 'error'
   const [showWarrantyForm, setShowWarrantyForm] = useState(false);
   const [selectedWarranty, setSelectedWarranty] = useState(warrantyPeriods[2]);
@@ -129,7 +133,7 @@ export default function RepairDetailPage() {
       if (window.confirm(`Wysłać klientowi SMS „${auto.label}” na numer ${customer.phone}?`)) {
         try {
           const body = messageTemplates(repair, customer.name || 'Kliencie').find((t) => t.id === auto.template)?.body;
-          await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: body });
+          await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: body, repairId: repair.id, kind: auto.template });
           await updateRepair(id, { [auto.field]: new Date().toISOString() });
         } catch (e) {
           console.error(e);
@@ -147,6 +151,8 @@ export default function RepairDetailPage() {
       warrantyMonths: selectedWarranty.months,
       warrantyEndDate: calcWarrantyEndDate(issuedAt, selectedWarranty.months),
       issuedAt,
+      paymentMethod: deliveryPayment,
+      paidAtDelivery: Math.max(0, total - (repair.deposit || 0)),
       ...(pickupSignature ? { signatures: { ...(repair.signatures || {}), pickup: stampSignature(pickupSignature, currentUser?.name) } } : {}),
     });
     setPickupSignature(null);
@@ -560,7 +566,7 @@ export default function RepairDetailPage() {
               if (!currentBody.trim() || smsState === 'sending') return;
               setSmsState('sending');
               try {
-                await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: currentBody });
+                await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: currentBody, repairId: repair.id, kind: messageBody ? 'manual' : selectedTemplateId });
                 setSmsState('sent');
               } catch (e) {
                 console.error(e);
@@ -620,6 +626,21 @@ export default function RepairDetailPage() {
                     </button>
                   )}
                 </div>
+
+                {(repair.smsLog || []).length > 0 && (
+                  <div className="rd-sms-log">
+                    <h3 className="rd-sms-log-title">Wysłane SMS-y ({repair.smsLog.length})</h3>
+                    {[...repair.smsLog].sort((a, b) => (b.at || '').localeCompare(a.at || '')).map((m, i) => (
+                      <div key={`${m.at}-${i}`} className="rd-sms-log-item">
+                        <div className="rd-sms-log-meta">
+                          <strong>{SMS_KIND_LABELS[m.kind] || templates.find((t) => t.id === m.kind)?.label || 'SMS'}</strong>
+                          <span>{m.at ? new Date(m.at).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' }) : ''}{m.by ? ` · ${m.by}` : ''}</span>
+                        </div>
+                        <div className="rd-sms-log-text">{m.text}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </details>
             );
           })()}
@@ -897,6 +918,21 @@ export default function RepairDetailPage() {
                     onClick={() => setSelectedWarranty(w)}
                   >
                     {w.label}
+                  </button>
+                ))}
+              </div>
+              <h2 className="rd-section-title" style={{ marginTop: 16 }}>
+                Płatność przy odbiorze — {Math.max(0, total - (repair.deposit || 0))} zł
+              </h2>
+              <div className="rd-warranty-options">
+                {PAYMENT_METHODS.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className={`rd-warranty-option ${deliveryPayment === m ? 'rd-warranty-option-active' : ''}`}
+                    onClick={() => setDeliveryPayment(m)}
+                  >
+                    {PAYMENT_ICONS[m]} {m}
                   </button>
                 ))}
               </div>
