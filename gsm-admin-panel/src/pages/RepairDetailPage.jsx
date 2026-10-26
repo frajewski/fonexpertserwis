@@ -21,6 +21,7 @@ import useSettings from '../store/useSettings';
 import { PAYMENT_METHODS, PAYMENT_ICONS } from '../constants/paymentMethods';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase/firebaseConfig';
+import { statusPillClass } from '../utils/statusPill';
 import './RepairDetailPage.css';
 
 const SMS_KIND_LABELS = { manual: '✏️ Własna treść', review: '⭐ Prośba o opinię' };
@@ -364,7 +365,7 @@ export default function RepairDetailPage() {
                   {repair.brand} {repair.model}
                 </h1>
               </div>
-              <span className={`rd-badge rd-badge-${tone}`}>{statusIcons[repair.status]} {repair.status}</span>
+              <span className={statusPillClass(repair.status)}>{statusIcons[repair.status]} {repair.status}</span>
             </div>
             {repair.imei && <div className="rd-imei">IMEI: {repair.imei}</div>}
             <p className="rd-desc">{repair.description}</p>

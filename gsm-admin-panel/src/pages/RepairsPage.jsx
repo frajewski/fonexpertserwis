@@ -5,6 +5,7 @@ import STATUS, { terminalStatuses } from '../constants/statuses';
 import { DOCUMENT_TYPE, documentTypeList } from '../constants/documentTypes';
 import { getStaleRepairs } from '../utils/calcProfit';
 import { ScanCodeButton } from '../scanner/ScanButtons';
+import { statusPillClass } from '../utils/statusPill';
 import './RepairsPage.css';
 
 const STATUS_TONE = {
@@ -389,7 +390,7 @@ export default function RepairsPage() {
                   </td>
                   <td>{customer?.name || '—'}</td>
                   <td>
-                    <span className={`rp-badge rp-badge-${tone}`}>{r.status}</span>
+                    <span className={statusPillClass(r.status)}>{r.status}</span>
                   </td>
                   <td className="rp-td-mono rp-td-muted">{fmtDate(r.createdAt)}</td>
                   {isAdmin && (

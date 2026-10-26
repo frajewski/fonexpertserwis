@@ -30,7 +30,7 @@ export function applyTheme(pref = getThemePref()) {
   else root.setAttribute('data-theme', pref);
   // Kolor paska przeglądarki / statusu PWA
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', isDark(pref) ? '#0F1320' : '#11172B');
+  if (meta) meta.setAttribute('content', isDark(pref) ? '#0E1117' : '#121A2E');
 }
 
 export function setThemePref(pref) {

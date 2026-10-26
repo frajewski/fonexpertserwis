@@ -5,6 +5,7 @@ import { calcRevenue } from '../utils/calcProfit';
 import { formatDateShort } from '../utils/formatDate';
 import STATUS, { statusIcons } from '../constants/statuses';
 import { failMessage } from '../utils/friendlyError';
+import { statusPillClass } from '../utils/statusPill';
 import './CustomerCardPage.css';
 
 const STATUS_TONE = {
@@ -122,7 +123,7 @@ export default function CustomerCardPage() {
                       <div className="cc-device">{r.brand} {r.model}</div>
                       <div className="cc-desc">{r.description}</div>
                     </td>
-                    <td><span className={`cc-badge cc-badge-${tone}`}>{statusIcons[r.status]} {r.status}</span></td>
+                    <td><span className={statusPillClass(r.status)}>{statusIcons[r.status]} {r.status}</span></td>
                     <td className="cc-td-mono cc-td-muted">{formatDateShort(r.createdAt)}</td>
                   </tr>
                 );
