@@ -29,7 +29,7 @@
 .tr-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .tr-chip { padding: 6px 12px; border-radius: 20px; background: var(--surface); border: 1.5px solid var(--line); font-size: 12.5px; font-weight: 500; color: var(--ink-soft); }
 .tr-chip:hover { border-color: var(--accent); }
-.tr-chip-active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.tr-chip-active { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 
 .tr-toolbar-secondary { flex-direction: row; align-items: center; flex-wrap: wrap; margin-top: -6px; }
 .tr-select-all-btn { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 12.5px; font-weight: 600; background: var(--paper); color: var(--ink); white-space: nowrap; }
@@ -52,7 +52,7 @@
 
 .tr-bulk-bar {
   position: sticky; bottom: calc(16px + var(--safe-bottom)); margin-top: 20px;
-  background: var(--ink); color: #fff; border-radius: var(--radius-md);
+  background: var(--ink); color: var(--on-ink); border-radius: var(--radius-md);
   padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
   gap: 14px; flex-wrap: wrap; box-shadow: var(--shadow-lift);
 }

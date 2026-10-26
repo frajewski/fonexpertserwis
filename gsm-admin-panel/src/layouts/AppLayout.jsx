@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { onPushLogout } from '../push/pushNotifications';
+import { getThemePref, setThemePref, nextTheme, THEME_ICONS, THEME_LABELS } from '../theme/theme';
 import './AppLayout.css';
 
 const NAV_ITEMS = [
@@ -31,6 +32,8 @@ export default function AppLayout({ children }) {
   const [verifySent, setVerifySent] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(getThemePref);
+  const cycleTheme = () => { const t = nextTheme(theme); setThemePref(t); setTheme(t); };
 
   const role = currentUser?.role;
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
@@ -99,6 +102,9 @@ export default function AppLayout({ children }) {
               <div className="sidebar-user-name">{currentUser?.name}</div>
               {role === 'admin' && <div className="sidebar-user-role">Administrator</div>}
             </div>
+          </button>
+          <button className="sidebar-logout" onClick={cycleTheme} title={`${THEME_LABELS[theme]} (kliknij, aby zmienić)`} aria-label={THEME_LABELS[theme]}>
+            {THEME_ICONS[theme]}
           </button>
           <button className="sidebar-logout" onClick={handleLogout} title="Wyloguj się">
             ⏻

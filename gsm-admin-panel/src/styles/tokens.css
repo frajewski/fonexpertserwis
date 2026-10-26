@@ -55,8 +55,94 @@
   --shadow-modal: 0 24px 60px -12px rgba(20, 25, 43, 0.32);
   --shadow-accent: 0 8px 24px -6px rgba(100, 101, 255, 0.35);
 
+  --on-ink:     #FFFFFF;   /* tekst na tle w kolorze --ink (aktywne chipy itp.) */
+
   --sidebar-width: 232px;
   --topbar-height: 56px;
+}
+
+/* ============================================================
+   CIEMNY MOTYW
+   Włączany ręcznie (data-theme="dark" na <html>, przełącznik w stopce
+   sidebara) albo automatycznie wg systemu, gdy wybrano „auto”.
+   Strony używają zmiennych z :root, więc wystarczy podmienić paletę;
+   niżej tylko kilka miejsc z kolorami wpisanymi na sztywno.
+   ============================================================ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink:        #E7E9F0;
+  --ink-soft:   #A3A9BD;
+  --ink-faint:  #6E7489;
+  --paper:      #0F1320;
+  --surface:    #181D2E;
+  --line:       #2A3045;
+  --on-ink:     #0F1320;
+
+  --navy-deep:  #0A0E19;
+
+  --accent:     #7576FF;
+  --accent-soft: #262A52;
+  --accent-deep: #6162F0;
+
+  --good:       #34D27A;
+  --good-soft:  #15301F;
+  --warn:       #FF6B55;
+  --warn-soft:  #3A1E1A;
+  --wait:       #E0B04A;
+  --wait-soft:  #33290F;
+  --info:       #5B9BFF;
+  --info-soft:  #172640;
+
+  --navy-gradient: linear-gradient(180deg, #0D1222 0%, #080B15 100%);
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px -4px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ink:        #E7E9F0;
+    --ink-soft:   #A3A9BD;
+    --ink-faint:  #6E7489;
+    --paper:      #0F1320;
+    --surface:    #181D2E;
+    --line:       #2A3045;
+    --on-ink:     #0F1320;
+    --navy-deep:  #0A0E19;
+    --accent:     #7576FF;
+    --accent-soft: #262A52;
+    --accent-deep: #6162F0;
+    --good:       #34D27A;
+    --good-soft:  #15301F;
+    --warn:       #FF6B55;
+    --warn-soft:  #3A1E1A;
+    --wait:       #E0B04A;
+    --wait-soft:  #33290F;
+    --info:       #5B9BFF;
+    --info-soft:  #172640;
+    --navy-gradient: linear-gradient(180deg, #0D1222 0%, #080B15 100%);
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px -4px rgba(0, 0, 0, 0.45);
+    --shadow-lift: 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+    --shadow-modal: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Kolory wpisane na sztywno w stronach – odpowiedniki dla ciemnego tła.
+   Dwa selektory: ręczny ciemny motyw i „auto” przy ciemnym systemie. */
+:root[data-theme="dark"] .rp-row-priority { background: #2A1C12; }
+:root[data-theme="dark"] .rp-row-priority:hover { background: #33210F; }
+:root[data-theme="dark"] .pt-row-low { background: #2E1719; }
+:root[data-theme="dark"] .rd-priority-toggle-active { background: #2A1C12; }
+:root[data-theme="dark"] .se-error { background: #3A1E1A; color: #FF8A78; }
+:root[data-theme="dark"] .rd-btn-pickup { color: var(--good); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .rp-row-priority { background: #2A1C12; }
+  :root:not([data-theme="light"]) .rp-row-priority:hover { background: #33210F; }
+  :root:not([data-theme="light"]) .pt-row-low { background: #2E1719; }
+  :root:not([data-theme="light"]) .rd-priority-toggle-active { background: #2A1C12; }
+  :root:not([data-theme="light"]) .se-error { background: #3A1E1A; color: #FF8A78; }
+  :root:not([data-theme="light"]) .rd-btn-pickup { color: var(--good); }
 }
 
 * { box-sizing: border-box; }

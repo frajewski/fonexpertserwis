@@ -3,12 +3,14 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './styles/tokens.css';
+import { applyTheme } from './theme/theme';
 import { registerServiceWorker } from './registerServiceWorker';
 import NetworkProvider from './network/NetworkProvider';
 import PushProvider from './push/PushProvider';
 import { initPushNotifications } from './push/pushNotifications';
 import NativeShell from './native/NativeShell';
 
+applyTheme(); // motyw przed pierwszym renderem – bez mignięcia jasnego ekranu
 registerServiceWorker();
 // Listenery push od razu przy starcie – żeby złapać kliknięcie powiadomienia,
 // które uruchomiło zamkniętą aplikację (w PWA nic nie robi)

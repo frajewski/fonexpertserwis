@@ -108,7 +108,7 @@
 }
 
 .rp-chip:hover { border-color: var(--accent); }
-.rp-chip-active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.rp-chip-active { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 
 .rp-table-wrap {
   background: var(--surface);

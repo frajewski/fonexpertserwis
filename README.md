@@ -92,6 +92,9 @@ Okresy (dziś/miesiąc/rok) z łącznym zyskiem (naprawy + skup, po kosztach), p
 ### 👤 Klienci
 Karta z historią zleceń, edycja danych kontaktowych.
 
+### 🌙 Ciemny motyw
+Przełącznik w stopce menu (🌓 jak w systemie → ☀️ jasny → 🌙 ciemny), zapamiętywany na urządzeniu (`src/theme/theme.js`, paleta w `src/styles/tokens.css`).
+
 ### 🔐 Moje konto
 Zmiana własnego hasła, weryfikacja email, reset hasła przez link.
 
