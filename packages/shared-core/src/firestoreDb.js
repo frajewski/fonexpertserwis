@@ -494,6 +494,12 @@ export function createFirestoreDb(db) {
     return getBookingById(id);
   };
 
+  // Usuwanie zgłoszenia – reguły Firestore pozwalają tylko adminowi
+  const deleteBookingRequest = async (id) => {
+    await deleteDoc(doc(db, 'bookingRequests', id));
+    return true;
+  };
+
   const subscribeToBookings = (currentUser, callback) => {
     if (!currentUser) {
       callback([]);
@@ -525,6 +531,6 @@ export function createFirestoreDb(db) {
     // zadania
     getTasks, addTask, updateTask, toggleTaskDone, deleteTask, subscribeToTasks,
     // bookings
-    getBookingById, getBookingsByCustomer, addBookingRequest, updateBookingRequest, subscribeToBookings,
+    getBookingById, getBookingsByCustomer, addBookingRequest, updateBookingRequest, deleteBookingRequest, subscribeToBookings,
   };
 }

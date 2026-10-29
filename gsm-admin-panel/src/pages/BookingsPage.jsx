@@ -60,16 +60,9 @@ function acceptSmsText(b, { number, note, price, deposit }) {
   ].filter(Boolean).join(' ');
 }
 
-// SMS do klienta przez bramkę (z potwierdzeniem); zapisuje się w historii zgłoszenia
-async function offerSms(booking, text) {
-  const phone = booking.customerPhone;
-  if (!phone) { alert('Zgłoszenie nie ma numeru telefonu – SMS nie zostanie wysłany.'); return; }
-  if (!window.confirm(`Wysłać klientowi SMS na numer ${phone}?\n\n„${text}”`)) return;
-  try {
-    await httpsCallable(functions, 'sendSmsToCustomer')({ phone, text, bookingId: booking.id, kind: 'booking' });
-  } catch (err) {
-    alert(err?.message || 'Nie udało się wysłać SMS.');
-  }
+// Wysyłka przez bramkę; wpis trafia do historii SMS zgłoszenia
+async function sendBookingSms(booking, text) {
+  await httpsCallable(functions, 'sendSmsToCustomer')({ phone: booking.customerPhone, text, bookingId: booking.id, kind: 'booking' });
 }
 
 function Detail({ label, children }) {
@@ -85,6 +78,8 @@ export default function BookingsPage() {
   const navigate = useNavigate();
   const bookings = useStore((s) => s.getVisibleBookings());
   const updateBooking = useStore((s) => s.updateBooking);
+  const deleteBooking = useStore((s) => s.deleteBooking);
+  const isAdmin = useStore((s) => s.currentUser?.role === 'admin');
   const getUserById = useStore((s) => s.getUserById);
   const customers = useStore((s) => s.getCustomers());
   const addWalkInCustomer = useStore((s) => s.addWalkInCustomer);
@@ -94,6 +89,27 @@ export default function BookingsPage() {
   const [showAll, setShowAll] = useState(false);
   const [drafts, setDrafts] = useState({});
   const [busyId, setBusyId] = useState(null);
+  // Okienko edycji SMS przed wysłaniem: { booking, text, resolve, sending }
+  const [smsDialog, setSmsDialog] = useState(null);
+
+  // Pokazuje treść do edycji; zwraca obietnicę, która kończy się po wysłaniu albo „Nie wysyłaj”
+  const offerSms = (booking, text) => {
+    if (!booking.customerPhone) { alert('Zgłoszenie nie ma numeru telefonu – SMS nie zostanie wysłany.'); return Promise.resolve(); }
+    return new Promise((resolve) => setSmsDialog({ booking, text, resolve, sending: false }));
+  };
+  const closeSmsDialog = () => { smsDialog?.resolve(); setSmsDialog(null); };
+  const confirmSmsDialog = async () => {
+    const text = smsDialog.text.trim();
+    if (!text) { alert('Treść SMS jest pusta.'); return; }
+    setSmsDialog((d) => ({ ...d, sending: true }));
+    try {
+      await sendBookingSms(smsDialog.booking, text);
+      closeSmsDialog();
+    } catch (err) {
+      alert(err?.message || 'Nie udało się wysłać SMS.');
+      setSmsDialog((d) => (d ? { ...d, sending: false } : d));
+    }
+  };
 
   const draft = (id) => ({ note: '', price: '', depositRequired: false, deposit: '', ...(drafts[id] || {}) });
   const setDraft = (id, k, v) => setDrafts((p) => ({ ...p, [id]: { ...draft(id), ...(p[id] || {}), [k]: v } }));
@@ -144,6 +160,13 @@ export default function BookingsPage() {
     await offerSms(b, acceptSmsText(b, {
       number: b.bookingNumber, note: b.adminNote, price: b.estimatedPrice, deposit: b.depositPaidAt ? 0 : b.depositAmount,
     }));
+  })();
+
+  const handleDelete = (b) => withBusy(b.id, async () => {
+    const label = [b.bookingNumber, deviceName(b), b.customerName].filter(Boolean).join(' · ');
+    if (!window.confirm(`Usunąć zgłoszenie „${label}”? Tego nie da się cofnąć.`)) return;
+    await deleteBooking(b.id);
+    setOpenId(null);
   })();
 
   // Zgłoszenie ze strony nie ma konta klienta – szukamy klienta po numerze
@@ -309,6 +332,12 @@ export default function BookingsPage() {
                     </div>
                   )}
 
+                  {isAdmin && (
+                    <div className="bk-actions-row bk-delete-row">
+                      <button className="bk-btn-delete" disabled={busy} onClick={() => handleDelete(b)}>🗑 Usuń zgłoszenie</button>
+                    </div>
+                  )}
+
                   {(b.smsLog || []).length > 0 && (
                     <div className="bk-sms-log">
                       {[...b.smsLog].sort((x, y) => (y.at || '').localeCompare(x.at || '')).map((m, i) => (
@@ -323,6 +352,29 @@ export default function BookingsPage() {
             </div>
           );
         })}
+
+        {smsDialog && (
+          <div className="bk-modal-backdrop" role="presentation" onClick={() => !smsDialog.sending && closeSmsDialog()}>
+            <div className="bk-modal" role="dialog" aria-modal="true" aria-label="SMS do klienta" onClick={(e) => e.stopPropagation()}>
+              <h2 className="bk-modal-title">SMS do klienta</h2>
+              <p className="bk-modal-sub">Na numer {smsDialog.booking.customerPhone} · możesz poprawić treść przed wysłaniem</p>
+              <textarea
+                className="bk-note bk-modal-text"
+                rows={6}
+                value={smsDialog.text}
+                onChange={(e) => setSmsDialog((d) => ({ ...d, text: e.target.value }))}
+                autoFocus
+              />
+              <div className="bk-modal-count">{smsDialog.text.length} znaków</div>
+              <div className="bk-actions-row">
+                <button className="bk-btn-ghost" disabled={smsDialog.sending} onClick={closeSmsDialog}>Nie wysyłaj</button>
+                <button className="bk-btn-primary" disabled={smsDialog.sending} onClick={confirmSmsDialog}>
+                  {smsDialog.sending ? 'Wysyłam…' : '📲 Wyślij SMS'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {visible.length === 0 && (
           <div className="bk-empty">{showAll ? 'Brak zgłoszeń rezerwacji' : 'Brak aktywnych rezerwacji'}</div>

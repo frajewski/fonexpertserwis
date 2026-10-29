@@ -58,6 +58,7 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
     subscribeToTasks,
     addBookingRequest: dbAddBooking,
     updateBookingRequest: dbUpdateBooking,
+    deleteBookingRequest: dbDeleteBooking,
     subscribeToBookings,
     getRepairsHistoryPage,
   } = firestoreDb;
@@ -303,6 +304,7 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
 
     addBooking: async (data) => dbAddBooking(data),
     updateBooking: async (id, changes) => dbUpdateBooking(id, changes),
+    deleteBooking: async (id) => dbDeleteBooking(id),
 
     convertBookingToRepair: async (bookingId) => {
       const booking = get().bookings.find((b) => b.id === bookingId);
