@@ -43,7 +43,7 @@ export default function LookupPage() {
       <header className="lk-header">
         <div className="lk-brand">
           <span className="lk-brand-mark">◈</span>
-          GSM Serwis
+          Fonexpert
         </div>
       </header>
 

@@ -186,3 +186,12 @@
 .bk-chip { padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line, #E3E5EA); background: #fff; font-size: 13px; color: var(--ink, #14192B); cursor: pointer; }
 .bk-chip-on { background: var(--accent, #6465FF); border-color: var(--accent, #6465FF); color: #fff; font-weight: 600; }
 .bk-chip-diag { margin-top: 8px; align-self: flex-start; }
+
+.bk-terms { background: var(--accent-soft, #EDEDFF); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--ink, #14192B); }
+.bk-terms-title { font-size: 14px; margin: 0 0 6px; }
+.bk-terms ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; line-height: 1.45; }
+.bk-rodo { font-size: 12px; color: var(--ink-soft, #5B6178); line-height: 1.5; }
+.bk-rodo summary { cursor: pointer; font-weight: 600; color: var(--ink, #14192B); padding: 4px 0; }
+.bk-rodo p { margin: 6px 0; }
+.bk-accept { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink, #14192B); line-height: 1.45; cursor: pointer; }
+.bk-accept input { margin-top: 3px; width: 18px; height: 18px; flex-shrink: 0; }

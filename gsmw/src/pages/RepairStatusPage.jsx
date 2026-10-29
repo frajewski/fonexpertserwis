@@ -154,7 +154,7 @@ export default function RepairStatusPage() {
         <button className="rs-back" onClick={() => navigate('/')}>
           ← Wyszukaj inne zlecenie
         </button>
-        <span className="rs-brand">◈ GSM Serwis</span>
+        <span className="rs-brand">◈ Fonexpert</span>
       </header>
 
       <main className="rs-main">

@@ -14,7 +14,7 @@ export default function BookingPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', phone: '', company: '', brand: '', model: '', description: '', preferredDate: '',
-    issues: [], needsDiagnosis: false,
+    issues: [], needsDiagnosis: false, acceptTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -32,6 +32,10 @@ export default function BookingPage() {
     e.preventDefault();
     if (!form.name.trim() || !form.phone.trim() || !form.brand.trim() || !form.model.trim()) {
       setError('Wypełnij imię i nazwisko, telefon, markę i model urządzenia.');
+      return;
+    }
+    if (!form.acceptTerms) {
+      setError('Zaakceptuj zasady rezerwacji i zadatku.');
       return;
     }
     if (form.issues.length === 0 && !form.needsDiagnosis && !form.description.trim()) {
@@ -60,6 +64,7 @@ export default function BookingPage() {
           <p className="bk-done-text">
             Serwis potwierdzi zgłoszenie SMS-em: dostaniesz numer rezerwacji, termin i wstępną wycenę.
             Przy poważniejszych naprawach poprosimy o zadatek BLIK-iem — w tytule wpisz wtedy numer rezerwacji.
+            Zadatek przepada w razie rezygnacji lub nieprzybycia w umówionym terminie.
           </p>
           <button className="bk-done-btn" onClick={() => navigate('/')}>Wróć do strony głównej</button>
         </div>
@@ -71,7 +76,7 @@ export default function BookingPage() {
     <div className="bk-page">
       <header className="bk-header">
         <button className="bk-back" onClick={() => navigate(-1)}>← Wróć</button>
-        <span className="bk-brand">◈ GSM Serwis</span>
+        <span className="bk-brand">◈ Fonexpert</span>
       </header>
 
       <main className="bk-main">
@@ -135,6 +140,46 @@ export default function BookingPage() {
             onChange={set('preferredDate')}
             type="date"
           />
+
+          <div className="bk-terms">
+            <h2 className="bk-terms-title">Zasady rezerwacji i zadatku</h2>
+            <ul>
+              <li>Po przejrzeniu zgłoszenia serwis wyśle SMS z numerem rezerwacji, terminem i wstępną wyceną.</li>
+              <li>Przy poważniejszych naprawach, zwłaszcza wymagających zamówienia części, serwis może poprosić o <strong>zadatek</strong> BLIK-iem na numer telefonu (w tytule numer rezerwacji). Rezerwacja jest potwierdzona po wpłacie.</li>
+              <li>Zadatek zaliczamy na poczet ceny naprawy.</li>
+              <li><strong>Jeśli zrezygnujesz z naprawy albo nie zgłosisz się w umówionym terminie, zadatek przepada</strong> (art. 394 Kodeksu cywilnego). Jeśli naprawy nie wykonamy z naszej winy, zwracamy zadatek w podwójnej wysokości.</li>
+            </ul>
+          </div>
+
+          <details className="bk-rodo">
+            <summary>Informacja o przetwarzaniu danych osobowych (RODO)</summary>
+            <p>
+              Administratorem Twoich danych jest Fonexpert Filip Rajewski, Bogusławice 29A, 09-100 Płońsk,
+              NIP 5671935602, tel. 739 696 665. Dane z formularza (imię i nazwisko, telefon, nazwa firmy, dane urządzenia
+              i opis usterki) przetwarzamy, aby obsłużyć zgłoszenie, skontaktować się z Tobą (telefon, SMS) i wykonać
+              naprawę — na podstawie art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy i jej wykonanie), a po
+              jej wykonaniu także w celu rozliczeń podatkowych (lit. c) i ewentualnych roszczeń (lit. f).
+            </p>
+            <p>
+              Dane zgłoszenia, które nie zakończyło się naprawą, przechowujemy do 12 miesięcy. Dane związane z wykonaną
+              naprawą — przez okres wymagany przepisami podatkowymi i do przedawnienia roszczeń. Odbiorcami danych mogą
+              być dostawcy usług informatycznych, z których korzystamy (hosting i baza danych Google Firebase, wysyłka SMS),
+              oraz biuro rachunkowe; dane mogą być przetwarzane poza EOG na podstawie standardowych klauzul umownych.
+            </p>
+            <p>
+              Masz prawo dostępu do danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania, sprzeciwu
+              oraz skargi do Prezesa UODO. Podanie danych jest dobrowolne, ale bez nich nie obsłużymy zgłoszenia.
+            </p>
+          </details>
+
+          <label className="bk-accept">
+            <input
+              type="checkbox"
+              checked={form.acceptTerms}
+              onChange={(e) => setForm((f) => ({ ...f, acceptTerms: e.target.checked }))}
+            />
+            <span>Akceptuję zasady rezerwacji i zadatku oraz zapoznałem/am się z informacją o przetwarzaniu danych. *</span>
+          </label>
 
           {error && <div className="bk-error">{error}</div>}
 

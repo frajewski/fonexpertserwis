@@ -55,7 +55,7 @@ function acceptSmsText(b, { number, note, price, deposit }) {
     `Dzień dobry! Rezerwacja ${number} (${deviceName(b)}) przyjęta.`,
     note,
     price ? `Wstępna cena: ${price} zł.` : '',
-    deposit ? `Prosimy o zadatek ${deposit} zł BLIK-iem na nr ${SHOP.blikPhone}, w tytule: ${number}.` : '',
+    deposit ? `Prosimy o zadatek ${deposit} zł BLIK-iem na nr ${SHOP.blikPhone}, w tytule: ${number}. W razie rezygnacji lub nieprzybycia zadatek przepada.` : '',
     SHOP.name,
   ].filter(Boolean).join(' ');
 }

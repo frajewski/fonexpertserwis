@@ -408,6 +408,9 @@ exports.createBookingRequestWeb = onCall(
           "Wypełnij imię i nazwisko, telefon i markę urządzenia."
         );
       }
+      if (data.acceptTerms !== true) {
+        throw new HttpsError("invalid-argument", "Zaakceptuj zasady rezerwacji i zadatku.");
+      }
       if (!description && issues.length === 0 && !needsDiagnosis) {
         throw new HttpsError(
           "invalid-argument",
@@ -425,6 +428,7 @@ exports.createBookingRequestWeb = onCall(
         description: description.slice(0, 2000),
         issues,
         needsDiagnosis,
+        termsAcceptedAt: new Date().toISOString(),
         preferredDate,
         status: "Oczekuje", // BOOKING_STATUS.PENDING – musi się zgadzać z constants/bookingStatuses.js,
         // inaczej panel admina (BookingsPage.jsx) nie rozpoznaje statusu i nie pokazuje
