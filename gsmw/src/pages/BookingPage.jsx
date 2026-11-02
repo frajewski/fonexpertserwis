@@ -64,7 +64,7 @@ export default function BookingPage() {
           <p className="bk-done-text">
             Serwis potwierdzi zgłoszenie SMS-em: dostaniesz numer rezerwacji, termin i wstępną wycenę.
             Przy poważniejszych naprawach poprosimy o zadatek BLIK-iem — w tytule wpisz wtedy numer rezerwacji.
-            Zadatek przepada w razie rezygnacji lub nieprzybycia w umówionym terminie.
+            Zadatek przepada w razie rezygnacji lub nieprzybycia w umówionym terminie bez wcześniejszego powiadomienia.
           </p>
           <button className="bk-done-btn" onClick={() => navigate('/')}>Wróć do strony głównej</button>
         </div>
@@ -147,7 +147,7 @@ export default function BookingPage() {
               <li>Po przejrzeniu zgłoszenia serwis wyśle SMS z numerem rezerwacji, terminem i wstępną wyceną.</li>
               <li>Przy poważniejszych naprawach, zwłaszcza wymagających zamówienia części, serwis może poprosić o <strong>zadatek</strong> BLIK-iem na numer telefonu (w tytule numer rezerwacji). Rezerwacja jest potwierdzona po wpłacie.</li>
               <li>Zadatek zaliczamy na poczet ceny naprawy.</li>
-              <li><strong>Jeśli zrezygnujesz z naprawy albo nie zgłosisz się w umówionym terminie, zadatek przepada</strong> (art. 394 Kodeksu cywilnego). Jeśli naprawy nie wykonamy z naszej winy, zwracamy zadatek w podwójnej wysokości.</li>
+              <li><strong>Jeśli zrezygnujesz z naprawy albo nie zgłosisz się w umówionym terminie bez wcześniejszego powiadomienia serwisu, zadatek przepada</strong> (art. 394 Kodeksu cywilnego). Jeśli naprawy nie wykonamy z naszej winy, zwracamy zadatek w podwójnej wysokości.</li>
             </ul>
           </div>
 

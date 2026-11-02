@@ -22,6 +22,8 @@ import { PAYMENT_METHODS, PAYMENT_ICONS } from '../constants/paymentMethods';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase/firebaseConfig';
 import { statusPillClass } from '../utils/statusPill';
+import AssignCustomer from '../components/AssignCustomer';
+import '../components/AssignCustomer.css';
 import './RepairDetailPage.css';
 
 const SMS_KIND_LABELS = { manual: '✏️ Własna treść', review: '⭐ Prośba o opinię' };
@@ -549,6 +551,9 @@ export default function RepairDetailPage() {
                 </button>
               )}
             </div>
+            {!customer && isStaff && (
+              <AssignCustomer repair={repair} onAssign={(customerId) => updateRepair(id, { customerId })} />
+            )}
           </div>
 
           {isStaff && customer && (customer.phone || customer.email) && (() => {

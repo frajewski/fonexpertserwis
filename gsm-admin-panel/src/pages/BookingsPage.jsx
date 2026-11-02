@@ -55,7 +55,7 @@ function acceptSmsText(b, { number, note, price, deposit }) {
     `Dzień dobry! Rezerwacja ${number} (${deviceName(b)}) przyjęta.`,
     note,
     price ? `Wstępna cena: ${price} zł.` : '',
-    deposit ? `Prosimy o zadatek ${deposit} zł BLIK-iem na nr ${SHOP.blikPhone}, w tytule: ${number}. W razie rezygnacji lub nieprzybycia zadatek przepada.` : '',
+    deposit ? `Prosimy o zadatek ${deposit} zł BLIK-iem na nr ${SHOP.blikPhone}, w tytule: ${number}. W razie rezygnacji lub nieprzybycia bez wcześniejszego powiadomienia zadatek przepada.` : '',
     SHOP.name,
   ].filter(Boolean).join(' ');
 }
@@ -185,6 +185,9 @@ export default function BookingsPage() {
     const issueText = b.needsDiagnosis ? 'Diagnoza' : (b.issues || []).join(', ');
     const repair = await addRepair({
       customerId,
+      customerName: b.customerName || '',
+      customerPhone: b.customerPhone || '',
+      bookingId: b.id,
       brand: b.brand,
       model: b.model || '',
       imei: '',
