@@ -66,6 +66,14 @@ function repairToPublicData(doc) {
     estimateAccepted: data.estimateAccepted ?? null,
     warrantyMonths: Number(data.warrantyMonths || 0),
     warrantyEndDate: data.warrantyEndDate || null,
+    // Proponowany termin wizyty/naprawy – tylko to, co klient ma zobaczyć
+    proposedSlot: data.proposedSlot && data.proposedSlot.at
+      ? {
+          at: data.proposedSlot.at,
+          status: data.proposedSlot.status || "pending",
+          respondedAt: data.proposedSlot.respondedAt || null,
+        }
+      : null,
   };
 }
 
@@ -98,7 +106,7 @@ async function assertPhoneMatchesRepair(repair, inputPhone) {
  * śledzenia (klient klika w link z SMS-a), albo po repairId + telefonie
  * (klient wyszukał zlecenie ręcznie).
  */
-async function resolveRepairForDecision({ repairId, phone, token }) {
+async function resolveRepairForDecision({ repairId, phone, token, checkEstimate = true }) {
   if (token) {
     const cleanToken = String(token).trim();
     const snap = await db
@@ -119,7 +127,7 @@ async function resolveRepairForDecision({ repairId, phone, token }) {
 
     const data = doc.data() || {};
 
-    if (data.estimateAccepted !== null && data.estimateAccepted !== undefined) {
+    if (checkEstimate && data.estimateAccepted !== null && data.estimateAccepted !== undefined) {
       throw new HttpsError("failed-precondition", "Decyzja o kosztorysie została już zapisana.");
     }
 
@@ -296,6 +304,51 @@ exports.lookupRepairsByPhone = onCall(
 /**
  * Akceptacja kosztorysu z panelu webowego.
  */
+/**
+ * Klient odpowiada na proponowany termin (link śledzenia albo nr zlecenia + telefon).
+ * data: { repairId?, phone?, token?, accept: boolean, note?: string }
+ */
+exports.respondToSlotWeb = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    try {
+      const { repairId, phone, token, accept, note } = request.data || {};
+      if (!request.auth) {
+        throw new HttpsError("unauthenticated", "Brak sesji użytkownika.");
+      }
+      if (typeof accept !== "boolean") {
+        throw new HttpsError("invalid-argument", "Brak odpowiedzi na termin.");
+      }
+
+      const repairRef = await resolveRepairForDecision({ repairId, phone, token, checkEstimate: false });
+      const snap = await repairRef.get();
+      const slot = (snap.data() || {}).proposedSlot;
+      if (!slot || !slot.at) {
+        throw new HttpsError("failed-precondition", "Brak proponowanego terminu.");
+      }
+      if (slot.status && slot.status !== "pending") {
+        throw new HttpsError("failed-precondition", "Odpowiedź na ten termin została już zapisana.");
+      }
+
+      const now = new Date().toISOString();
+      await repairRef.update({
+        "proposedSlot.status": accept ? "accepted" : "declined",
+        "proposedSlot.respondedAt": now,
+        "proposedSlot.customerNote": String(note || "").trim().slice(0, 300),
+        history: FieldValue.arrayUnion({
+          date: now,
+          status: accept ? "Klient potwierdził proponowany termin" : "Klient prosi o inny termin",
+        }),
+      });
+      return { ok: true, status: accept ? "accepted" : "declined" };
+    } catch (err) {
+      console.error("respondToSlotWeb error:", err);
+      if (err instanceof HttpsError) throw err;
+      throw new HttpsError("internal", err.message || "Błąd serwera.");
+    }
+  }
+);
+
 exports.acceptEstimateWeb = onCall(
   {
     region: "us-central1",

@@ -27,7 +27,9 @@ import AssignCustomer from '../components/AssignCustomer';
 import '../components/AssignCustomer.css';
 import './RepairDetailPage.css';
 
-const SMS_KIND_LABELS = { manual: '✏️ Własna treść', review: '⭐ Prośba o opinię' };
+const SMS_KIND_LABELS = { manual: '✏️ Własna treść', review: '⭐ Prośba o opinię', slot: '📅 Propozycja terminu' };
+const fmtSlot = (iso) => (iso ? new Date(iso).toLocaleString('pl-PL', { weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) : '');
+const SLOT_STATUS = { pending: '⏳ czeka na klienta', accepted: '✅ potwierdzony', declined: '❌ klient prosi o inny termin' };
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
 const toDateInputValue = (iso) => iso ? iso.slice(0, 10) : '';
@@ -66,7 +68,9 @@ export default function RepairDetailPage() {
   };
 
   const [deliveryPayment, setDeliveryPayment] = useState('gotówka');
-  const [smsState, setSmsState] = useState(''); // '' | 'sending' | 'sent' | 'error'
+  const [smsState, setSmsState] = useState('');
+  const [slotInput, setSlotInput] = useState('');
+  const [smsKind, setSmsKind] = useState(''); // rodzaj SMS do historii, gdy treść wstawił panel // '' | 'sending' | 'sent' | 'error'
   const [showWarrantyForm, setShowWarrantyForm] = useState(false);
   const [selectedWarranty, setSelectedWarranty] = useState(warrantyPeriods[2]);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -372,8 +376,11 @@ export default function RepairDetailPage() {
             </div>
             {repair.imei && <div className="rd-imei">IMEI: {repair.imei}</div>}
             <p className="rd-desc">{repair.description}</p>
-            {(repair.documentType || repair.customerNip || repair.screenLock) && (
+            {(repair.documentType || repair.customerNip || repair.screenLock || repair.proposedSlot) && (
               <div className="rd-chips">
+                {repair.proposedSlot && (
+                  <span className="rd-chip">📅 {fmtSlot(repair.proposedSlot.at)} · {SLOT_STATUS[repair.proposedSlot.status] || ''}</span>
+                )}
                 {repair.documentType && <span className="rd-chip">🧾 {repair.documentType}</span>}
                 {repair.customerNip && <span className="rd-chip">NIP {repair.customerNip}</span>}
                 {repair.screenLock && <span className="rd-chip">🔒 {repair.screenLock}</span>}
@@ -571,8 +578,8 @@ export default function RepairDetailPage() {
               if (!currentBody.trim() || smsState === 'sending') return;
               setSmsState('sending');
               try {
-                await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: currentBody, repairId: repair.id, kind: messageBody ? 'manual' : selectedTemplateId });
-                setSmsState('sent');
+                await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text: currentBody, repairId: repair.id, kind: smsKind || (messageBody ? 'manual' : selectedTemplateId) });
+                setSmsState('sent'); setSmsKind('');
               } catch (e) {
                 console.error(e);
                 alert(e?.message || 'Nie udało się wysłać SMS.');
@@ -584,10 +591,49 @@ export default function RepairDetailPage() {
             return (
               <details className="rd-card rd-fold">
                 <summary className="rd-section-title">Powiadom klienta</summary>
+                {!isClosed && (
+                  <div className="rd-slot">
+                    <div className="rd-slot-row">
+                      <label className="rd-slot-label" htmlFor="rd-slot-input">📅 Zaproponuj termin</label>
+                      <input
+                        id="rd-slot-input"
+                        type="datetime-local"
+                        className="rd-cost-edit-input rd-slot-input"
+                        value={slotInput}
+                        onChange={(e) => setSlotInput(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="rd-btn-ghost"
+                        disabled={!slotInput}
+                        onClick={async () => {
+                          const at = new Date(slotInput);
+                          if (Number.isNaN(at.getTime())) return;
+                          await updateRepair(id, {
+                            proposedSlot: { at: at.toISOString(), status: 'pending', proposedAt: new Date().toISOString(), by: currentUser?.name || '' },
+                          });
+                          const link = repair.trackingToken ? ` Potwierdź albo poproś o inny termin: https://gsm-serwis-klient.web.app/?token=${repair.trackingToken}` : '';
+                          setMessageBody(`Dzień dobry ${customer.name || ''}! Proponujemy termin naprawy ${repair.brand} ${repair.model}: ${fmtSlot(at.toISOString())}.${link} Fonexpert`.replace('Dzień dobry !', 'Dzień dobry!'));
+                          setSmsKind('slot');
+                          setSlotInput('');
+                        }}
+                      >
+                        Zaproponuj
+                      </button>
+                    </div>
+                    {repair.proposedSlot && (
+                      <p className="rd-slot-status">
+                        Termin {fmtSlot(repair.proposedSlot.at)}: <strong>{SLOT_STATUS[repair.proposedSlot.status] || '—'}</strong>
+                        {repair.proposedSlot.customerNote ? ` — „${repair.proposedSlot.customerNote}”` : ''}
+                      </p>
+                    )}
+                    {smsKind === 'slot' && <p className="rd-slot-hint">Treść SMS z terminem jest niżej — popraw ją, jeśli trzeba, i kliknij „📲 Wyślij SMS”.</p>}
+                  </div>
+                )}
                 <select
                   className="rd-notify-select"
                   value={selectedTemplateId}
-                  onChange={(e) => { setSelectedTemplateId(e.target.value); setMessageBody(''); }}
+                  onChange={(e) => { setSelectedTemplateId(e.target.value); setMessageBody(''); setSmsKind(''); }}
                 >
                   {templates.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                 </select>

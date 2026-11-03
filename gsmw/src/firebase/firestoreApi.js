@@ -11,6 +11,7 @@ const lookupRepairsByPhoneFn = httpsCallable(functions, 'lookupRepairsByPhone');
 const acceptEstimateWebFn = httpsCallable(functions, 'acceptEstimateWeb');
 const rejectEstimateWebFn = httpsCallable(functions, 'rejectEstimateWeb');
 const createBookingRequestWebFn = httpsCallable(functions, 'createBookingRequestWeb');
+const respondToSlotWebFn = httpsCallable(functions, 'respondToSlotWeb');
 
 export const lookupRepairByToken = async (token) => {
   try {
@@ -116,6 +117,12 @@ export async function rejectEstimate(repairId, phone, token) {
   await ensureAnonymousAuth();
   await rejectEstimateWebFn({ repairId, phone: normalizePhone(phone), token: token || undefined });
   return { id: repairId, estimateAccepted: false, status: 'Odwołane' };
+}
+
+export async function respondToSlot(repairId, phone, token, accept, note) {
+  await ensureAnonymousAuth();
+  await respondToSlotWebFn({ repairId, phone: normalizePhone(phone), token: token || undefined, accept, note: note || '' });
+  return accept ? 'accepted' : 'declined';
 }
 
 export async function createBookingRequest(formData) {

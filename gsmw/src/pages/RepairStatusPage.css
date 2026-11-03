@@ -253,3 +253,6 @@
 }
 
 .rs-booking-cta:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+.rs-slot-when { font-size: 16px; text-transform: capitalize; text-align: right; }
+.rs-slot-note { width: 100%; box-sizing: border-box; border: 1.5px solid var(--line, #E3E5EA); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; margin-bottom: 10px; resize: vertical; }

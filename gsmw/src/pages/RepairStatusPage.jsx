@@ -5,6 +5,7 @@ import {
   findRepairsByPhone,
   lookupRepairByToken,
   acceptEstimate,
+  respondToSlot,
   rejectEstimate,
   STATUS,
 } from '../firebase/firestoreApi';
@@ -33,6 +34,9 @@ export default function RepairStatusPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [decision, setDecision] = useState(null);
   const [error, setError] = useState('');
+  const [slotLoading, setSlotLoading] = useState(false);
+  const [slotNote, setSlotNote] = useState('');
+  const [showSlotNote, setShowSlotNote] = useState(false);
 
   useEffect(() => {
     const loadRepair = async () => {
@@ -114,6 +118,21 @@ export default function RepairStatusPage() {
     total > 0 &&
     repair.status !== STATUS.CANCELLED;
 
+  const handleSlot = async (accept) => {
+    if (!canDecide || !repair?.proposedSlot) return;
+    setSlotLoading(true);
+    setError('');
+    try {
+      const status = await respondToSlot(repair.id, phone, token, accept, accept ? '' : slotNote);
+      setRepair((r) => ({ ...r, proposedSlot: { ...r.proposedSlot, status } }));
+      setShowSlotNote(false);
+    } catch (err) {
+      setError(err?.message || 'Nie udało się zapisać odpowiedzi.');
+    } finally {
+      setSlotLoading(false);
+    }
+  };
+
   const handleAccept = async () => {
     if (!canDecide) return;
 
@@ -176,6 +195,53 @@ export default function RepairStatusPage() {
         <section className="rs-progress-card">
           <RepairProgress status={repair.status} />
         </section>
+
+        {repair.proposedSlot && repair.status !== STATUS.DELIVERED && repair.status !== STATUS.CANCELLED && (
+          <section className={`rs-estimate-card ${repair.proposedSlot.status === 'pending' ? 'rs-estimate-pending' : ''}`}>
+            <div className="rs-estimate-row">
+              <span className="rs-estimate-label">Proponowany termin</span>
+              <span className="rs-estimate-amount rs-slot-when">
+                {new Date(repair.proposedSlot.at).toLocaleString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+
+            {repair.proposedSlot.status === 'pending' && canDecide && (
+              <>
+                <p className="rs-estimate-note">Serwis proponuje ten termin naprawy. Daj znać, czy Ci pasuje.</p>
+                {showSlotNote && (
+                  <textarea
+                    className="rs-slot-note"
+                    rows={3}
+                    placeholder="Kiedy Ci pasuje? Np. „jutro po 16” (opcjonalnie)"
+                    value={slotNote}
+                    onChange={(e) => setSlotNote(e.target.value)}
+                  />
+                )}
+                <div className="rs-estimate-actions">
+                  {showSlotNote ? (
+                    <button className="rs-btn rs-btn-ghost" onClick={() => handleSlot(false)} disabled={slotLoading}>
+                      {slotLoading ? 'Wysyłam…' : 'Wyślij prośbę o inny termin'}
+                    </button>
+                  ) : (
+                    <button className="rs-btn rs-btn-ghost" onClick={() => setShowSlotNote(true)} disabled={slotLoading}>
+                      Inny termin
+                    </button>
+                  )}
+                  <button className="rs-btn rs-btn-primary" onClick={() => handleSlot(true)} disabled={slotLoading}>
+                    {slotLoading && !showSlotNote ? 'Zapisuję…' : 'Pasuje mi'}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {repair.proposedSlot.status === 'accepted' && (
+              <div className="rs-estimate-status rs-status-good">✓ Termin potwierdzony — do zobaczenia!</div>
+            )}
+            {repair.proposedSlot.status === 'declined' && (
+              <div className="rs-estimate-status rs-status-warn">Poprosiłeś o inny termin — serwis odezwie się z nową propozycją.</div>
+            )}
+          </section>
+        )}
 
         {total > 0 && (
           <section className={`rs-estimate-card ${needsDecision ? 'rs-estimate-pending' : ''}`}>

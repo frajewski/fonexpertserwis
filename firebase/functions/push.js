@@ -252,6 +252,19 @@ exports.pushOnRepairUpdated = onDocumentUpdated({ document: "repairs/{repairId}"
       { title: `Zlecenie ${nr} gotowe do odbioru`.replace(/\s+/g, " "), body: deviceLabel(after) }, data);
     return;
   }
+  const slotBefore = before.proposedSlot?.status;
+  const slotAfter = after.proposedSlot?.status;
+  if (slotBefore === "pending" && (slotAfter === "accepted" || slotAfter === "declined")) {
+    const when = new Date(after.proposedSlot.at).toLocaleString("pl-PL", {
+      timeZone: "Europe/Warsaw", weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit",
+    });
+    const staff = await getUserIdsByRoles(STAFF_ROLES);
+    await notifyOnce(event, staff, {
+      title: slotAfter === "accepted" ? `Klient potwierdził termin ${nr}: ${when}` : `Klient prosi o inny termin ${nr}`,
+      body: [deviceLabel(after), after.proposedSlot.customerNote].filter(Boolean).join(" — "),
+    }, data);
+    return;
+  }
   if (before.estimateAccepted == null && (after.estimateAccepted === true || after.estimateAccepted === false)) {
     const staff = await getUserIdsByRoles(STAFF_ROLES);
     await notifyOnce(event, staff,
