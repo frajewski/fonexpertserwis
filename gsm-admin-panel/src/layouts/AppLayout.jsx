@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: '/pulpit',     label: 'Pulpit',       icon: '⌂', roles: ['admin', 'worker'] },
   { to: '/',          label: 'Zlecenia',     icon: '◆', roles: ['admin', 'worker'] },
   { to: '/rezerwacje', label: 'Rezerwacje',   icon: '📅', roles: ['admin', 'worker'], badge: 'bookings' },
+  { to: '/kalendarz',  label: 'Kalendarz',    icon: '📆', roles: ['admin', 'worker'] },
   { to: '/kasa',       label: 'Kasa',         icon: '💰', roles: ['admin'] },
   { to: '/magazyn',    label: 'Magazyn',      icon: '▤', roles: ['admin', 'worker'] },
   { to: '/skup',       label: 'Skup',         icon: '◈', roles: ['admin'] },
