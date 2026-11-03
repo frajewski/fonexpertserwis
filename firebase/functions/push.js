@@ -260,7 +260,10 @@ exports.pushOnRepairUpdated = onDocumentUpdated({ document: "repairs/{repairId}"
     });
     const staff = await getUserIdsByRoles(STAFF_ROLES);
     await notifyOnce(event, staff, {
-      title: slotAfter === "accepted" ? `Klient potwierdził termin ${nr}: ${when}` : `Klient prosi o inny termin ${nr}`,
+      title: slotAfter === "accepted" ? `Klient potwierdził termin ${nr}: ${when}` : `Klient prosi o inny termin ${nr}`
+        + (slotAfter === "declined" && after.proposedSlot.counterAt
+          ? `: ${new Date(after.proposedSlot.counterAt).toLocaleString("pl-PL", { timeZone: "Europe/Warsaw", weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}`
+          : ""),
       body: [deviceLabel(after), after.proposedSlot.customerNote].filter(Boolean).join(" — "),
     }, data);
     return;

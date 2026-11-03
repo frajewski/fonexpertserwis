@@ -72,6 +72,7 @@ function repairToPublicData(doc) {
           at: data.proposedSlot.at,
           status: data.proposedSlot.status || "pending",
           respondedAt: data.proposedSlot.respondedAt || null,
+          counterAt: data.proposedSlot.counterAt || null,
         }
       : null,
   };
@@ -312,9 +313,18 @@ exports.respondToSlotWeb = onCall(
   { region: "us-central1" },
   async (request) => {
     try {
-      const { repairId, phone, token, accept, note } = request.data || {};
+      const { repairId, phone, token, accept, note, counterAt } = request.data || {};
       if (!request.auth) {
         throw new HttpsError("unauthenticated", "Brak sesji użytkownika.");
+      }
+      // Termin zaproponowany przez klienta: przyszłość, najwyżej 90 dni
+      let counter = null;
+      if (!accept && counterAt) {
+        const t = new Date(String(counterAt)).getTime();
+        if (Number.isNaN(t) || t < Date.now() - 60 * 60 * 1000 || t > Date.now() + 90 * 24 * 60 * 60 * 1000) {
+          throw new HttpsError("invalid-argument", "Wybierz termin z najbliższych 90 dni.");
+        }
+        counter = new Date(t).toISOString();
       }
       if (typeof accept !== "boolean") {
         throw new HttpsError("invalid-argument", "Brak odpowiedzi na termin.");
@@ -335,6 +345,7 @@ exports.respondToSlotWeb = onCall(
         "proposedSlot.status": accept ? "accepted" : "declined",
         "proposedSlot.respondedAt": now,
         "proposedSlot.customerNote": String(note || "").trim().slice(0, 300),
+        "proposedSlot.counterAt": counter,
         history: FieldValue.arrayUnion({
           date: now,
           status: accept ? "Klient potwierdził proponowany termin" : "Klient prosi o inny termin",

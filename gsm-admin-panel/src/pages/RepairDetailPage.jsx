@@ -151,6 +151,25 @@ export default function RepairDetailPage() {
     }
   };
 
+  // Klient zaproponował swój termin – serwis go przyjmuje i (opcjonalnie) potwierdza SMS-em
+  const handleAcceptCounterSlot = async () => {
+    const at = repair.proposedSlot?.counterAt;
+    if (!at) return;
+    await updateRepair(id, {
+      proposedSlot: { ...repair.proposedSlot, at, status: 'accepted', counterAt: null, acceptedByShop: true, respondedAt: new Date().toISOString() },
+    });
+    if (customer?.phone) {
+      const text = `Dzień dobry${customer.name ? ` ${customer.name}` : ''}! Potwierdzamy termin naprawy ${repair.brand} ${repair.model}: ${fmtSlot(at)}. Do zobaczenia! Fonexpert`;
+      if (window.confirm(`Wysłać klientowi potwierdzenie SMS?\n\n„${text}”`)) {
+        try {
+          await httpsCallable(functions, 'sendSmsToCustomer')({ phone: customer.phone, text, repairId: repair.id, kind: 'slot' });
+        } catch (e) {
+          alert(e?.message || 'Nie udało się wysłać SMS.');
+        }
+      }
+    }
+  };
+
   const handleConfirmDelivery = async () => {
     const issuedAt = new Date().toISOString();
     await updateRepair(id, {
@@ -384,6 +403,27 @@ export default function RepairDetailPage() {
                 {repair.documentType && <span className="rd-chip">🧾 {repair.documentType}</span>}
                 {repair.customerNip && <span className="rd-chip">NIP {repair.customerNip}</span>}
                 {repair.screenLock && <span className="rd-chip">🔒 {repair.screenLock}</span>}
+              </div>
+            )}
+            {isStaff && !isClosed && repair.proposedSlot?.status === 'declined' && (
+              <div className="rd-slot-alert">
+                <div>
+                  <strong>Klient prosi o inny termin</strong>
+                  {repair.proposedSlot.counterAt ? <> — proponuje <strong>{fmtSlot(repair.proposedSlot.counterAt)}</strong></> : null}
+                  {repair.proposedSlot.customerNote ? <div className="rd-slot-alert-note">„{repair.proposedSlot.customerNote}”</div> : null}
+                </div>
+                <div className="rd-slot-alert-actions">
+                  {repair.proposedSlot.counterAt && (
+                    <button type="button" className="rd-btn-primary rd-btn-inline" onClick={handleAcceptCounterSlot}>✅ Akceptuj termin klienta</button>
+                  )}
+                  <button
+                    type="button"
+                    className="rd-btn-ghost"
+                    onClick={() => { const el = document.getElementById('rd-slot-input'); el?.closest('details')?.setAttribute('open', ''); el?.focus(); }}
+                  >
+                    Zaproponuj inny
+                  </button>
+                </div>
               </div>
             )}
             {isStaff && !isClosed && (

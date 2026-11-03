@@ -256,3 +256,6 @@
 
 .rs-slot-when { font-size: 16px; text-transform: capitalize; text-align: right; }
 .rs-slot-note { width: 100%; box-sizing: border-box; border: 1.5px solid var(--line, #E3E5EA); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; margin-bottom: 10px; resize: vertical; }
+
+.rs-slot-pick { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.rs-slot-pick input { border: 1.5px solid var(--line, #E3E5EA); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }

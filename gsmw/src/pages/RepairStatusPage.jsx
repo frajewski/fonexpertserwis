@@ -36,6 +36,7 @@ export default function RepairStatusPage() {
   const [error, setError] = useState('');
   const [slotLoading, setSlotLoading] = useState(false);
   const [slotNote, setSlotNote] = useState('');
+  const [slotCounter, setSlotCounter] = useState('');
   const [showSlotNote, setShowSlotNote] = useState(false);
 
   useEffect(() => {
@@ -123,8 +124,9 @@ export default function RepairStatusPage() {
     setSlotLoading(true);
     setError('');
     try {
-      const status = await respondToSlot(repair.id, phone, token, accept, accept ? '' : slotNote);
-      setRepair((r) => ({ ...r, proposedSlot: { ...r.proposedSlot, status } }));
+      const counterAt = !accept && slotCounter ? new Date(slotCounter).toISOString() : null;
+      const status = await respondToSlot(repair.id, phone, token, accept, accept ? '' : slotNote, counterAt);
+      setRepair((r) => ({ ...r, proposedSlot: { ...r.proposedSlot, status, counterAt } }));
       setShowSlotNote(false);
     } catch (err) {
       setError(err?.message || 'Nie udało się zapisać odpowiedzi.');
@@ -209,10 +211,16 @@ export default function RepairStatusPage() {
               <>
                 <p className="rs-estimate-note">Serwis proponuje ten termin naprawy. Daj znać, czy Ci pasuje.</p>
                 {showSlotNote && (
+                  <label className="rs-slot-pick">
+                    <span>Kiedy Ci pasuje?</span>
+                    <input type="datetime-local" value={slotCounter} onChange={(e) => setSlotCounter(e.target.value)} />
+                  </label>
+                )}
+                {showSlotNote && (
                   <textarea
                     className="rs-slot-note"
                     rows={3}
-                    placeholder="Kiedy Ci pasuje? Np. „jutro po 16” (opcjonalnie)"
+                    placeholder="Uwagi (opcjonalnie), np. „mogę tylko po 16”"
                     value={slotNote}
                     onChange={(e) => setSlotNote(e.target.value)}
                   />
@@ -238,7 +246,9 @@ export default function RepairStatusPage() {
               <div className="rs-estimate-status rs-status-good">✓ Termin potwierdzony — do zobaczenia!</div>
             )}
             {repair.proposedSlot.status === 'declined' && (
-              <div className="rs-estimate-status rs-status-warn">Poprosiłeś o inny termin — serwis odezwie się z nową propozycją.</div>
+              <div className="rs-estimate-status rs-status-warn">
+                Poprosiłeś o inny termin{repair.proposedSlot.counterAt ? ` (${new Date(repair.proposedSlot.counterAt).toLocaleString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})` : ''} — serwis potwierdzi go SMS-em albo zaproponuje nowy.
+              </div>
             )}
           </section>
         )}

@@ -119,9 +119,9 @@ export async function rejectEstimate(repairId, phone, token) {
   return { id: repairId, estimateAccepted: false, status: 'Odwołane' };
 }
 
-export async function respondToSlot(repairId, phone, token, accept, note) {
+export async function respondToSlot(repairId, phone, token, accept, note, counterAt) {
   await ensureAnonymousAuth();
-  await respondToSlotWebFn({ repairId, phone: normalizePhone(phone), token: token || undefined, accept, note: note || '' });
+  await respondToSlotWebFn({ repairId, phone: normalizePhone(phone), token: token || undefined, accept, note: note || '', counterAt: counterAt || undefined });
   return accept ? 'accepted' : 'declined';
 }
 
