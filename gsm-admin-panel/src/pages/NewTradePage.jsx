@@ -1,3 +1,4 @@
+import PartOptions from '../components/PartOptions';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from '../store/useStore';
@@ -330,9 +331,7 @@ export default function NewTradePage() {
             <div className="nt-row">
               <select className="nt-input" value={pickPartId} onChange={(e) => setPickPartId(e.target.value)}>
                 <option value="">— wybierz część z magazynu —</option>
-                {parts.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name} (na stanie: {p.quantity || 0})</option>
-                ))}
+                <PartOptions parts={parts} />
               </select>
               <input type="number" className="nt-input" style={{ maxWidth: 70 }} value={pickQuantity} min="1" onChange={(e) => setPickQuantity(e.target.value)} />
               <button type="button" className="nt-back" onClick={handleAddInventoryPart}>Dodaj</button>

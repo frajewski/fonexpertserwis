@@ -81,7 +81,7 @@ Klient na stronie („Umów naprawę” w `gsmw`) podaje imię i nazwisko, telef
 Raport dowolnego dnia: zlecenia wydane i telefony sprzedane z podziałem na sposób płatności (gotówka/karta/BLIK/przelew — wybierany przy „Potwierdź wydanie” i „Oznacz jako sprzedany”), zadatki przyjęte tego dnia, wydruk raportu na A4. Dane czytane z bazy dla wybranego dnia (nie tylko z 30-dniowego okna).
 
 ### 📦 Magazyn części zamiennych
-Osobna ewidencja od Skupu, alert przy niskim stanie, blokada dodania części jeśli brak na stanie.
+Kategorie (wyświetlacze, baterie, gniazda ładowania, aparaty, obudowy i szybki, głośniki i mikrofony, taśmy i przyciski, akcesoria, inne) jako zakładki z licznikami; nowa część dostaje kategorię podpowiedzianą z nazwy, stare pozycje można przypisać automatycznie jednym przyciskiem. Wybór części w zleceniu i skupie pogrupowany wg kategorii. Osobna ewidencja od Skupu, alert przy niskim stanie, blokada dodania części jeśli brak na stanie.
 
 ### 💸 Koszty utrzymania firmy
 Księgowość, ZUS, VAT, PIT, reklama, materiały eksploatacyjne — odejmowane od zysku w Statystykach ("zysk po kosztach").

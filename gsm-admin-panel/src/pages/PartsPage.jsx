@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import useStore from '../store/useStore';
+import { PART_CATEGORIES, partCategoryById, guessPartCategory } from '../constants/partCategories';
 import './PartsPage.css';
 
 export default function PartsPage() {
@@ -13,6 +14,10 @@ export default function PartsPage() {
   const isAdmin = currentUser?.role === 'admin';
 
   const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('all'); // 'all' | id kategorii | 'none'
+  const [newCategory, setNewCategory] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [assigning, setAssigning] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newQuantity, setNewQuantity] = useState('');
@@ -27,12 +32,34 @@ export default function PartsPage() {
 
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
+  const catOf = (p) => (partCategoryById(p.category) ? p.category : 'none');
+  const counts = useMemo(() => {
+    const c = { all: parts.length, none: 0 };
+    parts.forEach((p) => { const k = catOf(p); c[k] = (c[k] || 0) + 1; });
+    return c;
+  }, [parts]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return [...parts]
+      .filter((p) => category === 'all' || catOf(p) === category)
       .filter((p) => !q || p.name?.toLowerCase().includes(q) || p.notes?.toLowerCase().includes(q))
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-  }, [parts, search]);
+  }, [parts, search, category]);
+
+  // Jednorazowe przypisanie kategorii starym pozycjom – po słowach w nazwie
+  const handleAutoAssign = async () => {
+    const todo = parts.filter((p) => catOf(p) === 'none');
+    if (!todo.length) return;
+    const preview = todo.slice(0, 8).map((p) => `• ${p.name} → ${partCategoryById(guessPartCategory(p.name)).label}`).join('\n');
+    if (!window.confirm(`Przypisać kategorie ${todo.length} pozycjom na podstawie nazwy?\n\n${preview}${todo.length > 8 ? '\n…' : ''}\n\nNietrafione poprawisz potem przez „Edytuj”.`)) return;
+    setAssigning(true);
+    try {
+      for (const p of todo) await updatePart(p.id, { category: guessPartCategory(p.name) });
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   const lowStock = parts.filter((p) => (p.quantity || 0) <= (p.minQuantity || 0));
 
@@ -45,7 +72,9 @@ export default function PartsPage() {
       minQuantity: parseInt(newMinQuantity) || 0,
       unitCost: parseFloat(newUnitCost) || 0,
       notes: newNotes.trim(),
+      category: newCategory || (category !== 'all' && category !== 'none' ? category : guessPartCategory(newName)),
     });
+    setNewCategory('');
     setNewName(''); setNewQuantity(''); setNewMinQuantity(''); setNewUnitCost(''); setNewNotes('');
     setShowAddForm(false);
   };
@@ -55,6 +84,7 @@ export default function PartsPage() {
     setEditQuantity(String(part.quantity || 0));
     setEditMinQuantity(String(part.minQuantity || 0));
     setEditUnitCost(String(part.unitCost || 0));
+    setEditCategory(partCategoryById(part.category) ? part.category : guessPartCategory(part.name));
   };
 
   const handleSaveEdit = async (id) => {
@@ -62,6 +92,7 @@ export default function PartsPage() {
       quantity: parseInt(editQuantity) || 0,
       minQuantity: parseInt(editMinQuantity) || 0,
       unitCost: parseFloat(editUnitCost) || 0,
+      category: editCategory || 'other',
     });
     setEditingId(null);
   };
@@ -93,6 +124,14 @@ export default function PartsPage() {
       {showAddForm && (
         <form className="pt-add-form" onSubmit={handleAdd}>
           <input className="pt-input" placeholder="Nazwa części (np. Wyświetlacz iPhone 12)" value={newName} onChange={(e) => setNewName(e.target.value)} required />
+          <select
+            className="pt-input pt-input-sm"
+            aria-label="Kategoria"
+            value={newCategory || (category !== 'all' && category !== 'none' ? category : guessPartCategory(newName))}
+            onChange={(e) => setNewCategory(e.target.value)}
+          >
+            {PART_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
+          </select>
           <input className="pt-input pt-input-sm" type="number" placeholder="Ilość" value={newQuantity} onChange={(e) => setNewQuantity(e.target.value)} />
           <input className="pt-input pt-input-sm" type="number" placeholder="Próg alertu" value={newMinQuantity} onChange={(e) => setNewMinQuantity(e.target.value)} />
           {isAdmin && (
@@ -101,6 +140,31 @@ export default function PartsPage() {
           <input className="pt-input" placeholder="Notatki (opcjonalnie)" value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
           <button className="pt-new-btn" type="submit">Zapisz</button>
         </form>
+      )}
+
+      <div className="pt-cats" role="tablist" aria-label="Kategorie części">
+        <button type="button" className={`pt-cat ${category === 'all' ? 'pt-cat-on' : ''}`} onClick={() => setCategory('all')}>
+          Wszystkie <span>{counts.all}</span>
+        </button>
+        {PART_CATEGORIES.map((c) => (
+          <button key={c.id} type="button" className={`pt-cat ${category === c.id ? 'pt-cat-on' : ''}`} onClick={() => setCategory(c.id)}>
+            {c.icon} {c.label} <span>{counts[c.id] || 0}</span>
+          </button>
+        ))}
+        {counts.none > 0 && (
+          <button type="button" className={`pt-cat pt-cat-none ${category === 'none' ? 'pt-cat-on' : ''}`} onClick={() => setCategory('none')}>
+            Bez kategorii <span>{counts.none}</span>
+          </button>
+        )}
+      </div>
+
+      {counts.none > 0 && (
+        <div className="pt-assign-banner">
+          <span>{counts.none} {counts.none === 1 ? 'pozycja nie ma' : 'pozycji nie ma'} jeszcze kategorii.</span>
+          <button type="button" className="pt-link-btn" disabled={assigning} onClick={handleAutoAssign}>
+            {assigning ? 'Przypisuję…' : 'Przypisz automatycznie wg nazwy'}
+          </button>
+        </div>
       )}
 
       <div className="pt-search">
@@ -126,6 +190,13 @@ export default function PartsPage() {
                 <tr key={p.id} className={isLow ? 'pt-row-low' : ''}>
                   <td>
                     <div className="pt-part-name">{p.name}</div>
+                    {editing ? (
+                      <select className="pt-input pt-input-sm pt-cat-select" aria-label="Kategoria" value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
+                        {PART_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
+                      </select>
+                    ) : category === 'all' && (
+                      <div className="pt-part-cat">{partCategoryById(p.category) ? `${partCategoryById(p.category).icon} ${partCategoryById(p.category).label}` : 'Bez kategorii'}</div>
+                    )}
                     {p.notes && <div className="pt-part-notes">{p.notes}</div>}
                   </td>
                   <td>

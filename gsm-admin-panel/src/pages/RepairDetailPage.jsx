@@ -1,3 +1,4 @@
+import PartOptions from '../components/PartOptions';
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
@@ -490,9 +491,7 @@ export default function RepairDetailPage() {
                 <div className="rd-add-part-row">
                   <select className="rd-cost-edit-input" value={pickPartId} onChange={(e) => setPickPartId(e.target.value)}>
                     <option value="">— wybierz część z magazynu —</option>
-                    {parts.map((p) => (
-                      <option key={p.id} value={p.id}>{p.name} (na stanie: {p.quantity || 0})</option>
-                    ))}
+                    <PartOptions parts={parts} />
                   </select>
                   <input
                     type="number"
