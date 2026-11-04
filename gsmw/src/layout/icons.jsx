@@ -29,3 +29,8 @@ export const IconClock = I(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 
 export const IconCall = I(<path d="M5 3.5h3.5l1.5 4.5-2.2 1.4a11 11 0 0 0 6.8 6.8L16 14l4.5 1.5V19a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.7 2 2 0 0 1 5 3.5z" />);
 export const IconMenu = I(<path d="M4 7h16M4 12h16M4 17h16" />);
 export const IconClose = I(<path d="M6 6l12 12M18 6 6 18" />);
+export const IconTimer = I(<><circle cx="12" cy="13.5" r="7.5" /><path d="M12 9.5v4l2.5 1.5M10 2.5h4M18.5 6l1.5-1.5" /></>);
+export const IconBox = I(<><path d="M12 2.8 20.5 7v10L12 21.2 3.5 17V7z" /><path d="M3.5 7 12 11.3 20.5 7M12 11.3v9.9M7.8 4.9l8.4 4.3" /></>);
+export const IconAward = I(<><circle cx="12" cy="9" r="6" /><path d="m9.5 9 1.8 1.8 3.2-3.4" /><path d="m8.5 14.2-1.5 7 5-2.5 5 2.5-1.5-7" /></>);
+export const IconImage = I(<><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m20.5 16-5-5-8.5 8.5" /></>);
+export const IconTag = I(<><path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1 1 0 0 1 0 1.4l-7.3 7.3a1 1 0 0 1-1.4 0z" /><circle cx="8" cy="8" r="1.4" /></>);

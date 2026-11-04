@@ -131,3 +131,7 @@
 .bk-modal-sub { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
 .bk-modal-text { min-height: 130px; font-size: 14px; color: var(--ink); }
 .bk-modal-count { font-size: 11.5px; color: var(--ink-faint); text-align: right; margin-top: -4px; }
+
+.bk-photos { display: flex; flex-wrap: wrap; gap: 8px; }
+.bk-photos img { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border, #e2e8f0); display: block; }
+.bk-muted { color: var(--text-muted, #64748b); font-size: 13px; }

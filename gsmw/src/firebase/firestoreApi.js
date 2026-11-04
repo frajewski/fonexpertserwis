@@ -125,6 +125,41 @@ export async function respondToSlot(repairId, phone, token, accept, note, counte
   return accept ? 'accepted' : 'declined';
 }
 
+// Zmniejsza zdjęcie do max 1600 px (JPEG ~0.82) – szybszy upload z telefonu.
+// Gdy przeglądarka nie umie zdekodować (np. HEIC), wysyłamy oryginał.
+async function compressImage(file) {
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.82));
+    return blob || file;
+  } catch {
+    return file;
+  }
+}
+
+// Wgrywa zdjęcia rezerwacji do bookingUploads/<uid sesji>/… i zwraca ścieżki
+export async function uploadBookingPhotos(files) {
+  if (!files?.length) return [];
+  const user = await ensureAnonymousAuth();
+  const { ref, uploadBytes } = await import('firebase/storage');
+  const { storage } = await import('./firebaseConfig');
+  const stamp = Date.now();
+  const paths = [];
+  for (let i = 0; i < Math.min(files.length, 5); i++) {
+    const blob = await compressImage(files[i]);
+    const ext = blob.type === 'image/jpeg' ? 'jpg' : (files[i].name.split('.').pop() || 'img').toLowerCase().slice(0, 5);
+    const path = `bookingUploads/${user.uid}/${stamp}-${i}.${ext}`;
+    await uploadBytes(ref(storage, path), blob, { contentType: blob.type || files[i].type || 'image/jpeg' });
+    paths.push(path);
+  }
+  return paths;
+}
+
 export async function createBookingRequest(formData) {
   await ensureAnonymousAuth();
   const payload = { ...formData, phone: normalizePhone(formData.phone) };

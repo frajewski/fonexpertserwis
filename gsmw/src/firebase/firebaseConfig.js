@@ -10,6 +10,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getFunctions } from 'firebase/functions';
+import { getStorage } from 'firebase/storage';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -24,6 +25,7 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
+export const storage = getStorage(app);
 
 // Zapewnia, że istnieje aktywna (anonimowa) sesja Auth, zanim panel webowy
 // wywoła jakąkolwiek Cloud Function – onCall wymaga request.auth != null

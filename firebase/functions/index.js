@@ -465,6 +465,12 @@ exports.createBookingRequestWeb = onCall(
         ? [...new Set(data.issues.filter((i) => ALLOWED_ISSUES.includes(i)))]
         : [];
       const needsDiagnosis = data.needsDiagnosis === true && issues.length === 0;
+      // Zdjęcia: tylko ścieżki z folderu tej sesji (bookingUploads/<uid>/…), maks. 5
+      const photoPaths = Array.isArray(data.photoPaths)
+        ? data.photoPaths
+            .filter((p) => typeof p === "string" && p.startsWith(`bookingUploads/${request.auth?.uid}/`) && !p.includes("..") && p.length < 200)
+            .slice(0, 5)
+        : [];
       const deviceType = ["Smartfon", "Tablet", "Laptop", "Inne"].includes(data.deviceType) ? data.deviceType : "";
 
       if (!name || !phone || !brand) {
@@ -492,6 +498,7 @@ exports.createBookingRequestWeb = onCall(
         model,
         description: description.slice(0, 2000),
         deviceType,
+        photoPaths,
         issues,
         needsDiagnosis,
         termsAcceptedAt: new Date().toISOString(),

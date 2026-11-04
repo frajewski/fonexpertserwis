@@ -51,7 +51,7 @@ export function SiteFooter() {
       <div className="sl-wrap sl-footer-grid">
         <div>
           <Logo light />
-          <p className="sl-footer-note">Fonexpert — status naprawy i rezerwacje online</p>
+          <p className="sl-footer-note">FONEXPERT — serwis telefonów, tabletów i laptopów.</p>
         </div>
         <div>
           <h2 className="sl-footer-title">Nawigacja</h2>

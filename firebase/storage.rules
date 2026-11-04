@@ -55,6 +55,14 @@ service firebase.storage {
       allow delete: if isStaff();
     }
 
+    // Zdjęcia dołączane przez klienta do rezerwacji online (panel klienta,
+    // anonimowa sesja). Klient może tylko DODAĆ plik do własnego folderu
+    // (uid sesji) – nie czyta ani nie kasuje; podgląd ma tylko personel.
+    match /bookingUploads/{uid}/{fileName} {
+      allow create: if isSignedIn() && request.auth.uid == uid && isValidImage();
+      allow read, delete: if isStaff();
+    }
+
     // Domyślnie: brak dostępu do czegokolwiek nieujętego wyżej
     match /{allPaths=**} {
       allow read, write: if false;

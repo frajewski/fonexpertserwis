@@ -7,12 +7,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { createBookingRequest } from '../firebase/firestoreApi';
+import { createBookingRequest, uploadBookingPhotos, findRepairByLookup, normalizeDisplayNumber, normalizePhone } from '../firebase/firestoreApi';
 import SHOP from '../shop';
 import {
-  IconPhone, IconTablet, IconLaptop, IconDevice, IconWrench, IconBolt, IconHeadset, IconShield,
+  IconPhone, IconTablet, IconLaptop, IconWrench, IconShield,
   IconCrack, IconBattery, IconPlug, IconCamera, IconSpeaker, IconDrop, IconPower, IconBack, IconCog,
-  IconDots, IconSearch, IconArrow, IconCheck, IconCall, IconClock, IconPin,
+  IconDots, IconSearch, IconArrow, IconCheck, IconTimer, IconBox, IconAward, IconImage, IconTag, IconClose,
 } from '../layout/icons';
 import './BookingPage.css';
 
@@ -22,8 +22,8 @@ export const BOOKING_ISSUES = [
   'Zalanie', 'Nie włącza się', 'Tylna szybka / obudowa', 'Oprogramowanie / blokada', 'Inne',
 ];
 const ISSUE_UI = {
-  'Zbity ekran / wyświetlacz': ['Zbity ekran', IconCrack],
-  'Bateria': ['Bateria', IconBattery],
+  'Zbity ekran / wyświetlacz': ['Uszkodzony ekran', IconCrack],
+  'Bateria': ['Słaba bateria', IconBattery],
   'Gniazdo ładowania': ['Nie ładuje', IconPlug],
   'Aparat': ['Aparat', IconCamera],
   'Głośnik / mikrofon': ['Głośnik / mikrofon', IconSpeaker],
@@ -35,7 +35,7 @@ const ISSUE_UI = {
 };
 
 const DEVICE_TYPES = [
-  ['Smartfon', IconPhone], ['Tablet', IconTablet], ['Laptop', IconLaptop], ['Inne', IconDevice],
+  ['Smartfon', IconPhone], ['Tablet', IconTablet], ['Laptop', IconLaptop], ['Inne', IconDots],
 ];
 const BRANDS = {
   Smartfon: ['Apple', 'Samsung', 'Xiaomi', 'Motorola', 'Huawei', 'Oppo', 'Realme', 'Google', 'OnePlus', 'Honor', 'Nokia', 'Sony'],
@@ -45,14 +45,8 @@ const BRANDS = {
 };
 const OTHER = '__inna__';
 
-const FAQ = [
-  ['Jak długo trwa naprawa?', 'Zależy od usterki i dostępności części. Proste naprawy, jak wymiana ekranu czy baterii, często robimy od ręki, jeśli część jest na miejscu. Gdy część trzeba zamówić, termin potwierdzimy SMS-em.'],
-  ['Czy muszę wcześniej umawiać wizytę?', 'Nie — możesz przyjść w godzinach otwarcia. Zgłoszenie online pozwala nam wcześniej przygotować lub zamówić część, więc naprawa idzie szybciej.'],
-  ['Skąd dowiem się o statusie naprawy?', 'Przy przyjęciu dostaniesz potwierdzenie z numerem zlecenia i kodem QR. Status sprawdzisz w zakładce „Sprawdź status”, a o ważnych zmianach (kosztorys, gotowe do odbioru) poinformujemy SMS-em.'],
-  ['Czy otrzymam wycenę przed naprawą?', 'Tak. Przed naprawą przekażemy kosztorys — naprawę wykonujemy dopiero po Twojej akceptacji, online przez link albo telefonicznie.'],
-];
 
-const STEPS = ['Urządzenie', 'Usterka', 'Kontakt'];
+const STEPS = ['Urządzenie i usterka', 'Opis i zdjęcia', 'Twoje dane'];
 
 export default function BookingPage() {
   const navigate = useNavigate();
@@ -67,6 +61,8 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [photos, setPhotos] = useState([]); // [{ file, url }]
+  const [lookup, setLookup] = useState({ nr: '', phone: '', loading: false, error: '' });
 
   // /umow-naprawe → od razu do formularza
   useEffect(() => {
@@ -88,9 +84,7 @@ export default function BookingPage() {
     if (s === 0) {
       if (!brand) return 'Wybierz albo wpisz markę urządzenia.';
       if (!form.model.trim()) return 'Wpisz model urządzenia.';
-    }
-    if (s === 1 && form.issues.length === 0 && !form.needsDiagnosis && !form.description.trim()) {
-      return 'Zaznacz, co jest uszkodzone, albo wybierz „Nie wiem — potrzebna diagnoza”.';
+      if (form.issues.length === 0 && !form.needsDiagnosis) return 'Zaznacz, co jest uszkodzone, albo wybierz „Nie wiem — potrzebna diagnoza”.';
     }
     if (s === 2) {
       if (!form.name.trim() || !form.phone.trim()) return 'Podaj imię i nazwisko oraz numer telefonu.';
@@ -117,7 +111,9 @@ export default function BookingPage() {
     setError('');
     setSubmitting(true);
     try {
+      const photoPaths = await uploadBookingPhotos(photos.map((p) => p.file));
       await createBookingRequest({
+        photoPaths,
         name: form.name, phone: form.phone, company: form.company,
         deviceType: form.deviceType, brand, model: form.model,
         issues: form.issues, needsDiagnosis: form.needsDiagnosis,
@@ -136,40 +132,49 @@ export default function BookingPage() {
 
   const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  const addPhotos = (fileList) => {
+    const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/') && f.size < 25 * 1024 * 1024);
+    setPhotos((prev) => [...prev, ...files.map((file) => ({ file, url: URL.createObjectURL(file) }))].slice(0, 5));
+  };
+  const removePhoto = (i) => setPhotos((prev) => { URL.revokeObjectURL(prev[i].url); return prev.filter((_, k) => k !== i); });
+
+  const handleLookup = async (e) => {
+    e.preventDefault();
+    if (!lookup.nr.trim() || !lookup.phone.trim()) { setLookup((l) => ({ ...l, error: 'Podaj numer zlecenia i telefon.' })); return; }
+    setLookup((l) => ({ ...l, loading: true, error: '' }));
+    try {
+      const cleanPhone = normalizePhone(lookup.phone);
+      const repair = await findRepairByLookup(normalizeDisplayNumber(lookup.nr), cleanPhone);
+      if (!repair) { setLookup((l) => ({ ...l, loading: false, error: 'Nie znaleziono zlecenia — sprawdź numer i telefon.' })); return; }
+      navigate(`/zlecenie/${repair.id}`, { state: { phone: cleanPhone } });
+    } catch (err) {
+      setLookup((l) => ({ ...l, loading: false, error: err.message || 'Nie udało się sprawdzić statusu.' }));
+    }
+  };
+
   return (
     <main className="bp">
       {/* ===== HERO ===== */}
       <section className="bp-hero">
-        <div className="bp-wrap bp-hero-grid">
+        <div className="bp-wrap">
           <div className="bp-hero-text">
-            <h1 className="bp-hero-title">Twój telefon znów będzie <span>działał jak należy.</span></h1>
-            <p className="bp-hero-sub">Zgłoś usterkę online w kilka chwil. Skontaktujemy się z Tobą, aby ustalić szczegóły naprawy.</p>
-            <div className="bp-hero-actions">
-              <button type="button" className="bp-btn bp-btn-primary bp-btn-lg" onClick={scrollToForm}>
-                <IconWrench size={22} /> Zgłoś naprawę <IconArrow size={18} />
-              </button>
-              <Link to="/status" className="bp-btn bp-btn-ghost bp-btn-lg"><IconSearch size={20} /> Sprawdź status</Link>
-            </div>
+            <h1 className="bp-hero-title">
+              Szybka i wygodna naprawa Twojego <span className="bp-hero-accent">telefonu
+                <svg className="bp-swoosh" viewBox="0 0 160 18" aria-hidden="true"><path d="M3 14 C 50 2, 110 2, 157 9" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg>
+              </span>
+            </h1>
+            <p className="bp-hero-sub">Zgłoś usterkę online, a my zajmiemy się resztą. Wycena, kontakt i naprawa — bez zbędnego czekania.</p>
+            <button type="button" className="bp-cta" onClick={scrollToForm}>
+              <IconWrench size={24} /> Zgłoś naprawę online <IconArrow size={20} />
+            </button>
           </div>
-          <div className="bp-hero-media">
-            <img src="/hero-repair.jpg" alt="Serwisant naprawia smartfon na macie serwisowej" />
-          </div>
-        </div>
-      </section>
 
-      {/* ===== KORZYŚCI ===== */}
-      <section className="bp-wrap bp-features" aria-label="Dlaczego warto">
-        <div className="bp-feature">
-          <IconBolt size={40} className="bp-feature-icon bp-green" />
-          <div><h2>Szybkie zgłoszenie</h2><p>Intuicyjny formularz, który zajmie Ci tylko kilka minut.</p></div>
-        </div>
-        <div className="bp-feature">
-          <IconHeadset size={40} className="bp-feature-icon bp-blue" />
-          <div><h2>Kontakt z serwisem</h2><p>Szybko oddzwonimy lub napiszemy, aby potwierdzić zgłoszenie.</p></div>
-        </div>
-        <div className="bp-feature">
-          <IconShield size={40} className="bp-feature-icon bp-green" />
-          <div><h2>Przejrzyste zasady</h2><p>Jasne informacje o przebiegu naprawy i jej kosztach.</p></div>
+          <ul className="bp-features" aria-label="Dlaczego warto">
+            <li><IconTimer size={36} className="bp-f-blue" /><div><strong>Szybkie zgłoszenie</strong><span>Wypełnisz w 2 minuty</span></div></li>
+            <li><IconShield size={36} className="bp-f-green" /><div><strong>Wycena przed naprawą</strong><span>Zawsze informujemy o koszcie</span></div></li>
+            <li><IconBox size={36} className="bp-f-blue" /><div><strong>Powiadomienia SMS</strong><span>Na każdym etapie naprawy</span></div></li>
+            <li><IconAward size={36} className="bp-f-blue" /><div><strong>Sprawdzone części</strong><span>Oryginalne i wysokiej jakości zamienniki</span></div></li>
+          </ul>
         </div>
       </section>
 
@@ -182,18 +187,17 @@ export default function BookingPage() {
               <h2>Zgłoszenie wysłane</h2>
               <p>Serwis potwierdzi zgłoszenie SMS-em: dostaniesz numer rezerwacji, termin i wstępną wycenę.</p>
               <p>Przy poważniejszych naprawach poprosimy o zadatek BLIK-iem — w tytule wpisz wtedy numer rezerwacji. Zadatek przepada w razie rezygnacji lub nieprzybycia w umówionym terminie bez wcześniejszego powiadomienia.</p>
-              <button type="button" className="bp-btn bp-btn-ghost" onClick={() => navigate('/status')}>Sprawdź status naprawy</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate>
-              <h2 className="bp-card-title"><IconWrench size={30} className="bp-blue" /> Zgłoś urządzenie do naprawy</h2>
+              <h2 className="bp-card-title"><IconWrench size={34} className="bp-blue" /> Zgłoś urządzenie do naprawy</h2>
 
               <ol className="bp-steps" aria-label="Kroki formularza">
                 {STEPS.map((label, i) => (
                   <li key={label} className={`bp-step ${i === step ? 'bp-step-now' : ''} ${i < step ? 'bp-step-done' : ''}`}>
                     <button type="button" onClick={() => (i < step ? setStep(i) : null)} disabled={i > step} aria-current={i === step ? 'step' : undefined}>
-                      <span className="bp-step-dot">{i < step ? <IconCheck size={16} /> : i + 1}</span>
-                      <span className="bp-step-label">{i + 1}. {label}</span>
+                      <span className="bp-step-dot">{i < step ? <IconCheck size={14} /> : i + 1}</span>
+                      <span className="bp-step-label">{label}</span>
                     </button>
                   </li>
                 ))}
@@ -232,12 +236,7 @@ export default function BookingPage() {
                       <input value={form.brandOther} onChange={set('brandOther')} placeholder="Wpisz markę" />
                     </label>
                   )}
-                </div>
-              )}
-
-              {step === 1 && (
-                <div className="bp-pane">
-                  <h3 className="bp-q">Co się dzieje z urządzeniem?</h3>
+                  <h3 className="bp-q">Jaka jest usterka?</h3>
                   <div className="bp-tiles bp-tiles-5">
                     {BOOKING_ISSUES.map((issue) => {
                       const [label, Icon] = ISSUE_UI[issue];
@@ -255,14 +254,37 @@ export default function BookingPage() {
                     <IconSearch size={20} /> Nie wiem — potrzebna diagnoza
                   </button>
 
+                </div>
+              )}
+
+              {step === 1 && (
+                <div className="bp-pane">
                   <label className="bp-field">
-                    <span>Opisz problem{form.issues.length || form.needsDiagnosis ? ' (opcjonalnie)' : ''}</span>
+                    <span>Opisz problem (opcjonalnie)</span>
                     <textarea rows={4} value={form.description} onChange={set('description')} placeholder="Np. telefon spadł, ekran pęknięty w rogu, dotyk działa" />
                   </label>
                   <label className="bp-field bp-field-half">
                     <span>Preferowany termin (opcjonalnie)</span>
                     <input type="date" value={form.preferredDate} onChange={set('preferredDate')} />
                   </label>
+                  <div className="bp-field">
+                    <span>Zdjęcia usterki (opcjonalnie, do 5)</span>
+                    <div className="bp-photos">
+                      {photos.map((p, i) => (
+                        <div key={p.url} className="bp-photo">
+                          <img src={p.url} alt={`Zdjęcie ${i + 1}`} />
+                          <button type="button" aria-label="Usuń zdjęcie" onClick={() => removePhoto(i)}><IconClose size={14} /></button>
+                        </div>
+                      ))}
+                      {photos.length < 5 && (
+                        <label className="bp-photo-add">
+                          <IconImage size={26} />
+                          <span>Dodaj zdjęcie</span>
+                          <input type="file" accept="image/*" multiple hidden onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }} />
+                        </label>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -312,38 +334,47 @@ export default function BookingPage() {
           )}
         </div>
 
-        <aside className="bp-aside" aria-label="Jak to działa i kontakt">
-          <div className="bp-aside-card">
-            <h2>Jak to działa?</h2>
-            <ol className="bp-how">
-              <li><strong>Wysyłasz zgłoszenie</strong><span>Urządzenie, usterka i Twój telefon.</span></li>
-              <li><strong>Dostajesz SMS</strong><span>Numer rezerwacji, termin i wstępna wycena.</span></li>
-              <li><strong>Naprawiamy</strong><span>Status sprawdzisz online w każdej chwili.</span></li>
-            </ol>
+        <aside className="bp-aside" aria-label="Dlaczego warto zgłosić online">
+          <div className="bp-promo">
+            <h2>Pęknięty <span>ekran?</span></h2>
+            <p>Zgłoś naprawę online i poznaj wycenę bez wychodzenia z domu.</p>
+            <svg className="bp-promo-phone" viewBox="0 0 160 260" aria-hidden="true">
+              <defs>
+                <linearGradient id="pp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#3B82F6" /><stop offset="1" stopColor="#0B1F4D" /></linearGradient>
+              </defs>
+              <rect x="22" y="8" width="128" height="244" rx="22" fill="#0B1226" stroke="#60A5FA" strokeWidth="3" />
+              <rect x="30" y="16" width="112" height="228" rx="16" fill="url(#pp)" />
+              <g stroke="#E0F2FE" strokeWidth="1.4" fill="none" opacity=".9">
+                <path d="M96 150 L60 96 L44 60" /><path d="M96 150 L140 120" /><path d="M96 150 L130 210 L138 240" />
+                <path d="M96 150 L52 196" /><path d="M96 150 L92 70 L104 24" /><path d="M96 150 L34 140" />
+                <path d="M70 120 L82 128 M118 136 L128 150 M112 188 L122 178 M66 168 L78 176" />
+              </g>
+              <circle cx="96" cy="150" r="5" fill="#E0F2FE" />
+            </svg>
           </div>
-          <div className="bp-aside-card">
-            <h2>Wolisz zadzwonić?</h2>
-            <a className="bp-aside-phone" href={SHOP.phoneHref}><IconCall size={20} /> {SHOP.phone}</a>
-            <p className="bp-aside-row"><IconPin size={18} /><span>{SHOP.addressLine1}, {SHOP.addressLine2}</span></p>
-            <p className="bp-aside-row"><IconClock size={18} /><span>{SHOP.hours.map(([d, h]) => <span key={d} className="bp-aside-hours">{d}: {h}</span>)}</span></p>
-          </div>
+          <ul className="bp-checks">
+            <li><span><IconCheck size={14} /></span> Wycena przed naprawą</li>
+            <li><span><IconCheck size={14} /></span> Indywidualna wycena</li>
+            <li><span><IconCheck size={14} /></span> Powiadomienia o postępie</li>
+          </ul>
         </aside>
       </section>
 
-      {/* ===== FAQ ===== */}
-      <section className="bp-wrap bp-faq">
-        <div>
-          <h2 className="bp-faq-title">Najczęściej zadawane <span>pytania</span></h2>
-          <p className="bp-faq-sub">Sprawdź odpowiedzi na najpopularniejsze pytania dotyczące zgłaszania napraw.</p>
-        </div>
-        <div className="bp-faq-list">
-          {FAQ.map(([q, a]) => (
-            <details key={q} className="bp-faq-item">
-              <summary>{q}</summary>
-              <p>{a}</p>
-            </details>
-          ))}
-        </div>
+      {/* ===== STATUS ===== */}
+      <section className="bp-wrap">
+        <form className="bp-status" onSubmit={handleLookup}>
+          <IconBox size={54} className="bp-status-icon" />
+          <div className="bp-status-text">
+            <h2>Sprawdź status naprawy</h2>
+            <p>Wpisz numer zlecenia i telefon, i zobacz, na jakim etapie jest Twoje urządzenie.</p>
+          </div>
+          <div className="bp-status-form">
+            <label className="bp-status-input"><IconTag size={20} /><input aria-label="Numer zlecenia" placeholder="Nr zlecenia" value={lookup.nr} onChange={(e) => setLookup((l) => ({ ...l, nr: e.target.value }))} /></label>
+            <label className="bp-status-input"><IconPhone size={20} /><input aria-label="Telefon" type="tel" placeholder="Telefon" value={lookup.phone} onChange={(e) => setLookup((l) => ({ ...l, phone: e.target.value }))} /></label>
+            <button type="submit" className="bp-btn bp-btn-primary" disabled={lookup.loading}>{lookup.loading ? 'Szukam…' : 'Sprawdź'} <IconArrow size={18} /></button>
+          </div>
+          {lookup.error && <p className="bp-status-error" role="alert">{lookup.error}</p>}
+        </form>
       </section>
     </main>
   );
