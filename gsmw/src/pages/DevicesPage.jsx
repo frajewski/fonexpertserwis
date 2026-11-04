@@ -1,5 +1,5 @@
 // ============================================================
-//  DevicesPage.jsx – „Urządzenia”: sprzedaż nowych i używanych
+//  DevicesPage.jsx – „Skup i sprzedaż” (/skup-i-sprzedaz): sprzedaż nowych i używanych
 //  (gwarancja, testy) + skup z formularzem wyceny.
 //  Zapytanie trafia do panelu admina (Wyceny skupu) przez
 //  funkcję createBuybackRequestWeb – listy stanów/akcesoriów
@@ -62,7 +62,7 @@ export default function DevicesPage() {
 
   useEffect(() => {
     const prev = document.title;
-    document.title = 'Telefony nowe i używane, skup | Fonexpert Płońsk';
+    document.title = 'Skup i sprzedaż telefonów | Fonexpert Płońsk';
     if (window.location.hash === '#wycena') setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);
     return () => { document.title = prev; };
   }, []);

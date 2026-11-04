@@ -537,7 +537,7 @@ exports.createBookingRequestWeb = onCall(
 
 
 /**
- * Zapytanie o wycenę urządzenia do skupu (zakładka „Urządzenia” w panelu klienta).
+ * Zapytanie o wycenę urządzenia do skupu (zakładka „Skup i sprzedaż” w panelu klienta).
  * Zapis tylko przez funkcję; czyta i obsługuje wyłącznie admin.
  */
 exports.createBuybackRequestWeb = onCall(

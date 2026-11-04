@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LookupPage from './pages/LookupPage';
 import BookingPage from './pages/BookingPage';
 import B2bCatalogPage from './pages/B2bCatalogPage';
@@ -23,7 +23,8 @@ export default function App() {
       <Route path="/" element={<SiteLayout><HomeRoute /></SiteLayout>} />
       <Route path="/umow-naprawe" element={<SiteLayout><BookingPage /></SiteLayout>} />
       <Route path="/status" element={<SiteLayout><LookupPage /></SiteLayout>} />
-      <Route path="/urzadzenia" element={<SiteLayout><DevicesPage /></SiteLayout>} />
+      <Route path="/skup-i-sprzedaz" element={<SiteLayout><DevicesPage /></SiteLayout>} />
+      <Route path="/urzadzenia" element={<Navigate to="/skup-i-sprzedaz" replace />} />
       <Route path="/faq" element={<SiteLayout><FaqPage /></SiteLayout>} />
       <Route path="/kontakt" element={<SiteLayout><ContactPage /></SiteLayout>} />
       <Route path="/zlecenie/:id" element={<SiteLayout><RepairStatusPage /></SiteLayout>} />

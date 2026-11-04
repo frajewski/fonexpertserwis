@@ -1,6 +1,6 @@
 // ============================================================
 //  BuybackRequestsPage.jsx – „Wyceny skupu” (tylko admin)
-//  Zapytania o wycenę z zakładki „Urządzenia” w panelu klienta
+//  Zapytania o wycenę z zakładki „Skup i sprzedaż” w panelu klienta
 //  (kolekcja buybackRequests, zapis przez createBuybackRequestWeb).
 // ============================================================
 import { useEffect, useMemo, useState } from 'react';
@@ -102,7 +102,7 @@ export default function BuybackRequestsPage() {
     <div className="bk-page">
       <header className="bk-header">
         <h1 className="bk-title">Wyceny skupu</h1>
-        <p className="bk-count">Zapytania klientów z zakładki „Urządzenia” na stronie</p>
+        <p className="bk-count">Zapytania klientów z zakładki „Skup i sprzedaż” na stronie</p>
         <div className="bk-tabs">
           <button type="button" className={`bk-tab ${!showAll ? 'bk-tab-on' : ''}`} onClick={() => setShowAll(false)}>Aktywne ({countActive})</button>
           <button type="button" className={`bk-tab ${showAll ? 'bk-tab-on' : ''}`} onClick={() => setShowAll(true)}>Wszystkie ({items.length})</button>
