@@ -2,8 +2,8 @@
 export const SHOP = {
   name: 'Fonexpert',
   tagline: 'Serwis GSM',
-  phone: '516 516 026',
-  phoneHref: 'tel:+48516516026',
+  phone: '739 696 665',
+  phoneHref: 'tel:+48739696665',
   email: 'kontaktfonexpert@gmail.com',
   addressLine1: 'ul. Żołnierzy Wyklętych 16 (Pasaż Kaufland)',
   addressLine2: '09-100 Płońsk',
