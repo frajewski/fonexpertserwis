@@ -465,6 +465,7 @@ exports.createBookingRequestWeb = onCall(
         ? [...new Set(data.issues.filter((i) => ALLOWED_ISSUES.includes(i)))]
         : [];
       const needsDiagnosis = data.needsDiagnosis === true && issues.length === 0;
+      const deviceType = ["Smartfon", "Tablet", "Laptop", "Inne"].includes(data.deviceType) ? data.deviceType : "";
 
       if (!name || !phone || !brand) {
         throw new HttpsError(
@@ -490,6 +491,7 @@ exports.createBookingRequestWeb = onCall(
         brand,
         model,
         description: description.slice(0, 2000),
+        deviceType,
         issues,
         needsDiagnosis,
         termsAcceptedAt: new Date().toISOString(),

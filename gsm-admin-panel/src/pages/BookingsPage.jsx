@@ -260,7 +260,7 @@ export default function BookingsPage() {
                     <Detail label="Klient">{customer?.name || b.customerName || '—'}</Detail>
                     <Detail label="Telefon">{phone ? <a href={`tel:${phone}`}>{phone}</a> : '—'}</Detail>
                     {b.company && <Detail label="Firma">{b.company}</Detail>}
-                    <Detail label="Urządzenie">{deviceName(b) || '—'}</Detail>
+                    <Detail label="Urządzenie">{[b.deviceType, deviceName(b)].filter(Boolean).join(' · ') || '—'}</Detail>
                     <Detail label="Usterka">
                       {b.needsDiagnosis ? <span className="bk-chip bk-chip-diag">🔍 Potrzebna diagnoza</span>
                         : (b.issues || []).length ? (b.issues || []).map((i) => <span key={i} className="bk-chip">{i}</span>)

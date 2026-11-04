@@ -1,4 +1,4 @@
-.rs-page { min-height: 100vh; }
+.rs-page { min-height: 60vh; }
 
 .rs-loading {
   display: flex;
@@ -19,8 +19,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--line);
+  padding: 18px 20px 0;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .rs-back {
@@ -155,7 +156,7 @@
 .rs-btn:disabled { opacity: 0.6; cursor: wait; }
 
 .rs-btn-primary { background: var(--accent); color: #fff; }
-.rs-btn-primary:hover { background: #5253E8; }
+.rs-btn-primary:hover { background: var(--accent-deep); }
 
 .rs-btn-ghost {
   background: transparent;

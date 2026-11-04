@@ -3,25 +3,26 @@
    ============================================================ */
 
 :root {
-  /* Kolory – zgodne z apką mobilną (granat + fiolet), z własnym charakterem */
-  --ink:        #14192B;   /* tekst główny, prawie czarny granat */
-  --ink-soft:   #5B6178;   /* tekst drugoplanowy */
-  --paper:      #F5F3EE;   /* tło — ciepła biel, nie szpitalna */
+  /* Kolory – niebieska paleta marki Fonexpert (makieta 2026-11) */
+  --ink:        #0F172A;
+  --ink-soft:   #475569;
+  --paper:      #F6F8FB;
   --surface:    #FFFFFF;
-  --line:       #E3E0D8;
+  --line:       #E2E8F0;
 
-  --navy:       #1A2438;   /* głęboki granat — sekcje ciemne, nagłówek */
-  --navy-soft:  #2A3650;
+  --navy:       #1B2230;
+  --navy-soft:  #2A3343;
 
-  --accent:     #6465FF;   /* fiolet z apki — akcje główne */
-  --accent-soft: #EDEDFF;
+  --accent:     #1662E8;
+  --accent-deep: #0F4FC4;
+  --accent-soft: #EAF1FE;
 
-  --good:       #1DB954;   /* status: gotowe / zaakceptowane */
-  --good-soft:  #E7F8ED;
-  --warn:       #E8533D;   /* status: wymaga uwagi / akcji klienta */
-  --warn-soft:  #FCEAE6;
-  --wait:       #C99A2E;   /* status: w toku / oczekuje */
-  --wait-soft:  #FAF1DD;
+  --good:       #16A34A;
+  --good-soft:  #E8F7EE;
+  --warn:       #DC3B2F;
+  --warn-soft:  #FDECEA;
+  --wait:       #B7791F;
+  --wait-soft:  #FDF4E3;
 
   /* Typografia */
   --font-display: 'Space Grotesk', sans-serif;

@@ -61,7 +61,7 @@ export default function RepairStatusPage() {
         }
 
         if (!phone) {
-          navigate('/');
+          navigate('/status');
           return;
         }
 
@@ -91,7 +91,7 @@ export default function RepairStatusPage() {
     return (
       <div className="rs-loading">
         {error}{' '}
-        <button className="rs-back-link" onClick={() => navigate('/')}>
+        <button className="rs-back-link" onClick={() => navigate('/status')}>
           Wróć do wyszukiwania
         </button>
       </div>
@@ -102,7 +102,7 @@ export default function RepairStatusPage() {
     return (
       <div className="rs-loading">
         Nie znaleziono tego zlecenia.{' '}
-        <button className="rs-back-link" onClick={() => navigate('/')}>
+        <button className="rs-back-link" onClick={() => navigate('/status')}>
           Wróć do wyszukiwania
         </button>
       </div>
@@ -171,12 +171,11 @@ export default function RepairStatusPage() {
 
   return (
     <div className="rs-page">
-      <header className="rs-header">
-        <button className="rs-back" onClick={() => navigate('/')}>
+      <div className="rs-header">
+        <button className="rs-back" onClick={() => navigate('/status')}>
           ← Wyszukaj inne zlecenie
         </button>
-        <span className="rs-brand">◈ Fonexpert</span>
-      </header>
+      </div>
 
       <main className="rs-main">
         <section className="rs-device-card">

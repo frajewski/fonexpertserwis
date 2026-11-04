@@ -40,12 +40,6 @@ export default function LookupPage() {
 
   return (
     <div className="lk-page">
-      <header className="lk-header">
-        <div className="lk-brand">
-          <span className="lk-brand-mark">◈</span>
-          Fonexpert
-        </div>
-      </header>
 
       <main className="lk-main">
         <div className="lk-hero">

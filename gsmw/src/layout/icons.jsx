@@ -1,0 +1,31 @@
+// Proste ikony liniowe (stroke = currentColor), bez zewnętrznych bibliotek
+const base = { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
+const I = (paths) => function Icon({ size = 24, ...rest }) { return <svg {...base} width={size} height={size} {...rest}>{paths}</svg>; };
+
+export const IconPhone = I(<><rect x="7" y="2.5" width="10" height="19" rx="2.2" /><path d="M11 18.5h2" /></>);
+export const IconTablet = I(<><rect x="4.5" y="2.5" width="15" height="19" rx="2.2" /><path d="M11 18.5h2" /></>);
+export const IconLaptop = I(<><rect x="4.5" y="5" width="15" height="10" rx="1.5" /><path d="M2.5 18.5h19" /></>);
+export const IconDevice = I(<><rect x="6" y="6" width="12" height="12" rx="3" /><path d="M9.5 3v3M14.5 3v3M9.5 18v3M14.5 18v3" /></>);
+export const IconWrench = I(<path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L3.5 17.5l3 3 5.7-5.7a4 4 0 0 0 5.3-5.3l-2.6 2.6-2.4-.6-.6-2.4z" />);
+export const IconBolt = I(<path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z" />);
+export const IconHeadset = I(<><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><rect x="3" y="13" width="4" height="6" rx="1.5" /><rect x="17" y="13" width="4" height="6" rx="1.5" /><path d="M19 19c0 1.5-1.5 2.5-4 2.5h-2" /></>);
+export const IconShield = I(<><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.4 7.5 10 4.3-1.6 7.5-5.4 7.5-10v-6z" /><path d="m8.5 12 2.5 2.5 4.5-5" /></>);
+export const IconCrack = I(<><rect x="7" y="2.5" width="10" height="19" rx="2.2" /><path d="m9 6 3 4-2 3 4 4" /></>);
+export const IconBattery = I(<><rect x="3" y="7" width="16" height="10" rx="2" /><path d="M21 10.5v3M6 10v4M9 10v4" /></>);
+export const IconPlug = I(<><path d="M9 2.5v5M15 2.5v5M7 7.5h10v3a5 5 0 0 1-10 0z" /><path d="M12 15.5v6" /></>);
+export const IconCamera = I(<><path d="M3.5 8.5a2 2 0 0 1 2-2h2l1.5-2h6l1.5 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="3.5" /></>);
+export const IconSpeaker = I(<><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" /></>);
+export const IconDrop = I(<path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z" />);
+export const IconPower = I(<><path d="M12 3v8" /><path d="M7 6.5a7 7 0 1 0 10 0" /></>);
+export const IconBack = I(<><rect x="7" y="2.5" width="10" height="19" rx="2.2" /><circle cx="10" cy="6.5" r="1.3" /></>);
+export const IconCog = I(<><circle cx="12" cy="12" r="3" /><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" /></>);
+export const IconDots = I(<><circle cx="12" cy="12" r="9" /><path d="M8 12h.01M12 12h.01M16 12h.01" strokeWidth="2.6" /></>);
+export const IconSearch = I(<><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></>);
+export const IconArrow = I(<path d="M5 12h14M13 6l6 6-6 6" />);
+export const IconCheck = I(<path d="m5 12.5 4.5 4.5L19 7.5" />);
+export const IconMail = I(<><rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="m3.5 7 8.5 6 8.5-6" /></>);
+export const IconPin = I(<><path d="M12 21.5s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z" /><circle cx="12" cy="9.5" r="2.5" /></>);
+export const IconClock = I(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>);
+export const IconCall = I(<path d="M5 3.5h3.5l1.5 4.5-2.2 1.4a11 11 0 0 0 6.8 6.8L16 14l4.5 1.5V19a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.7 2 2 0 0 1 5 3.5z" />);
+export const IconMenu = I(<path d="M4 7h16M4 12h16M4 17h16" />);
+export const IconClose = I(<path d="M6 6l12 12M18 6 6 18" />);
