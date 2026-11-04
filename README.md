@@ -74,6 +74,9 @@ Dwa tryby: **kupno** i **komis**. Skala stanu Grade A+ do D, nowy/używany. Dane
 ### 🤝 U komisantów (`/komisanci`, tylko Admin)
 Własne telefony oddane innym osobom w komis (status `U komisanta`). Komisant zatrzymuje nadwyżkę, a Ty ustalasz kwotę, którą chcesz uzyskać („Cena dla komisanta”, ustawiana też w karcie telefonu). Lista grupowana po komisantach, formularz przekazania z wieloma telefonami, **druk protokołu przekazania**, „💰 Zapłacił” (rejestruje sprzedaż), „↩ Zwrot”, edycja danych komisanta i przenoszenie telefonu między komisantami, alert przy ≥30 dniach. Telefony u komisantów nie trafiają do katalogu B2B.
 
+### 🏷 Wyceny skupu (`/wyceny`, tylko admin)
+Zapytania z zakładki „Urządzenia” w panelu klienta (`gsmw` → `/urzadzenia`): typ, marka, model, pamięć, stan, kondycja baterii, akcesoria, opis i do 5 zdjęć. Zapis wyłącznie przez funkcję `createBuybackRequestWeb` (kolekcja `buybackRequests`, maks. 5 zapytań na sesję na dobę); odczyt i obsługa tylko admin. W panelu: licznik nowych w menu, push do admina, wpisanie ceny → podgląd i edycja SMS z wyceną (status „Wycenione”), „Kupione” / „Odrzuć”, usuwanie, historia SMS.
+
 ### 📅 Rezerwacje (`/rezerwacje`)
 Klient na stronie („Umów naprawę” w `gsmw`) podaje imię i nazwisko, telefon, markę i model, wybiera rodzaj urządzenia, zaznacza usterki z listy albo „Nie wiem — potrzebna diagnoza”, opis, preferowany termin i może dodać do 5 zdjęć usterki (Storage `bookingUploads/<uid>/`, widoczne w szczegółach rezerwacji i przenoszone do zdjęć zlecenia). W panelu (licznik nowych w menu, zakładki Aktywne/Wszystkie) kliknięcie rozwija pełne szczegóły. **Akceptacja nadaje numer rezerwacji** (`R001/2026`, licznik `counters/bookings-ROK`), zapisuje odpowiedź, wstępną cenę i opcjonalny **zadatek BLIK** — SMS do klienta (podgląd przed wysłaniem) zawiera numer i instrukcję wpłaty na numer telefonu z numerem rezerwacji w tytule (numer BLIK w `src/constants/shopInfo.js`). Wpłatę oznacza się przyciskiem „Zadatek wpłacony”; „Utwórz zlecenie” dopasowuje klienta po telefonie (albo go zakłada) i przenosi wpłacony zadatek do zlecenia. Historia SMS przy zgłoszeniu.
 
@@ -150,6 +153,7 @@ Parametry `REVIEW_URL` (link do opinii Google) i `REVIEW_SMS_MODE` Firebase pyta
 | `expenses` | Koszty utrzymania firmy |
 | `tasks` | Wspólna lista zadań zespołu |
 | `bookingRequests` | Zgłoszenia rezerwacji terminu |
+| `buybackRequests` | Zapytania o wycenę do skupu (tylko admin) |
 | `b2bConfig` | Token aktywnego linku B2B (niedostępne klientowi bezpośrednio) |
 | `b2bCatalog/{token}/items` | Publiczny, okrojony katalog dla klienta B2B |
 | `counters` | Liczniki numerów zleceń (`N/ROK`) |

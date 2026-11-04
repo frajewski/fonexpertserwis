@@ -537,6 +537,74 @@ exports.createBookingRequestWeb = onCall(
 
 
 /**
+ * Zapytanie o wycenę urządzenia do skupu (zakładka „Urządzenia” w panelu klienta).
+ * Zapis tylko przez funkcję; czyta i obsługuje wyłącznie admin.
+ */
+exports.createBuybackRequestWeb = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    try {
+      if (!request.auth) throw new HttpsError("unauthenticated", "Brak sesji użytkownika.");
+      const data = request.data || {};
+      const str = (v, max) => String(v || "").trim().slice(0, max);
+
+      const name = str(data.name, 120);
+      const phone = normalizePhone(data.phone || "");
+      const deviceType = ["Smartfon", "Tablet", "Laptop", "Smartwatch", "Inne"].includes(data.deviceType) ? data.deviceType : "";
+      const brand = str(data.brand, 60);
+      const model = str(data.model, 80);
+      const storage = str(data.storage, 30);
+      const CONDITIONS = ["Jak nowy", "Bardzo dobry", "Dobry", "Widoczne ślady użytkowania", "Uszkodzony"];
+      const condition = CONDITIONS.includes(data.condition) ? data.condition : "";
+      const batteryHealth = Number.isFinite(Number(data.batteryHealth)) && Number(data.batteryHealth) > 0
+        ? Math.min(100, Math.round(Number(data.batteryHealth))) : null;
+      const ACCESSORIES = ["Pudełko", "Ładowarka / kabel", "Dowód zakupu", "Etui / szkło"];
+      const accessories = Array.isArray(data.accessories)
+        ? [...new Set(data.accessories.filter((a) => ACCESSORIES.includes(a)))] : [];
+      const description = str(data.description, 2000);
+      const photoPaths = Array.isArray(data.photoPaths)
+        ? data.photoPaths
+            .filter((p) => typeof p === "string" && p.startsWith(`bookingUploads/${request.auth.uid}/`) && !p.includes("..") && p.length < 200)
+            .slice(0, 5)
+        : [];
+
+      if (!name || !phone || !brand || !model) {
+        throw new HttpsError("invalid-argument", "Podaj markę, model, imię i numer telefonu.");
+      }
+      if (!condition) throw new HttpsError("invalid-argument", "Wybierz stan urządzenia.");
+      if (data.acceptPrivacy !== true) throw new HttpsError("invalid-argument", "Zaakceptuj informację o przetwarzaniu danych.");
+
+      // Prosta ochrona przed spamem: maks. 5 zapytań na sesję na dobę
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const recent = await db.collection("buybackRequests")
+        .where("authUid", "==", request.auth.uid).where("createdAt", ">=", since).limit(5).get();
+      if (recent.size >= 5) throw new HttpsError("resource-exhausted", "Wysłano już kilka zapytań — zadzwoń do nas, chętnie pomożemy.");
+
+      const now = new Date().toISOString();
+      const ref = await db.collection("buybackRequests").add({
+        customerName: name,
+        customerPhone: phone,
+        deviceType, brand, model, storage, condition, batteryHealth, accessories, description, photoPaths,
+        status: "Nowe",
+        offerPrice: null,
+        adminNote: "",
+        privacyAcceptedAt: now,
+        source: "web",
+        createdAt: now,
+        createdAtServer: FieldValue.serverTimestamp(),
+        authUid: request.auth.uid,
+      });
+      return { ok: true, id: ref.id };
+    } catch (err) {
+      console.error("createBuybackRequestWeb error:", err);
+      if (err instanceof HttpsError) throw err;
+      throw new HttpsError("internal", err.message || "Błąd serwera.");
+    }
+  }
+);
+
+
+/**
  * Funkcja używana przez panel webowy:
  * wyszukiwanie zlecenia po bezpiecznym tokenie z linku śledzenia.
  * Przykład linku: https://gsmserviceapp-ff8f6.web.app/?token=abc123

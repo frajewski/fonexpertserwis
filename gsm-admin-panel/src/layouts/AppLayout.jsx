@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
 import { NavLink, useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { onPushLogout } from '../push/pushNotifications';
@@ -13,6 +15,7 @@ const NAV_ITEMS = [
   { to: '/kasa',       label: 'Kasa',         icon: '💰', roles: ['admin'] },
   { to: '/magazyn',    label: 'Magazyn',      icon: '▤', roles: ['admin', 'worker'] },
   { to: '/skup',       label: 'Skup',         icon: '◈', roles: ['admin'] },
+  { to: '/wyceny',     label: 'Wyceny skupu', icon: '🏷', roles: ['admin'], badge: 'buyback' },
   { to: '/umowa',      label: 'Umowa skupu',  icon: '📝', roles: ['admin'] },
   { to: '/komisanci',  label: 'U komisantów', icon: '🤝', roles: ['admin'] },
   { to: '/klienci',    label: 'Klienci',      icon: '◎', roles: ['admin', 'worker'] },
@@ -27,7 +30,14 @@ export default function AppLayout({ children }) {
   const logout = useStore((s) => s.logout);
   const resendVerification = useStore((s) => s.resendVerification);
   const pendingBookings = useStore((s) => s.getPendingBookingsCount());
-  const badges = { bookings: pendingBookings };
+  const isAdminUser = currentUser?.role === 'admin';
+  const [newBuybacks, setNewBuybacks] = useState(0);
+  useEffect(() => {
+    if (!isAdminUser) { setNewBuybacks(0); return undefined; }
+    const q = query(collection(db, 'buybackRequests'), where('status', '==', 'Nowe'));
+    return onSnapshot(q, (snap) => setNewBuybacks(snap.size), () => setNewBuybacks(0));
+  }, [isAdminUser]);
+  const badges = { bookings: pendingBookings, buyback: newBuybacks };
   const navigate = useNavigate();
 
   const [verifySent, setVerifySent] = useState(false);

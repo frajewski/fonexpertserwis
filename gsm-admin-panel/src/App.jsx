@@ -31,6 +31,7 @@ import TradeDetailPage from './pages/TradeDetailPage';
 import StatsPage from './pages/StatsPage';
 import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
+import BuybackRequestsPage from './pages/BuybackRequestsPage';
 
 function ProtectedRoute({ children }) {
   const currentUser = useStore((s) => s.currentUser);
@@ -145,6 +146,7 @@ export default function App() {
       <Route path="/skup" element={<AdminOnlyRoute><TradePage /></AdminOnlyRoute>} />
       <Route path="/komisanci" element={<AdminOnlyRoute><ConsignedOutPage /></AdminOnlyRoute>} />
       <Route path="/skup/nowy" element={<AdminOnlyRoute><NewTradePage /></AdminOnlyRoute>} />
+      <Route path="/wyceny" element={<AdminOnlyRoute><BuybackRequestsPage /></AdminOnlyRoute>} />
       <Route path="/umowa" element={<AdminOnlyRoute><PurchaseContractPage /></AdminOnlyRoute>} />
       <Route path="/skup/import" element={<AdminOnlyRoute><ImportPhonesPage /></AdminOnlyRoute>} />
       <Route path="/skup/kalkulator" element={<AdminOnlyRoute><CalculatorPage /></AdminOnlyRoute>} />

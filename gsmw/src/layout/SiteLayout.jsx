@@ -21,6 +21,8 @@ const NAV = [
   { to: '/', label: 'Strona główna', end: true },
   { to: '/umow-naprawe', label: 'Umów naprawę' },
   { to: '/status', label: 'Sprawdź status' },
+  { to: '/urzadzenia', label: 'Urządzenia' },
+  { to: '/faq', label: 'FAQ' },
   { to: '/kontakt', label: 'Kontakt' },
 ];
 

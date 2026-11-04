@@ -11,6 +11,7 @@ const lookupRepairsByPhoneFn = httpsCallable(functions, 'lookupRepairsByPhone');
 const acceptEstimateWebFn = httpsCallable(functions, 'acceptEstimateWeb');
 const rejectEstimateWebFn = httpsCallable(functions, 'rejectEstimateWeb');
 const createBookingRequestWebFn = httpsCallable(functions, 'createBookingRequestWeb');
+const createBuybackRequestWebFn = httpsCallable(functions, 'createBuybackRequestWeb');
 const respondToSlotWebFn = httpsCallable(functions, 'respondToSlotWeb');
 
 export const lookupRepairByToken = async (token) => {
@@ -158,6 +159,12 @@ export async function uploadBookingPhotos(files) {
     paths.push(path);
   }
   return paths;
+}
+
+export async function createBuybackRequest(formData) {
+  await ensureAnonymousAuth();
+  const { data } = await createBuybackRequestWebFn({ ...formData, phone: normalizePhone(formData.phone) });
+  return data;
 }
 
 export async function createBookingRequest(formData) {

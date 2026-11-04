@@ -184,7 +184,7 @@ exports.sendSmsToCustomer = onCall(
       throw new HttpsError("permission-denied", "Tylko personel może wysyłać SMS-y.");
     }
 
-    const { phone, text, repairId, bookingId, kind } = request.data || {};
+    const { phone, text, repairId, bookingId, buybackId, kind } = request.data || {};
     const to = toE164PL(phone);
     const body = String(text || "").trim();
 
@@ -208,6 +208,7 @@ exports.sendSmsToCustomer = onCall(
     };
     if (repairId) await logSms("repairs", repairId, entry);
     if (bookingId) await logSms("bookingRequests", bookingId, entry);
+    if (buybackId && role === "admin") await logSms("buybackRequests", buybackId, entry);
     return { ok: true };
   }
 );

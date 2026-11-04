@@ -284,6 +284,15 @@ exports.pushOnBookingCreated = onDocumentCreated({ document: "bookingRequests/{b
     { type: "booking", bookingId: event.params.bookingId });
 });
 
+exports.pushOnBuybackCreated = onDocumentCreated({ document: "buybackRequests/{buybackId}", region: REGION }, async (event) => {
+  const b = event.data && event.data.data();
+  if (!b) return;
+  const admins = await getUserIdsByRoles(["admin"]);
+  await notifyOnce(event, admins,
+    { title: "Nowe zapytanie o wycenę (skup)", body: [b.brand, b.model, b.storage].filter(Boolean).join(" ") || "Urządzenie" },
+    { type: "buyback", buybackId: event.params.buybackId });
+});
+
 exports.pushOnLowStock = onDocumentUpdated({ document: "parts/{partId}", region: REGION }, async (event) => {
   const before = event.data.before.data() || {};
   const after = event.data.after.data() || {};

@@ -206,6 +206,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ---------- ZAPYTANIA O WYCENĘ (SKUP) ----------
+    // Tworzy wyłącznie Cloud Function createBuybackRequestWeb; obsługuje tylko admin
+    // (pracownik nie ma dostępu do skupu ani cen zakupu).
+    match /buybackRequests/{id} {
+      allow read, update, delete: if isAdmin();
+      allow create: if false;
+    }
+
     // ---------- META ----------
     // Dokument adminAssigned – używany WYŁĄCZNIE przez Cloud Function
     // (decideInitialRole) do bezpiecznego, atomowego oznaczenia "kto stał się

@@ -11,12 +11,12 @@
 //  do zlecenia jako zadatek (i do raportu Kasy).
 // ============================================================
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, runTransaction } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { db, functions, storage } from '../firebase/firebaseConfig';
-import { getDownloadURL, ref as storageRef } from 'firebase/storage';
+import { db, functions } from '../firebase/firebaseConfig';
+import StoragePhotos, { storagePhotoUrls } from '../components/StoragePhotos';
 import useStore from '../store/useStore';
 import { BOOKING_STATUS, BOOKING_STATUS_ICONS } from '../constants/bookingStatuses';
 import STATUS from '../constants/statuses';
@@ -183,7 +183,7 @@ export default function BookingsPage() {
       customerId = existing?.id
         || (await addWalkInCustomer({ name: b.customerName || 'Klient', phone: b.customerPhone || '', email: '' })).id;
     }
-    const photoUrls = await bookingPhotoUrls(b.photoPaths);
+    const photoUrls = await storagePhotoUrls(b.photoPaths);
     const issueText = b.needsDiagnosis ? 'Diagnoza' : (b.issues || []).join(', ');
     const repair = await addRepair({
       customerId,
@@ -271,7 +271,7 @@ export default function BookingsPage() {
                     </Detail>
                     <Detail label="Opis klienta"><span className="bk-pre">{b.description || '—'}</span></Detail>
                     {(b.photoPaths || []).length > 0 && (
-                      <Detail label={`Zdjęcia (${b.photoPaths.length})`}><BookingPhotos paths={b.photoPaths} /></Detail>
+                      <Detail label={`Zdjęcia (${b.photoPaths.length})`}><StoragePhotos paths={b.photoPaths} /></Detail>
                     )}
                     <Detail label="Preferowany termin">{b.preferredDate ? fmtPreferred(b.preferredDate) : 'dowolny'}</Detail>
                     <Detail label="Zgłoszono">{fmtDateTime(b.createdAt)}{b.source === 'web' ? ' · ze strony' : ''}</Detail>
@@ -393,28 +393,3 @@ export default function BookingsPage() {
   );
 }
 
-async function bookingPhotoUrls(paths) {
-  const list = (paths || []).slice(0, 5);
-  const urls = await Promise.all(list.map((p) => getDownloadURL(storageRef(storage, p)).catch(() => null)));
-  return urls.filter(Boolean);
-}
-
-function BookingPhotos({ paths }) {
-  const [urls, setUrls] = useState(null);
-  const key = (paths || []).join('|');
-  useEffect(() => {
-    let alive = true;
-    bookingPhotoUrls(paths).then((u) => { if (alive) setUrls(u); });
-    return () => { alive = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
-  if (!urls) return <span className="bk-muted">Ładowanie…</span>;
-  if (!urls.length) return <span className="bk-muted">Nie udało się wczytać zdjęć</span>;
-  return (
-    <div className="bk-photos">
-      {urls.map((u) => (
-        <a key={u} href={u} target="_blank" rel="noreferrer"><img src={u} alt="Zdjęcie usterki" loading="lazy" /></a>
-      ))}
-    </div>
-  );
-}
