@@ -124,6 +124,11 @@ export default function RepairStatusPage() {
     setSlotLoading(true);
     setError('');
     try {
+      if (!accept && slotCounter && new Date(slotCounter).getTime() < Date.now()) {
+        setError('Wybierz termin, który jeszcze nie minął.');
+        setSlotLoading(false);
+        return;
+      }
       const counterAt = !accept && slotCounter ? new Date(slotCounter).toISOString() : null;
       const status = await respondToSlot(repair.id, phone, token, accept, accept ? '' : slotNote, counterAt);
       setRepair((r) => ({ ...r, proposedSlot: { ...r.proposedSlot, status, counterAt } }));
@@ -212,7 +217,7 @@ export default function RepairStatusPage() {
                 {showSlotNote && (
                   <label className="rs-slot-pick">
                     <span>Kiedy Ci pasuje?</span>
-                    <input type="datetime-local" value={slotCounter} onChange={(e) => setSlotCounter(e.target.value)} />
+                    <input type="datetime-local" min={nowLocalMinute()} value={slotCounter} onChange={(e) => setSlotCounter(e.target.value)} />
                   </label>
                 )}
                 {showSlotNote && (
@@ -348,4 +353,10 @@ function badgeTone(status) {
   if (status === STATUS.READY || status === STATUS.DELIVERED) return 'good';
   if (status === STATUS.CANCELLED) return 'warn';
   return 'wait';
+}
+// Bieżąca chwila jako wartość dla <input type="datetime-local"> (czas lokalny)
+function nowLocalMinute() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }

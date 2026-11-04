@@ -321,7 +321,7 @@ exports.respondToSlotWeb = onCall(
       let counter = null;
       if (!accept && counterAt) {
         const t = new Date(String(counterAt)).getTime();
-        if (Number.isNaN(t) || t < Date.now() - 60 * 60 * 1000 || t > Date.now() + 90 * 24 * 60 * 60 * 1000) {
+        if (Number.isNaN(t) || t < Date.now() - 5 * 60 * 1000 || t > Date.now() + 90 * 24 * 60 * 60 * 1000) {
           throw new HttpsError("invalid-argument", "Wybierz termin z najbliższych 90 dni.");
         }
         counter = new Date(t).toISOString();
@@ -457,6 +457,13 @@ exports.createBookingRequestWeb = onCall(
       const model = String(data.model || "").trim();
       const description = String(data.description || "").trim();
       const preferredDate = String(data.preferredDate || "").trim().slice(0, 20);
+      if (preferredDate) {
+        // Data YYYY-MM-DD nie może być wcześniejsza niż dziś (czas polski)
+        const todayPl = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(new Date());
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(preferredDate) || preferredDate < todayPl) {
+          throw new HttpsError("invalid-argument", "Preferowany termin nie może być wcześniejszy niż dzisiaj.");
+        }
+      }
       const ALLOWED_ISSUES = [
         "Zbity ekran / wyświetlacz", "Bateria", "Gniazdo ładowania", "Aparat", "Głośnik / mikrofon",
         "Zalanie", "Nie włącza się", "Tylna szybka / obudowa", "Oprogramowanie / blokada", "Inne",

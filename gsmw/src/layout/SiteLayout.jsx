@@ -21,6 +21,7 @@ const NAV = [
   { to: '/', label: 'Strona główna', end: true },
   { to: '/umow-naprawe', label: 'Umów naprawę' },
   { to: '/status', label: 'Sprawdź status' },
+  { to: '/kontakt', label: 'Kontakt' },
 ];
 
 export function SiteHeader() {
@@ -38,7 +39,6 @@ export function SiteHeader() {
               {n.label}
             </NavLink>
           ))}
-          <a href="#kontakt" className="sl-nav-link" onClick={() => setOpen(false)}>Kontakt</a>
         </nav>
       </div>
     </header>

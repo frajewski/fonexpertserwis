@@ -81,6 +81,9 @@ export default function BookingPage() {
   const brand = form.brand === OTHER ? form.brandOther.trim() : form.brand;
 
   const validate = (s) => {
+    if (s === 1 && form.preferredDate && form.preferredDate < todayLocal()) {
+      return 'Preferowany termin nie może być wcześniejszy niż dzisiaj.';
+    }
     if (s === 0) {
       if (!brand) return 'Wybierz albo wpisz markę urządzenia.';
       if (!form.model.trim()) return 'Wpisz model urządzenia.';
@@ -265,7 +268,7 @@ export default function BookingPage() {
                   </label>
                   <label className="bp-field bp-field-half">
                     <span>Preferowany termin (opcjonalnie)</span>
-                    <input type="date" value={form.preferredDate} onChange={set('preferredDate')} />
+                    <input type="date" min={todayLocal()} value={form.preferredDate} onChange={set('preferredDate')} />
                   </label>
                   <div className="bp-field">
                     <span>Zdjęcia usterki (opcjonalnie, do 5)</span>
@@ -378,4 +381,10 @@ export default function BookingPage() {
       </section>
     </main>
   );
+}
+
+// Dzisiejsza data w formacie YYYY-MM-DD (czas lokalny) — dolna granica terminu
+function todayLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
