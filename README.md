@@ -1,258 +1,245 @@
-# 🔧 Fonexpert — System zarządzania serwisem GSM
+# 🔧 Fonexpert — system serwisu GSM
 
-Kompletny system do zarządzania serwisem napraw telefonów, skupem/komisem używanych urządzeń, magazynem części, sprzedażą hurtową B2B i kontaktem z klientami — dwie aplikacje webowe (panel admina instalowalny jako PWA na telefonie), współdzielące jedną, żywą bazę danych.
+System dla serwisu **Fonexpert** (Pasaż Kaufland, Płońsk): zlecenia napraw, rezerwacje online, skup i komis telefonów, magazyn części, kasa, statystyki, katalog B2B i SMS-y do klientów. Dwie aplikacje webowe na jednej bazie Firebase, a panel admina działa też jako PWA i aplikacja Android.
 
-Repo: **github.com/frajewski/fonexpertserwis**
-
-> 📱 Panel admina jako **PWA i aplikacja hybrydowa Android (Capacitor)**: architektura, pluginy, build APK/AAB, testy i scenariusz prezentacji są w [`gsm-admin-panel/HYBRID_APP.md`](gsm-admin-panel/HYBRID_APP.md).
+| | |
+|---|---|
+| Panel klienta | https://gsm-serwis-klient.web.app |
+| Panel admina | https://gsm-serwis-admin.web.app (+ APK `pl.fonexpert.serwis`) |
+| Projekt Firebase | `gsmserviceapp-ff8f6` |
+| Repozytorium | github.com/frajewski/fonexpertserwis |
 
 ```
-┌──────────────────────┐     ┌─────────────────────────┐
-│  🖥️ Panel admina       │     │  🌐 Panel klienta         │
-│  (web + PWA)          │     │  (web)                    │
-│  (gsm-admin-panel)    │     │  (gsmw)                   │
-│                       │     │  • śledzenie zleceń       │
-│                       │     │  • katalog B2B (/oferta)  │
-└───────────┬───────────┘     └─────────┬─────────────────┘
-            │                           │
-            └─────────────┬─────────────┘
+ 🌐 Panel klienta (gsmw)            🖥️ Panel admina (gsm-admin-panel)
+ strona serwisu, zgłoszenia,        web + PWA + Android (Capacitor)
+ status naprawy, skup, B2B          zlecenia, rezerwacje, skup, kasa…
+            │                                   │
+            └──────────────┬────────────────────┘
+                           ▼
+              🔥 Firebase (firebase/)
+              Auth · Firestore · Storage · Cloud Functions · FCM
                            │
-             ┌─────────────▼─────────────┐
-             │   🔥 Firebase (firebase/)  │
-             │   (gsmserviceapp-ff8f6)    │
-             │  Auth · Firestore ·        │
-             │  Storage · Cloud Functions │
-             └────────────────────────────┘
+                           ▼
+              📲 Bramka SMS (Android + SMS Gateway, Cloud Server)
 ```
-
----
 
 ## Spis treści
-
-1. [Dwie aplikacje](#dwie-aplikacje)
-2. [Funkcje panelu admina](#funkcje-panelu-admina)
-3. [Katalog B2B](#katalog-b2b)
-   - [Bramka SMS](#bramka-sms)
-4. [Architektura danych](#architektura-danych)
-5. [Role i uprawnienia](#role-i-uprawnienia)
-6. [Instalacja i uruchomienie](#instalacja-i-uruchomienie)
-7. [Konfiguracja Firebase](#konfiguracja-firebase)
-8. [Struktura repozytorium](#struktura-repozytorium)
-9. [Znane ograniczenia](#znane-ograniczenia)
+1. [Panel klienta (`gsmw`)](#-panel-klienta-gsmw)
+2. [Panel admina (`gsm-admin-panel`)](#-panel-admina-gsm-admin-panel)
+3. [Najważniejsze procesy](#-najważniejsze-procesy)
+4. [Bramka SMS](#-bramka-sms)
+5. [Backend: funkcje, dane, bezpieczeństwo](#-backend-funkcje-dane-bezpieczeństwo)
+6. [Role](#-role)
+7. [Uruchomienie i wdrożenie](#-uruchomienie-i-wdrożenie)
+8. [Struktura repozytorium](#-struktura-repozytorium)
+9. [Znane ograniczenia](#-znane-ograniczenia)
 
 ---
 
-## Dwie aplikacje
+## 🌐 Panel klienta (`gsmw`)
 
-### 🖥️ `gsm-admin-panel/` — Panel administracyjny (web + PWA)
+Publiczna strona serwisu. Klient **nie zakłada konta** — panel loguje go anonimowo w Firebase, a dane zlecenia dostaje tylko przez Cloud Functions (link z tokenem albo numer zlecenia + telefon).
 
-Działa jako strona w przeglądarce **oraz** jako instalowalna aplikacja na telefonie (PWA — "Dodaj do ekranu głównego", otwiera się bez paska adresu). Dla Admina i Pracownika.
+| Adres | Co jest na stronie |
+|---|---|
+| `/` | Strona główna: hero z przyciskiem zgłoszenia i szybkim sprawdzeniem statusu, usługi, najczęstsze naprawy (link otwiera formularz z zaznaczoną usterką), „jak to działa”, FAQ, dojazd |
+| `/umow-naprawe` | Zgłoszenie naprawy w 2 krokach: urządzenie i usterka → dane kontaktowe; opcjonalnie opis, do 5 zdjęć, preferowany termin (nie wcześniej niż dziś), firma; akceptacja zasad zadatku i RODO. Parametry `?usterka=<usterka>|diagnoza`, `?typ=Tablet|Laptop|Inne` |
+| `/status` | Wyszukanie zlecenia po numerze (np. `14/2026`) i telefonie |
+| `/?token=…`, `/zlecenie/:id` | Status naprawy: 5 etapów, komunikat dla każdego statusu, historia zmian z datami, potwierdzenie albo zmiana proponowanego terminu, akceptacja/odrzucenie kosztorysu, gwarancja po odbiorze, kontakt |
+| `/skup-i-sprzedaz` | Sprzedaż nowych (gwarancja 12–24 mies.) i używanych (1–6 mies.) urządzeń, lista testów, formularz bezpłatnej wyceny do skupu (stan, opcjonalnie pamięć, bateria, zestaw, zdjęcia) |
+| `/faq` | 20 pytań w 4 kategoriach, wyszukiwarka, dane strukturalne FAQPage dla Google |
+| `/kontakt` | Wizytówka (status „otwarte/zamknięte” wg czasu w Polsce), mapa Google, trasa, link do opinii |
+| `/oferta/:token` | Prywatny katalog B2B (bez nagłówka strony, `noindex`) |
 
-### 🌐 `gsmw/` — Panel klienta (web)
+**Gdzie zmieniać treści:** dane kontaktowe, godziny, link do wizytówki i pinezka mapy — `gsmw/src/shop.js`; FAQ — `gsmw/src/data/faq.js`; lista testów urządzeń — `TESTS` w `pages/DevicesPage.jsx`; najczęstsze naprawy na stronie głównej — `POPULAR` w `pages/HomePage.jsx`.
 
-Dwie role w jednym miejscu:
-- **Śledzenie zlecenia** — bez logowania, przez numer zlecenia + telefon albo link/QR z potwierdzenia. Status naprawy, historia oraz **akceptacja / odrzucenie kosztorysu bezpośrednio z linku** (token w linku wystarcza, bez wpisywania numeru i telefonu).
-- **Katalog B2B** (`/oferta/:token`) — prywatna, niezaindeksowana strona z ofertą hurtową dla stałego klienta biznesowego, patrz niżej.
-
----
-
-## Funkcje panelu admina
-
-### 🏠 Pulpit (`/pulpit`) — ekran startowy po zalogowaniu
-Zysk dzisiaj, wszystkie alerty w jednym miejscu, lista zadań na dziś/jutro (wspólna dla zespołu), szybkie skróty, podgląd bieżącego miesiąca.
-
-### 🔧 Zlecenia
-Przyjęcie z edytowalną datą, priorytet, zadatek wpłacony z osobną linią "Do zapłaty" w kosztorysie, kosztorys z auto-wyliczaniem usługi (Łącznie − Części), wykonana usługa i zużyte części z Magazynu (automatyczne odjęcie stanu i doliczenie kosztu, blokada przy zerowym stanie), dokument sprzedaży (Paragon/Faktura), zdjęcia, **druk potwierdzenia przyjęcia z kodem QR** do śledzenia statusu online, **druk potwierdzenia wydania** ze skróconymi warunkami gwarancji, druk naklejki na sprzęt, filtry (marka, model, typ dokumentu, priorytet, zakres dat) zapamiętywane między odświeżeniami strony, historia starsza niż 30 dni doładowywana na żądanie, historia wysłanych SMS-ów w zleceniu (ręczne, automatyczne i prośby o opinię), szablony SMS z linkiem śledzenia (w tym przypomnienie o odbiorze i "części dotarły"), **wysyłka SMS jednym kliknięciem z komputera** przez bramkę SMS (patrz niżej), **wyszukiwanie po numerze telefonu klienta**.
-
-**Statusy:** Przyjęte → W diagnozie → Zamów części → W naprawie → Oczekuje na części → **Czeka na klienta** (części dotarły, klient powiadomiony — zmiana statusu proponuje wysłanie SMS „części dotarły”, raz na zlecenie) → Gotowe do odbioru → Odebrane / Anulowane.
-
-**Karta zlecenia:** zwijane sekcje (Powiadom klienta, Zdjęcia, Podpisy), statusy jako kompaktowe „pigułki”, typ dokumentu / NIP / PIN jako plakietki w nagłówku, w wydanych zleceniach podgląd i przełącznik SMS-a z prośbą o opinię.
-
-### 📱 Skup / sprzedaż telefonów
-Dwa tryby: **kupno** i **komis**. Skala stanu Grade A+ do D, nowy/używany. Dane sprzedającego (imię, adres, dowód/PESEL) + **umowy do druku**: umowa kupna od osoby prywatnej powstaje w osobnej zakładce **📝 Umowa skupu** (`/umowa`) — jeden formularz (sprzedawca z PESEL i dowodem, urządzenie, checkboxy stanu/wyposażenia/blokad, weryfikacja IMEI, sposób zapłaty, cena, podpis na ekranie) → „Generuj umowę” dodaje telefon do Skupu i od razu otwiera wydruk (jedna kartka A4, kwota także słownie; papier dla klienta i biura rachunkowego). Ponowny wydruk: „📄 Drukuj umowę” w karcie telefonu. Umowa komisu nadal z formularza „Dodaj telefon” (tryb Komis). Gwarancja wybierana przy oznaczaniu jako sprzedany (te same okresy co w naprawach) + **karta gwarancyjna do druku**, dołączana do paragonu. Zdjęcie telefonu (wgrywane, podmieniane, usuwalne). Filtry (marka, model, pamięć, dostawca, sprzedawca, zakres dat, cena) zapamiętywane między odświeżeniami. Kalkulator wyceny na bazie historii transakcji. Pole "W ofercie B2B" + cena hurtowa, pojedynczo lub hurtem dla zaznaczonych.
-
-### 🤝 U komisantów (`/komisanci`, tylko Admin)
-Własne telefony oddane innym osobom w komis (status `U komisanta`). Komisant zatrzymuje nadwyżkę, a Ty ustalasz kwotę, którą chcesz uzyskać („Cena dla komisanta”, ustawiana też w karcie telefonu). Lista grupowana po komisantach, formularz przekazania z wieloma telefonami, **druk protokołu przekazania**, „💰 Zapłacił” (rejestruje sprzedaż), „↩ Zwrot”, edycja danych komisanta i przenoszenie telefonu między komisantami, alert przy ≥30 dniach. Telefony u komisantów nie trafiają do katalogu B2B.
-
-### 🌐 Panel klienta – układ i komponenty (`gsmw`)
-Wspólne komponenty w `gsmw/src/styles/ui.css` (kontener `ui-wrap` = `--wrap` 1200 px, sekcje, hero, karty, przyciski `ui-btn-cta/primary/secondary/light`, pola `ui-field`, komunikaty `ui-alert`, stany ładowania i sukcesu). Hierarchia przycisków: jeden gradientowy CTA na ekran, potem primary/secondary/link. Strony: `/` (HomePage: hero + szybkie sprawdzenie statusu, usługi, najczęstsze naprawy, jak to działa, FAQ, dojazd), `/umow-naprawe` (2 kroki; `?usterka=…`/`?typ=…` zaznacza usterkę), `/status`, `/skup-i-sprzedaz`, `/faq`, `/kontakt`, `/zlecenie/:id`. Błędy dla klienta przez `utils/friendlyError.js`.
-
-### 🏷 Wyceny skupu (`/wyceny`, tylko admin)
-Zapytania z zakładki „Skup i sprzedaż” w panelu klienta (`gsmw` → `/skup-i-sprzedaz`): typ, marka, model, pamięć, stan, kondycja baterii, akcesoria, opis i do 5 zdjęć. Zapis wyłącznie przez funkcję `createBuybackRequestWeb` (kolekcja `buybackRequests`, maks. 5 zapytań na sesję na dobę); odczyt i obsługa tylko admin. W panelu: licznik nowych w menu, push do admina, wpisanie ceny → podgląd i edycja SMS z wyceną (status „Wycenione”), „Kupione” / „Odrzuć”, usuwanie, historia SMS.
-
-### 📅 Rezerwacje (`/rezerwacje`)
-Klient na stronie („Umów naprawę” w `gsmw`) podaje imię i nazwisko, telefon, markę i model, wybiera rodzaj urządzenia, zaznacza usterki z listy albo „Nie wiem — potrzebna diagnoza”, opis, preferowany termin i może dodać do 5 zdjęć usterki (Storage `bookingUploads/<uid>/`, widoczne w szczegółach rezerwacji i przenoszone do zdjęć zlecenia). W panelu (licznik nowych w menu, zakładki Aktywne/Wszystkie) kliknięcie rozwija pełne szczegóły. **Akceptacja nadaje numer rezerwacji** (`R001/2026`, licznik `counters/bookings-ROK`), zapisuje odpowiedź, wstępną cenę i opcjonalny **zadatek BLIK** — SMS do klienta (podgląd przed wysłaniem) zawiera numer i instrukcję wpłaty na numer telefonu z numerem rezerwacji w tytule (numer BLIK w `src/constants/shopInfo.js`). Wpłatę oznacza się przyciskiem „Zadatek wpłacony”; „Utwórz zlecenie” dopasowuje klienta po telefonie (albo go zakłada) i przenosi wpłacony zadatek do zlecenia. Historia SMS przy zgłoszeniu.
-
-### 💰 Kasa (`/kasa`)
-Raport dowolnego dnia: zlecenia wydane i telefony sprzedane z podziałem na sposób płatności (gotówka/karta/BLIK/przelew — wybierany przy „Potwierdź wydanie” i „Oznacz jako sprzedany”), zadatki przyjęte tego dnia, wydruk raportu na A4. Dane czytane z bazy dla wybranego dnia (nie tylko z 30-dniowego okna).
-
-### 📦 Magazyn części zamiennych
-Kategorie (wyświetlacze, baterie, gniazda ładowania, aparaty, obudowy i szybki, głośniki i mikrofony, taśmy i przyciski, akcesoria, inne) jako zakładki z licznikami; nowa część dostaje kategorię podpowiedzianą z nazwy, stare pozycje można przypisać automatycznie jednym przyciskiem. Wybór części w zleceniu i skupie pogrupowany wg kategorii. Osobna ewidencja od Skupu, alert przy niskim stanie, blokada dodania części jeśli brak na stanie.
-
-### 💸 Koszty utrzymania firmy
-Księgowość, ZUS, VAT, PIT, reklama, materiały eksploatacyjne — odejmowane od zysku w Statystykach ("zysk po kosztach").
-
-### 📊 Statystyki
-Okresy (dziś/miesiąc/rok) z łącznym zyskiem (naprawy + skup, po kosztach), przychód ze sprzedaży telefonów osobno od zysku, szczegółowy widok dowolnego miesiąca z historii (strona sama doczytuje starsze zlecenia spoza 30-dniowego okna), top marki/modele, marża wg marki, wykres roczny.
-
-### 👤 Klienci
-Karta z historią zleceń, edycja danych kontaktowych.
-
-### 🌙 Ciemny motyw
-Przełącznik w stopce menu (🌓 jak w systemie → ☀️ jasny → 🌙 ciemny), zapamiętywany na urządzeniu (`src/theme/theme.js`, paleta w `src/styles/tokens.css`).
-
-### 🔐 Moje konto
-Zmiana własnego hasła, weryfikacja email, reset hasła przez link.
+**Wygląd:** wspólne komponenty w `gsmw/src/styles/ui.css` (kontener `ui-wrap` = `--wrap` 1200 px, hero, sekcje, karty, przyciski, pola, komunikaty, stany ładowania i sukcesu), kolory w `styles/tokens.css`. Hierarchia przycisków: jeden gradientowy `ui-btn-cta` na ekran, potem `ui-btn-primary`, `ui-btn-secondary`, `ui-link`. Błędy pokazywane klientowi przechodzą przez `utils/friendlyError.js` (bez technicznych komunikatów Firebase).
 
 ---
 
-## Katalog B2B
+## 🖥️ Panel admina (`gsm-admin-panel`)
 
-Prywatna, niezaindeksowana (`noindex`) strona ofertowa dla klienta hurtowego — link z tokenem w ścieżce, bez logowania po stronie klienta.
+React + Vite, ten sam kod jako strona, PWA i aplikacja Android (Capacitor, szczegóły w [`gsm-admin-panel/HYBRID_APP.md`](gsm-admin-panel/HYBRID_APP.md)). Jasny/ciemny motyw (przełącznik w menu, `src/theme/theme.js`).
 
-**Jak działa:**
-1. Admin oznacza telefony jako "W ofercie B2B" z ceną hurtową (pojedynczo w karcie telefonu albo hurtem przez zaznaczenie wielu na liście Skupu).
-2. Cloud Function (`syncB2bCatalog`) nasłuchuje zmian w `phones/` i utrzymuje osobną, publicznie-czytelną kolekcję `b2bCatalog/{token}/items/` zawierającą **wyłącznie białą listę bezpiecznych pól** (marka, model, pamięć, kolor, grade, cena B2B, zdjęcie) — cena zakupu, marża, dane sprzedającego, notatki nigdy tam nie trafiają. Telefon znika z katalogu automatycznie po sprzedaży, odznaczeniu checkboxa albo wyzerowaniu ceny.
-3. Admin generuje/odświeża link w panelu (Skup → "🔗 Link B2B"), z opcją unieważnienia starego i wygenerowania nowego tokena.
-4. Klient otwiera link — widzi kafelki marek z liczbą sztuk i widełkami cenowymi, klika w markę, widzi listę modeli z ceną i przyciskiem **"Rezerwuj →"**, który otwiera WhatsApp z gotową wiadomością.
-5. Lista aktualizuje się na żywo (`onSnapshot`) — klient widzi zmiany bez odświeżania strony.
+| Menu | Kto | Co robi |
+|---|---|---|
+| **Pulpit** `/pulpit` | admin, pracownik | Zysk dziś, alerty, wspólna lista zadań, skróty |
+| **Zlecenia** `/` | admin, pracownik | Lista z filtrami i wyszukiwaniem po telefonie; karta zlecenia (szczegóły niżej) |
+| **Rezerwacje** `/rezerwacje` | admin, pracownik | Zgłoszenia ze strony: szczegóły, zdjęcia, akceptacja z numerem `R001/2026` i SMS-em, zadatek BLIK, zamiana na zlecenie; usuwanie tylko admin |
+| **Kalendarz** `/kalendarz` | admin, pracownik | Tydzień: proponowane/potwierdzone terminy napraw i preferowane terminy z rezerwacji |
+| **Kasa** `/kasa` | admin | Raport dnia wg sposobu płatności (gotówka/karta/BLIK/przelew), zadatki, wydruk A4 |
+| **Magazyn** `/magazyn` | admin, pracownik | Części w kategoriach (wyświetlacze, baterie, gniazda…), alert niskiego stanu, zużycie w zleceniach |
+| **Skup** `/skup` | admin | Telefony kupione i w komisie, grade A+–D, zdjęcia, filtry, sprzedaż z gwarancją i kartą gwarancyjną, kalkulator wyceny, oferta B2B |
+| **Wyceny skupu** `/wyceny` | admin | Zapytania z formularza na stronie: dane, zdjęcia, cena → SMS z wyceną, „Kupione”/„Odrzuć” |
+| **Umowa skupu** `/umowa` | admin | Umowa kupna od osoby prywatnej (PESEL, dowód, stan, IMEI, podpis) na jednej kartce A4; zapis dodaje telefon do Skupu |
+| **U komisantów** `/komisanci` | admin | Telefony oddane innym w komis: protokół przekazania, „Zapłacił”, zwrot |
+| **Klienci** `/klienci` | admin, pracownik | Karta klienta z historią zleceń |
+| **Statystyki** `/statystyki` | admin | Zysk naprawy + skup po kosztach, dowolny miesiąc z historii, marki, marże, wykres roczny |
+| **Koszty firmy** `/koszty` | admin | Księgowość, ZUS, podatki, reklama… odejmowane od zysku |
+| **Użytkownicy**, **Ustawienia** | admin | Role kont; dane serwisu (Firestore `meta/settings`) |
+
+**Karta zlecenia:**
+- Kosztorys (łącznie − części = usługa), zadatek i „do zapłaty”, części z magazynu, typ dokumentu (paragon/faktura), zdjęcia i podpisy.
+- Wydruki: potwierdzenie przyjęcia z kodem QR do śledzenia, potwierdzenie wydania z warunkami gwarancji, naklejka.
+- Sposób płatności przy wydaniu.
+- Proponowany termin naprawy (SMS z linkiem; klient akceptuje albo proponuje inny, który przyjmujesz jednym przyciskiem).
+- Ręczne SMS-y z szablonów, historia SMS-ów, przełącznik prośby o opinię.
+- Przypisanie klienta, jeśli zlecenie go nie ma.
+
+**Statusy zlecenia:** Przyjęte → W diagnozie → Zamów części → W naprawie → Oczekuje na części → Czeka na klienta → Gotowe do odbioru → Odebrane (albo Anulowane). Przy „Czeka na klienta” i „Gotowe do odbioru” panel proponuje SMS („części dotarły”, „gotowe do odbioru”), każdy najwyżej raz na zlecenie. Statusy są w `packages/shared-core/src/constants/statuses.js`; każda zmiana trafia do `history` zlecenia (data, status, kto).
+
+**Pracownik** nie widzi cen zakupu ani wartości finansowych: nie ma dostępu do Skupu, Wycen, Umowy, Komisantów, Kasy, Statystyk, Kosztów, Użytkowników i Ustawień.
 
 ---
 
-## Bramka SMS
+## 🔁 Najważniejsze procesy
 
-SMS-y wychodzą z własnego numeru właściciela, przez telefon z Androidem z kartą SIM i aplikacją **SMS Gateway for Android** ([sms-gate.app](https://sms-gate.app)) w trybie **Cloud Server**. Cloud Functions wywołują API bramki (`https://api.sms-gate.app/3rdparty/v1/messages`, Basic Auth), a bramka przekazuje wiadomość do telefonu.
+**Rezerwacja → zlecenie**
+1. Klient wysyła formularz `/umow-naprawe` (funkcja `createBookingRequestWeb`; zdjęcia w Storage `bookingUploads/<uid>/`).
+2. Push do personelu, licznik w menu „Rezerwacje”.
+3. Akceptacja nadaje numer `R001/ROK` (`counters/bookings-ROK`) i wysyła SMS (do edycji przed wysłaniem) z terminem, ceną i ewentualnym zadatkiem BLIK na numer z `src/constants/shopInfo.js` — w tytule numer rezerwacji. Zadatek przepada przy rezygnacji albo nieprzyjściu bez uprzedzenia.
+4. „Zadatek wpłacony” → „Utwórz zlecenie”: klient dopasowany po telefonie (albo założony), zadatek i zdjęcia przechodzą do zlecenia.
+
+**Śledzenie naprawy:** każde zlecenie ma `trackingToken`; link `https://gsm-serwis-klient.web.app/?token=…` jest w SMS-ach i w kodzie QR na potwierdzeniu. Klient widzi tylko pola z `repairToPublicData` (bez notatek wewnętrznych i autorów zmian).
+
+**Skup online:** formularz `/skup-i-sprzedaz` → `createBuybackRequestWeb` (maks. 5 zapytań na sesję na dobę) → push do admina → „Wyceny skupu”: cena i SMS → klient przychodzi z dowodem → „Umowa skupu”.
+
+**Katalog B2B:** telefon oznaczony „W ofercie B2B” z ceną hurtową trafia przez `syncB2bCatalog` do publicznej kolekcji `b2bCatalog/{token}/items` (tylko marka, model, pamięć, kolor, grade, cena, zdjęcie). Link generujesz w Skupie („🔗 Link B2B”) i możesz go unieważnić. Klient widzi listę na żywo i rezerwuje przez WhatsApp.
+
+---
+
+## 📲 Bramka SMS
+
+SMS-y wychodzą z numeru właściciela przez telefon z Androidem i aplikacją **SMS Gateway for Android** ([sms-gate.app](https://sms-gate.app)) w trybie **Cloud Server**. Funkcje wołają `https://api.sms-gate.app/3rdparty/v1/messages` (Basic Auth).
 
 | Funkcja (`firebase/functions/reviewSms.js`) | Do czego |
 |---|---|
-| `sendSmsToCustomer` (callable, tylko Admin/Pracownik) | Przycisk „📲 Wyślij SMS” w karcie zlecenia i SMS „części dotarły” przy statusie „Czeka na klienta” |
-| `sendReviewRequests` (codziennie 11:00, Europa/Warszawa) | Jednorazowa prośba o opinię Google dla zleceń „Odebrane” 3–6 dni po wydaniu |
-
-**Prośba o opinię:** po wysłaniu zapisuje `reviewRequestSentAt` (każde zlecenie dostaje SMS najwyżej raz), pomija zlecenia z `noReviewSms: true` (przełącznik w karcie zlecenia), jeden SMS na numer na przebieg. Treść bez polskich znaków (jeden SMS = 160 znaków). Tryby parametru `REVIEW_SMS_MODE`: `off`, `dry` (tylko log, domyślny), `live`.
+| `sendSmsToCustomer` (callable, admin i pracownik) | Wszystkie SMS-y z panelu: zlecenia, rezerwacje, wyceny skupu (te tylko admin). Wpis trafia do `smsLog` dokumentu |
+| `sendReviewRequests` (codziennie 11:00 czasu polskiego) | Jednorazowa prośba o opinię Google 3–6 dni po odbiorze; pomija zlecenia z `noReviewSms` |
 
 **Konfiguracja:**
 ```bash
-cd firebase
+cd ~/Desktop/pro/firebase
 printf '%s' 'LOGIN' | firebase functions:secrets:set SMSGATE_USER --data-file -
-printf '%s' 'HASLO'  | firebase functions:secrets:set SMSGATE_PASS --data-file -
-firebase deploy --only functions:sendReviewRequests,functions:sendSmsToCustomer
+printf '%s' 'HASLO' | firebase functions:secrets:set SMSGATE_PASS --data-file -
 ```
-Parametry `REVIEW_URL` (link do opinii Google) i `REVIEW_SMS_MODE` Firebase pyta przy deployu albo czyta z `firebase/functions/.env.*`.
+`REVIEW_URL` i `REVIEW_SMS_MODE` (`off` / `dry` / `live`) są w `firebase/functions/.env.gsmserviceapp-ff8f6` — ten plik ma pierwszeństwo przed `.env` i **nie może trafić do gita**.
 
-**Wymagania po stronie telefonu:** aplikacja musi być uruchomiona z włączonym Cloud Server, internet, bateria ustawiona na „Nieograniczone”, wyłączone „Wstrzymaj aktywność w aplikacji, jeśli nie jest używana”, włączone „Start on boot”. Wysłane SMS-y nie pojawiają się w Wiadomościach Google — status widać w zakładce MESSAGES aplikacji bramki albo przez API (`GET /3rdparty/v1/messages`).
+**Telefon z bramką:** aplikacja uruchomiona z włączonym Cloud Server, internet, bateria „Bez ograniczeń”, „Start on boot” włączone. Wysłanych SMS-ów nie widać w Wiadomościach Google — status jest w zakładce MESSAGES aplikacji bramki.
 
 ---
 
-## Architektura danych
+## 🔥 Backend: funkcje, dane, bezpieczeństwo
 
-### Współdzielone kolekcje Firestore
+**Cloud Functions** (`firebase/functions/`, region `us-central1`; `b2b.js`, `push.js`, `reviewSms.js` są dołączane do `index.js`):
 
-| Kolekcja | Co przechowuje |
+| Grupa | Funkcje |
 |---|---|
-| `users` | Profile (rola, telefon, email) |
-| `repairs` | Zlecenia naprawy |
-| `phones` | Telefony w skupie/komisie |
-| `parts` | Magazyn części zamiennych |
-| `expenses` | Koszty utrzymania firmy |
-| `tasks` | Wspólna lista zadań zespołu |
-| `bookingRequests` | Zgłoszenia rezerwacji terminu |
-| `buybackRequests` | Zapytania o wycenę do skupu (tylko admin) |
-| `b2bConfig` | Token aktywnego linku B2B (niedostępne klientowi bezpośrednio) |
-| `b2bCatalog/{token}/items` | Publiczny, okrojony katalog dla klienta B2B |
-| `counters` | Liczniki numerów zleceń (`N/ROK`) |
+| Panel klienta | `lookupRepair` (numer + telefon), `lookupRepairsByPhone`, `lookupRepairByToken`, `acceptEstimateWeb`, `rejectEstimateWeb`, `respondToSlotWeb`, `createBookingRequestWeb`, `createBuybackRequestWeb` |
+| Role | `decideInitialRole`, `syncOwnRoleClaim`, `setUserRoleClaim` |
+| Push (FCM) | `registerPushDevice`, `unregisterPushDevice`, `sendTestPush`, `pushOnRepairCreated`, `pushOnRepairUpdated`, `pushOnBookingCreated`, `pushOnBuybackCreated`, `pushOnLowStock`, `pushOnTaskCreated`, `pushOnTaskAssigned` |
+| B2B | `syncB2bCatalog`, `getB2bLink`, `regenerateB2bLink` |
+| SMS | `sendSmsToCustomer`, `sendReviewRequests` |
 
-### Real-time + historia na żądanie
-Subskrypcja na żywo obejmuje ostatnie 30 dni zleceń — starsze dociągane ręcznie, stronami (lista zleceń) albo automatycznie przy wejściu w Statystyki.
+**Firestore:**
 
-### Custom Claims (role)
-Rola (`admin`/`worker`/`customer`) żyje jako custom claim w tokenie Firebase Auth.
+| Kolekcja | Zawartość | Dostęp |
+|---|---|---|
+| `repairs` | Zlecenia (z `history`, `smsLog`, `proposedSlot`, `trackingToken`) | personel |
+| `phones` | Skup i komis | personel; usuwa admin (menu Skup widzi tylko admin) |
+| `parts` | Magazyn części | personel |
+| `bookingRequests` | Rezerwacje ze strony | personel; usuwa admin |
+| `buybackRequests` | Zapytania o wycenę | tylko admin; zapis tylko przez funkcję |
+| `users`, `tasks`, `expenses` | Konta i role, zadania, koszty | wg reguł |
+| `counters` | Numery zleceń `N/ROK` i rezerwacji | personel |
+| `meta/settings` | Ustawienia serwisu | admin |
+| `b2bConfig`, `b2bCatalog/{token}/items` | Token B2B, okrojony katalog | zapis tylko funkcje; katalog czyta każdy z losowym tokenem w ścieżce |
+
+**Storage:** `repairs/` (zdjęcia zleceń), `trade/` (zdjęcia skupu), `bookingUploads/<uid>/` (zdjęcia od klientów: zapis tylko do własnego folderu sesji, odczyt tylko personel).
+
+**Zasady bezpieczeństwa:** rola jest custom claimem w tokenie Auth; panel klienta nie czyta Firestore bezpośrednio, tylko przez funkcje, które sprawdzają token albo zgodność telefonu i zwracają okrojone dane; sam numer zlecenia nie wystarcza do podglądu.
+
+**Liczba danych w panelu admina:** na żywo subskrybowane są zlecenia z ostatnich 30 dni; starsze są doczytywane na żądanie (lista, Statystyki, Kasa).
 
 ---
 
-## Role i uprawnienia
+## 👥 Role
 
 | Rola | Dostęp |
 |---|---|
-| 👑 **Admin** | Wszystko — finanse, Magazyn, Koszty, Statystyki, Użytkownicy, link B2B |
-| 🔧 **Pracownik** | Pulpit, Zlecenia, Magazyn, Klienci, Zadania, wysyłka SMS — **bez** Skupu, U komisantów, Kosztów, Statystyk, Użytkowników, Ustawień i B2B |
-| 👤 **Klient** | Tylko panel klienta (`gsmw`) — status, kosztorys, historia |
-| — **Klient B2B** | Bez konta — token w linku, dostęp tylko do `b2bCatalog` tej jednej instancji |
+| 👑 Admin | Wszystko |
+| 🔧 Pracownik | Pulpit, Zlecenia, Rezerwacje, Kalendarz, Magazyn, Klienci, SMS-y — bez finansów, skupu i ustawień |
+| 🌐 Klient | Bez konta (sesja anonimowa) — tylko własne zlecenie przez link z tokenem albo numer + telefon |
+| 🤝 Klient B2B | Bez konta — tylko katalog z jednego aktywnego linku |
 
 ---
 
-## Instalacja i uruchomienie
-
-### 🖥️ Panel admina
-
-**Produkcja:** https://gsm-serwis-admin.web.app/
+## 🚀 Uruchomienie i wdrożenie
 
 **Lokalnie:**
 ```bash
-cd gsm-admin-panel
-npm install
-npm run dev
+cd ~/Desktop/pro/gsm-admin-panel && npm install && npm run dev   # panel admina
+cd ~/Desktop/pro/gsmw && npm install && npm run dev              # panel klienta
 ```
 
-### 🌐 Panel klienta
-
+**Wdrożenie (zawsze z właściwego folderu):**
 ```bash
-cd gsmw
-npm install
-npm run dev
+# backend: reguły, indeksy, Storage, funkcje
+cd ~/Desktop/pro/firebase && firebase deploy --only firestore:rules,firestore:indexes,storage,functions
+
+# panel klienta
+cd ~/Desktop/pro/gsmw && npm run build && firebase deploy --only hosting:klient
+
+# panel admina (web + PWA)
+cd ~/Desktop/pro/gsm-admin-panel && npm run build && firebase deploy --only hosting
 ```
+Po wdrożeniu odśwież panel w przeglądarce (Cmd+Shift+R), bo PWA trzyma starą wersję w cache.
+
+**Aktualizacja aplikacji na telefonie (Android, przez kabel USB):**
+```bash
+cd ~/Desktop/pro/gsm-admin-panel && npm version patch && npm run build && npx cap sync android \
+  && cd android && ./gradlew assembleRelease \
+  && ~/Library/Android/sdk/platform-tools/adb install -r app/build/outputs/apk/release/app-release.apk
+```
+
+**Adres panelu klienta** jest w dwóch miejscach: `clientUrl` w `gsm-admin-panel/src/constants/shopInfo.js` i `WEB_PANEL_URL` w `packages/shared-core/src/firestoreDb.js`. Przy zmianie hostingu (np. własnej domenie) zmień oba; stare kody QR rozpoznaje skaner dzięki `LEGACY_CLIENT_HOSTS`.
 
 ---
 
-## Konfiguracja Firebase
-
-Backend żyje w **osobnym folderze `firebase/`**:
-
-```bash
-cd firebase
-firebase login
-firebase deploy --only firestore:rules,firestore:indexes,functions,storage --project gsmserviceapp-ff8f6
-```
-
-Funkcje B2B (`syncB2bCatalog`, `getB2bLink`, `regenerateB2bLink`) mieszkają w `firebase/functions/b2b.js`, push w `push.js`, a bramka SMS w `reviewSms.js` — wszystkie dociągane do głównego `index.js` przez `Object.assign(exports, require('./…'))`. Projekt Firebase ma dwa hostingi (`admin`, `klient`): `firebase deploy --only hosting:admin` w `gsm-admin-panel/` i `hosting:klient` w `gsmw/`.
-
----
-
-## Struktura repozytorium
+## 🗂 Struktura repozytorium
 
 ```
 pro/
-├── firebase/                🔥 Backend — reguły, Cloud Functions
-│   ├── functions/
-│   │   ├── index.js
-│   │   ├── b2b.js            ← katalog B2B (sync, generowanie linku)
-│   │   ├── push.js           ← powiadomienia push (FCM)
-│   │   └── reviewSms.js      ← bramka SMS: ręczna wysyłka + prośby o opinię
-│   ├── firestore.rules
-│   ├── storage.rules
+├── firebase/                   🔥 backend
+│   ├── functions/              index.js, b2b.js, push.js, reviewSms.js (+ .env.* poza gitem)
+│   ├── firestore.rules, firestore.indexes.json, storage.rules
 │   └── firebase.json
-│
-├── gsm-admin-panel/          🖥️ Panel administracyjny (web + PWA)
-│   ├── src/pages/            ← Pulpit, Zlecenia, Skup, Magazyn, Koszty, Statystyki…
-│   ├── src/utils/            ← generatory PDF-do-druku (potwierdzenia, umowy, karta gwarancyjna, naklejki)
-│   ├── vite.config.js        ← konfiguracja PWA
-│   └── public/                ← ikony PWA
-│
-├── gsmw/                     🌐 Panel klienta
-│   └── src/pages/
-│       ├── RepairStatusPage.jsx
-│       └── B2bCatalogPage.jsx  ← katalog hurtowy
-│
-└── packages/shared-core/     📦 Współdzielona logika (store, Firestore, kalkulacje)
+├── gsm-admin-panel/            🖥️ panel admina (web, PWA, Android)
+│   ├── src/pages/              ekrany z menu (Repairs, Bookings, Calendar, CashReport, Trade, BuybackRequests…)
+│   ├── src/components/         m.in. PurchaseContractCard, AssignCustomer, StoragePhotos
+│   ├── src/utils/              wydruki (print*.js), szablony SMS, statusy
+│   ├── src/constants/          shopInfo (adres panelu klienta, BLIK), kategorie części, płatności
+│   ├── android/, capacitor.config.ts, HYBRID_APP.md
+│   └── vite.config.js          PWA
+├── gsmw/                       🌐 panel klienta
+│   ├── src/pages/              HomePage, BookingPage, LookupPage, RepairStatusPage, DevicesPage, FaqPage, ContactPage, B2bCatalogPage
+│   ├── src/components/         StatusLookupForm
+│   ├── src/styles/             tokens.css, ui.css
+│   ├── src/data/faq.js, src/shop.js, src/utils/friendlyError.js
+│   └── public/                 hero-dark.jpg
+└── packages/shared-core/       📦 wspólny store (Zustand), dostęp do Firestore, stałe (statusy, gwarancje…)
 ```
 
 ---
 
-## Znane ograniczenia
+## ⚠️ Znane ograniczenia
 
-- **Umowy kupna-sprzedaży/komisu, karta gwarancyjna i regulamin serwisu** to szkice przygotowane bez udziału prawnika — przed użyciem z klientami wymagają przeglądu prawnego.
-- **Dane firmy (nazwa, adres, NIP, telefon) są zahardkodowane** w kilku plikach `utils/print*.js` zamiast czytane z jednego miejsca — przy zmianie trzeba poprawić każdy plik osobno.
-- **Zdjęcia na kafelkach katalogu B2B** biorą pierwsze dostępne zdjęcie telefonu danej marki — znika, jeśli ten konkretny telefon zostanie sprzedany. Zahardkodowane, stałe obrazki per marka — w planach.
-- **Panel klienta (`gsmw`)** nie ma pola na zdjęcia w formularzu "Umów naprawę".
-- **iOS PWA** ma ograniczenia względem Androida (brak powiadomień push).
-- **Backup bazy** — brak jeszcze jednoprzyciskowego eksportu całej bazy.
-- **Bramka SMS zależy od telefonu** — gdy Android uśpi aplikację lub telefon straci internet, wiadomości czekają w kolejce („Pending”) i wychodzą z opóźnieniem. Nie obsługuje odpowiedzi „STOP”; rezygnację z SMS-a o opinię ustawia się ręcznie w zleceniu.
+- **Dokumenty prawne** (umowy kupna i komisu, karta gwarancyjna, zasady zadatku, RODO) są przygotowane bez prawnika — warto je przejrzeć z prawnikiem.
+- **Dane firmy w wydrukach** (nazwa, adres, NIP) są wpisane osobno w kilku plikach `gsm-admin-panel/src/utils/print*.js`.
+- **Bramka SMS zależy od jednego telefonu** — gdy Android uśpi aplikację albo zabraknie internetu, SMS-y czekają w kolejce. Odpowiedzi „STOP” nie są obsługiwane.
+- **Zdjęcia na kafelkach katalogu B2B** to pierwsze zdjęcie telefonu danej marki — znikają, gdy ten telefon zostanie sprzedany.
+- **Ceny zakupu przed pracownikiem są ukryte tylko w interfejsie** — reguły Firestore pozwalają personelowi czytać `phones`. Pełne ukrycie wymagałoby osobnej kolekcji na ceny zakupu dostępnej tylko dla admina.
+- **Root `package.json`** wymienia workspace `new` (stara aplikacja mobilna), którego nie ma w repo — instaluj zależności osobno w `gsm-admin-panel/` i `gsmw/`.
+- **iOS (PWA)** nie dostaje powiadomień push tak jak Android.
+- **Backup bazy** — brak eksportu całej bazy jednym przyciskiem.
+- **Hero panelu klienta** (`gsmw/public/hero-dark.jpg`) ma niską rozdzielczość — warto podmienić na własne zdjęcie z serwisu.
