@@ -53,6 +53,8 @@ Publiczna strona serwisu. Klient **nie zakłada konta** — panel loguje go anon
 
 **Gdzie zmieniać treści:** dane kontaktowe, godziny, dane rejestrowe do klauzul RODO, link do wizytówki i pinezka mapy — `gsmw/src/shop.js`; FAQ — `gsmw/src/data/faq.js`; lista testów urządzeń — `TESTS` w `pages/DevicesPage.jsx`; najczęstsze naprawy na stronie głównej — `POPULAR` w `pages/HomePage.jsx`.
 
+**Wydajność i SEO:** podstrony ładowane osobno (`React.lazy` w `App.jsx`), Firebase pobierany dopiero przy formularzach i statusie; fonty hostowane lokalnie (`@fontsource/*`, bez Google Fonts); `index.html` zawiera dane firmy dla Google (JSON-LD `MobilePhoneStore`), podgląd linku (`og-image.jpg`), favicon i manifest; `public/robots.txt` i `sitemap.xml`; tytuł i opis każdej podstrony ustawia `utils/seo.js` (`usePageMeta`). Na telefonie dolny pasek „Zadzwoń / Zgłoś naprawę” (bez niego na stronach z formularzem), strona 404, `/polityka-prywatnosci`, `/zasady-rezerwacji`, mapa Google ładowana po kliknięciu, podpowiedzi modeli w `data/models.js`.
+
 **Wygląd:** wspólne komponenty w `gsmw/src/styles/ui.css` (kontener `ui-wrap` = `--wrap` 1200 px, hero, sekcje, karty, przyciski, pola, komunikaty, stany ładowania i sukcesu), kolory w `styles/tokens.css`. Hierarchia przycisków: jeden gradientowy `ui-btn-cta` na ekran, potem `ui-btn-primary`, `ui-btn-secondary`, `ui-link`. Błędy pokazywane klientowi przechodzą przez `utils/friendlyError.js` (bez technicznych komunikatów Firebase).
 
 ---

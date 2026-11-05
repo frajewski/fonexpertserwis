@@ -2,7 +2,6 @@
 // Używany na stronie głównej (wariant „glass” na ciemnym tle) i na /status.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { findRepairByLookup, normalizeDisplayNumber, normalizePhone } from '../firebase/firestoreApi';
 import friendlyError, { isValidPlPhone } from '../utils/friendlyError';
 import { IconTag, IconPhone, IconArrow, IconInfo } from '../layout/icons';
 import './StatusLookupForm.css';
@@ -19,6 +18,7 @@ export default function StatusLookupForm({ variant = 'card', title = 'Sprawdź s
     e.preventDefault();
     const errs = {};
     if (!nr.trim()) errs.nr = 'Wpisz numer zlecenia, np. 14/2026.';
+    else if (/^\s*r/i.test(nr)) errs.nr = 'To numer rezerwacji z SMS-a. Status sprawdzisz po oddaniu telefonu — numer zlecenia jest na potwierdzeniu przyjęcia.';
     if (!phone.trim()) errs.phone = 'Wpisz numer telefonu.';
     else if (!isValidPlPhone(phone)) errs.phone = 'Numer telefonu powinien mieć 9 cyfr.';
     setErrors(errs);
@@ -27,6 +27,8 @@ export default function StatusLookupForm({ variant = 'card', title = 'Sprawdź s
 
     setLoading(true);
     try {
+      // Firebase ładowany dopiero przy wyszukiwaniu – strona główna startuje szybciej
+      const { findRepairByLookup, normalizeDisplayNumber, normalizePhone } = await import('../firebase/firestoreApi');
       const cleanPhone = normalizePhone(phone);
       const repair = await findRepairByLookup(normalizeDisplayNumber(nr), cleanPhone);
       if (!repair) {

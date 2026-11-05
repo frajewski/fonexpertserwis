@@ -1,0 +1,11 @@
+/* 404, polityka prywatności, zasady */
+.ip { color: var(--ink); }
+.ip-body { padding-top: 36px; }
+.ip-call { margin: 24px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: var(--ink-soft); font-size: 15px; }
+.ip-doc { font-size: 16px; line-height: 1.7; color: var(--ink); }
+.ip-doc h2 { margin: 32px 0 10px; font-family: var(--font-display); font-size: 22px; }
+.ip-doc h2:first-child { margin-top: 0; }
+.ip-doc p, .ip-doc li { color: #334155; }
+.ip-doc ul, .ip-doc ol { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.ip-doc a { color: var(--accent); font-weight: 600; }
+.ip-note { margin-top: 28px; padding: 14px 16px; border-radius: 12px; background: var(--accent-soft); font-size: 14.5px; }

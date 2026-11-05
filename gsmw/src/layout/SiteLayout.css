@@ -20,8 +20,10 @@
 .sl-footer { background: #1B2230; color: #D5DBE6; margin-top: 64px; padding: 44px 0 36px; }
 .sl-footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr 1.2fr; gap: 32px; }
 .sl-footer-note { font-size: 13px; color: #AEB6C6; margin: 14px 0 0; }
-.sl-footer-title { font-size: 14px; font-weight: 700; color: #fff; margin: 4px 0 14px; }
-.sl-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; }
+.sl-footer-title { font-size: 14px; font-weight: 700; color: #fff; margin: 4px 0 8px; }
+.sl-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.sl-footer-list a { display: inline-flex; align-items: center; min-height: 40px; }
+.sl-footer-icons li { min-height: 40px; align-items: center; }
 .sl-footer-list a:hover { color: #fff; text-decoration: underline; }
 .sl-footer-icons li { display: flex; gap: 10px; align-items: flex-start; }
 .sl-footer-icons svg { flex-shrink: 0; margin-top: 1px; color: #AEB6C6; }
@@ -41,3 +43,37 @@
   .sl-wrap { padding: 0 16px; }
   .sl-footer-grid { grid-template-columns: 1fr; gap: 24px; }
 }
+
+/* Przejdź do treści – widoczne po Tab */
+.sl-skip { position: absolute; left: 12px; top: -60px; z-index: 100; background: var(--accent); color: #fff; padding: 10px 16px; border-radius: 10px; font-weight: 700; transition: top .15s; }
+.sl-skip:focus { top: 12px; }
+.sl-content:focus { outline: none; }
+
+/* Stopka – dół */
+.sl-footer-bottom { display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; margin-top: 28px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .12); font-size: 13px; color: #AEB6C6; }
+.sl-footer-legal { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.sl-footer-legal a { display: inline-flex; align-items: center; min-height: 40px; }
+.sl-footer-legal a:hover { color: #fff; text-decoration: underline; }
+
+/* Menu na telefonie: dodatki i tło */
+.sl-nav-extra { display: none; }
+.sl-backdrop { display: none; }
+body.sl-lock { overflow: hidden; }
+
+/* Dolny pasek akcji na telefonie */
+.sl-actionbar { display: none; }
+
+@media (max-width: 1000px) {
+  .sl-header { z-index: 40; }
+  .sl-nav { max-height: calc(100vh - 72px); overflow-y: auto; z-index: 2; }
+  .sl-nav-link { min-height: 52px; display: flex; align-items: center; font-size: 16px; }
+  .sl-nav-extra { display: flex; flex-direction: column; gap: 10px; padding-top: 16px; }
+  .sl-nav-hours { display: flex; gap: 8px; align-items: center; margin: 4px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+  .sl-backdrop { display: block; position: fixed; inset: 72px 0 0; background: rgba(7, 13, 31, .55); border: 0; z-index: 1; cursor: default; }
+}
+@media (max-width: 760px) {
+  .sl-actionbar { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--surface) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px -12px rgba(15, 23, 42, .25); }
+  .sl-actionbar .ui-btn { min-height: 50px; }
+  .sl-has-bar .sl-footer { padding-bottom: calc(36px + 72px + env(safe-area-inset-bottom)); }
+}
+body.sl-lock .sl-actionbar { display: none; }

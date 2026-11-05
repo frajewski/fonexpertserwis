@@ -5,6 +5,9 @@
 
 import { STATUS } from '../constants/statuses';
 import { getMonthName } from './formatDate';
+import { classifyRepair } from './repairCategories';
+
+export * from './repairCategories';
 
 // Zysk z jednej naprawy = serviceCost (to pole JEST już wyliczone jako
 // Łącznie − Części w formularzu kosztorysu, więc nie odejmujemy części
@@ -126,11 +129,10 @@ export const getTopBrands = (repairsArray) => {
   return sortedRanking(countOccurrences(brands));
 };
 
-// TODO: gdy dodasz pole faultType do Repair, użyj r.faultType zamiast opisu
+// Usterki grupowane w rodzaje napraw (repairCategories.js), więc
+// „Uszkodzony lcd” i „Uszkodzony wyświetlacz” liczą się razem.
 export const getTopFaults = (repairsArray) => {
-  const faults = repairsArray
-    .map((r) => r.description?.split(' ').slice(0, 3).join(' ') || 'Brak opisu')
-    .filter(Boolean);
+  const faults = repairsArray.map((r) => classifyRepair(r).label);
   return sortedRanking(countOccurrences(faults)).slice(0, 5);
 };
 

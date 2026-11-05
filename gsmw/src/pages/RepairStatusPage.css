@@ -205,3 +205,8 @@
   .rs-contact-btns .rs-btn { padding: 11px 10px; }
 }
 @media (prefers-reduced-motion: reduce) { .rs-steps::after, .rs-action-link { transition: none; } .rs-spinner { animation-duration: 2s; } }
+
+/* Cele dotyku min. 44 px */
+.rs-case-pill { min-height: 44px; }
+.rs-text-btn { min-height: 44px; }
+.rs-faq summary { padding: 8px 0; min-height: 44px; display: flex; align-items: center; }

@@ -15,7 +15,10 @@ import {
   IconDrop, IconPower, IconBack, IconCog, IconDots, IconSearch, IconArrow, IconCheck, IconImage, IconClose,
   IconInfo, IconCall, IconChevron, IconBox, IconShield,
 } from '../layout/icons';
+import { modelsFor } from '../data/models';
+import { priceFor, PRICE_NOTE, ISSUE_PRICE_LABEL } from '../data/prices';
 import './BookingPage.css';
+import { usePageMeta } from '../utils/seo';
 
 // Najczęstsze usterki – ta sama lista jest na serwerze (createBookingRequestWeb) jako biała lista.
 export const BOOKING_ISSUES = [
@@ -67,7 +70,7 @@ export default function BookingPage() {
   const [progress, setProgress] = useState('');
   const [done, setDone] = useState(false);
 
-  useEffect(() => { document.title = 'Zgłoś naprawę online | Fonexpert Płońsk'; }, []);
+  usePageMeta({ title: 'Zgłoś naprawę online', description: 'Zgłoś naprawę telefonu, tabletu lub laptopa online w 2 krokach. Odpiszemy SMS-em z terminem i wstępną wyceną. Fonexpert, Pasaż Kaufland Płońsk.', path: '/umow-naprawe' });
   useEffect(() => () => photos.forEach((p) => URL.revokeObjectURL(p.url)), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const brand = form.brand === OTHER ? form.brandOther.trim() : form.brand;
@@ -247,7 +250,8 @@ export default function BookingPage() {
                     </div>
                     <div className={`ui-field ${errors.model ? 'ui-field-error' : ''}`} data-field="model">
                       <label className="ui-label" htmlFor="bp-model">Model</label>
-                      <input id="bp-model" className="ui-input" value={form.model} onChange={setField('model')} placeholder="np. iPhone 14, Galaxy A54" autoComplete="off" />
+                      <input id="bp-model" className="ui-input" list="bp-models" value={form.model} onChange={setField('model')} placeholder="np. iPhone 14, Galaxy A54" autoComplete="off" />
+                      <datalist id="bp-models">{modelsFor(brand).map((m) => <option key={m} value={m} />)}</datalist>
                       {errors.model && <span className="ui-field-msg">{errors.model}</span>}
                     </div>
                   </div>
@@ -271,6 +275,15 @@ export default function BookingPage() {
                       {form.needsDiagnosis ? <IconCheck size={18} /> : <IconSearch size={18} />} Nie wiem — potrzebna diagnoza
                     </button>
                     {errors.issues && <span className="ui-field-msg">{errors.issues}</span>}
+                    {(() => {
+                      const hints = form.issues.map((i) => [ISSUE_PRICE_LABEL[i], priceFor(i, brand)]).filter(([, p]) => p);
+                      return hints.length > 0 && (
+                        <p className="bp-price-hint">
+                          Orientacyjnie: {hints.map(([l, p]) => `${l} od ${p} zł`).join(', ')}.
+                          <small>{PRICE_NOTE}</small>
+                        </p>
+                      );
+                    })()}
                   </fieldset>
                 </div>
               )}
@@ -347,6 +360,7 @@ export default function BookingPage() {
                       <span>Akceptuję <strong>zasady rezerwacji i zadatku</strong> oraz zapoznałem/am się z informacją o przetwarzaniu danych.</span>
                     </label>
                     {errors.acceptTerms && <span className="ui-field-msg">{errors.acceptTerms}</span>}
+                    <p className="bp-doclinks"><Link to="/zasady-rezerwacji" target="_blank">Zasady rezerwacji i zadatku</Link> · <Link to="/polityka-prywatnosci" target="_blank">Polityka prywatności</Link></p>
                     <details className="bp-rodo">
                       <summary>Zasady rezerwacji i zadatku</summary>
                       <ul>

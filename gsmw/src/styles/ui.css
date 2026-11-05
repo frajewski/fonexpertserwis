@@ -126,3 +126,7 @@
   .ui-lead { font-size: 16px; }
   .ui-btn-row .ui-btn { flex: 1 1 auto; }
 }
+
+/* Ładowanie podstrony (React.lazy) */
+.ui-page-loader { min-height: 60vh; display: grid; place-items: center; color: var(--accent); }
+.ui-page-loader .ui-spinner { width: 28px; height: 28px; border-width: 3px; }

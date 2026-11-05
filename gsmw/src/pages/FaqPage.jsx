@@ -2,15 +2,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SHOP from '../shop';
-import FAQ_GROUPS from '../data/faq';
+import FAQ_GROUPS, { faqSlug } from '../data/faq';
+import { useLocation } from 'react-router-dom';
 import { IconSearch, IconArrow, IconCall } from '../layout/icons';
 import './FaqPage.css';
+import { usePageMeta } from '../utils/seo';
 
 const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');
 
 export default function FaqPage() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('all');
+
+  usePageMeta({ title: 'FAQ — najczęstsze pytania', description: 'Ile kosztuje naprawa, jak długo trwa, czy stracę dane, gwarancja i zadatek — odpowiedzi na najczęstsze pytania klientów serwisu Fonexpert w Płońsku.', path: '/faq' });
 
   // FAQPage schema (wyniki rozszerzone w Google)
   useEffect(() => {
@@ -24,10 +28,12 @@ export default function FaqPage() {
       })),
     });
     document.head.appendChild(el);
-    const prevTitle = document.title;
-    document.title = 'FAQ — najczęstsze pytania | Fonexpert Płońsk';
-    return () => { el.remove(); document.title = prevTitle; };
+    return () => { el.remove(); };
   }, []);
+
+  // Wejście z linku /faq#pytanie – otwórz to pytanie (ScrollManager przewija do kotwicy)
+  const { hash } = useLocation();
+  const openSlug = decodeURIComponent(hash.replace('#', ''));
 
   const groups = useMemo(() => {
     const nq = norm(q.trim());
@@ -69,7 +75,7 @@ export default function FaqPage() {
             <section key={g.id} className="fq-group">
               <h2 className="fq-group-title">{g.title}</h2>
               {g.items.map(([question, answer]) => (
-                <details key={question} className="fq-item" open={Boolean(q.trim())}>
+                <details key={question} id={faqSlug(question)} className="fq-item" open={Boolean(q.trim()) || openSlug === faqSlug(question)}>
                   <summary>{question}<span className="fq-plus" aria-hidden="true" /></summary>
                   <p>{answer}</p>
                 </details>

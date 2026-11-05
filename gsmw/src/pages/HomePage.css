@@ -101,3 +101,42 @@
   .hp-visit-btns .ui-btn { width: 100%; }
   .hp-visit-link { justify-content: center; }
 }
+
+.hp-status-toggle { display: none; }
+.hp-faq-more { display: inline-block; margin-left: 4px; font-weight: 600; color: var(--accent); font-size: 14px; }
+@media (max-width: 620px) {
+  .hp-status-toggle { display: inline-flex; }
+  .hp-hero-side .hp-status-form { display: none; }
+  .hp-status-open .hp-status-form { display: block; }
+  .hp-status-open .hp-status-toggle { display: none; }
+}
+
+/* Cena „od” na kafelkach usterek */
+.hp-issue-price { margin-top: 3px; font-size: 13.5px; font-weight: 700; color: var(--accent); }
+
+/* Cennik */
+.hp-prices-wrap { padding-top: 8px; }
+.hp-prices { padding: 30px 32px; }
+.hp-prices-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 22px; }
+.hp-prices-head .ui-text { max-width: 640px; }
+.hp-prices-head .ui-btn { flex-shrink: 0; }
+.hp-price-table { display: flex; flex-direction: column; }
+.hp-price-row { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr)); align-items: center; gap: 12px; padding: 14px 12px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; border-radius: 10px; transition: background .15s; }
+.hp-price-row:last-child { border-bottom: none; }
+a.hp-price-row:hover { background: var(--paper); }
+.hp-price-row strong { font-size: 15.5px; }
+.hp-price-th { padding-top: 0; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+.hp-price-th span:not(:first-child), .hp-price-cell { text-align: right; }
+.hp-price-cell { font-size: 14px; color: var(--ink-soft); white-space: nowrap; }
+.hp-price-cell b { font-size: 16px; color: var(--ink); }
+.hp-price-cell small { display: none; }
+
+@media (max-width: 760px) {
+  .hp-prices { padding: 22px 18px; }
+  .hp-prices-head { flex-direction: column; align-items: stretch; }
+  .hp-price-th { display: none; }
+  .hp-price-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; padding: 16px 4px; }
+  .hp-price-row strong { grid-column: 1 / -1; }
+  .hp-price-cell { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; text-align: left; }
+  .hp-price-cell small { display: inline; font-size: 13px; color: var(--ink-faint); margin-right: auto; }
+}

@@ -6,7 +6,6 @@
 //  muszą się zgadzać z białą listą na serwerze.
 // ============================================================
 import { useEffect, useRef, useState } from 'react';
-import { createBuybackRequest, uploadBookingPhotos } from '../firebase/firestoreApi';
 import friendlyError, { isValidPlPhone } from '../utils/friendlyError';
 import { Link } from 'react-router-dom';
 import SHOP from '../shop';
@@ -15,7 +14,9 @@ import {
   IconImage, IconClose, IconSparkle, IconRecycle, IconCash, IconCall, IconSearch, IconTag, IconInfo, IconChevron,
 } from '../layout/icons';
 import './BookingPage.css';
+import { modelsFor } from '../data/models';
 import './DevicesPage.css';
+import { usePageMeta } from '../utils/seo';
 
 const DEVICE_TYPES = [
   ['Smartfon', IconPhone], ['Tablet', IconTablet], ['Laptop', IconLaptop], ['Smartwatch', IconWatch], ['Inne', IconDots],
@@ -65,11 +66,9 @@ export default function DevicesPage() {
   const [progress, setProgress] = useState('');
   const [done, setDone] = useState(false);
 
+  usePageMeta({ title: 'Skup i sprzedaż telefonów', description: 'Nowe telefony z gwarancją 12–24 mies., używane z gwarancją 1–6 mies., każdy testowany. Skup telefonów z bezpłatną wyceną online. Fonexpert Płońsk.', path: '/skup-i-sprzedaz' });
   useEffect(() => {
-    const prev = document.title;
-    document.title = 'Skup i sprzedaż telefonów | Fonexpert Płońsk';
     if (window.location.hash === '#wycena') setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);
-    return () => { document.title = prev; };
   }, []);
 
   const setField = (key) => (e) => {
@@ -116,6 +115,8 @@ export default function DevicesPage() {
     }
     setSubmitting(true);
     try {
+      // Firebase dopiero przy wysyłce – strona Skup i sprzedaż ładuje się szybciej
+      const { createBuybackRequest, uploadBookingPhotos } = await import('../firebase/firestoreApi');
       let photoPaths = [];
       if (photos.length) {
         setProgress(`Wysyłam zdjęcia (${photos.length})…`);
@@ -271,7 +272,8 @@ export default function DevicesPage() {
                   </div>
                   <div className={`ui-field ${errors.model ? 'ui-field-error' : ''}`} data-field="model">
                     <label className="ui-label" htmlFor="dv-model">Model</label>
-                    <input id="dv-model" className="ui-input" value={form.model} onChange={setField('model')} placeholder="np. iPhone 13, Galaxy S23" autoComplete="off" />
+                    <input id="dv-model" className="ui-input" list="dv-models" value={form.model} onChange={setField('model')} placeholder="np. iPhone 13, Galaxy S23" autoComplete="off" />
+                    <datalist id="dv-models">{modelsFor(brand).map((m) => <option key={m} value={m} />)}</datalist>
                     {errors.model && <span className="ui-field-msg">{errors.model}</span>}
                   </div>
                 </div>
@@ -367,6 +369,7 @@ export default function DevicesPage() {
                     <span>Zapoznałem/am się z informacją o przetwarzaniu danych i chcę otrzymać wycenę.</span>
                   </label>
                   {errors.acceptPrivacy && <span className="ui-field-msg">{errors.acceptPrivacy}</span>}
+                  <p className="bp-doclinks"><Link to="/polityka-prywatnosci" target="_blank">Polityka prywatności</Link></p>
                   <details className="bp-rodo">
                     <summary>Informacja o przetwarzaniu danych osobowych (RODO)</summary>
                     <p>Administratorem Twoich danych jest {SHOP.legalName}, {SHOP.legalAddress}, NIP {SHOP.nip}, tel. {SHOP.phone}. Dane z formularza (imię, telefon, dane i zdjęcia urządzenia) przetwarzamy, aby przygotować wycenę i skontaktować się z Tobą (telefon, SMS) — na podstawie art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy).</p>

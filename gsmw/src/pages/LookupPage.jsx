@@ -1,13 +1,13 @@
 // /status – wyszukiwanie zlecenia po numerze i telefonie
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import StatusLookupForm from '../components/StatusLookupForm';
 import SHOP from '../shop';
 import { IconTag, IconBox, IconCall, IconArrow, IconWrench } from '../layout/icons';
 import './LookupPage.css';
+import { usePageMeta } from '../utils/seo';
 
 export default function LookupPage() {
-  useEffect(() => { document.title = 'Sprawdź status naprawy | Fonexpert Płońsk'; }, []);
+  usePageMeta({ title: 'Sprawdź status naprawy', description: 'Sprawdź, na jakim etapie jest naprawa Twojego telefonu — wystarczy numer zlecenia i numer telefonu.', path: '/status' });
   return (
     <main className="lk">
       <section className="ui-hero ui-hero-compact ui-hero-overlap">
@@ -26,7 +26,7 @@ export default function LookupPage() {
             <span className="ui-icon-tile"><IconTag size={22} /></span>
             <div>
               <h2 className="ui-h3">Gdzie znajdę numer zlecenia?</h2>
-              <p className="ui-text">Na potwierdzeniu przyjęcia (np. <b className="lk-mono">14/2026</b>) i w SMS-ie, który od nas dostałeś.</p>
+              <p className="ui-text">Na potwierdzeniu przyjęcia (np. <b className="lk-mono">14/2026</b>) i w SMS-ie, który od nas dostałeś. Numer rezerwacji z SMS-a (np. <b className="lk-mono">R001/2026</b>) to jeszcze nie zlecenie — numer zlecenia dostajesz przy oddaniu telefonu. <Link to="/zasady-rezerwacji" className="ui-link">Jak to działa</Link></p>
             </div>
           </div>
           <div className="ui-card ui-card-pad lk-tip">

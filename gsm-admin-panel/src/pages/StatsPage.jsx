@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import useStore from '../store/useStore';
-import { getStatsByPeriod, getTopBrands, getTopFaults, filterByMonth, filterDeliveredByMonth, calcRevenue, calcProfit } from '../utils/calcProfit';
+import { getStatsByPeriod, getTopBrands, getTopFaults, filterByMonth, filterDeliveredByMonth, calcRevenue, calcProfit, getRepairPriceStats } from '../utils/calcProfit';
 import { getTopSellingModels, getAvgProfitByBrand, getStalePhones, getMonthlyTradeData, getTradeStatsForMonth, getTradeProfitToday, getTradeProfitThisMonth, getTradeProfitThisYear } from '../utils/calcTradeStats';
 import STATUS from '../constants/statuses';
 import './StatsPage.css';
@@ -212,6 +212,8 @@ export default function StatsPage() {
         </div>
       </div>
 
+      <RepairPriceStats repairs={completed} selectedDate={selectedDate} monthLabel={`${MONTH_NAMES_FULL[selectedDate.month]} ${selectedDate.year}`} />
+
       <div className="st-row">
         <div className="st-card">
           <h2 className="st-section-title">Top 5 marek</h2>
@@ -335,5 +337,119 @@ function PeriodCard({ label, data, tradeProfit = 0, expenses = 0 }) {
         </span>
       </div>
     </div>
+  );
+}
+
+// ---- Ceny i marże wg rodzaju naprawy ----
+
+const PRICE_PERIODS = [
+  { id: '3m', label: 'Ostatnie 3 mies.', months: 3 },
+  { id: '12m', label: 'Ostatnie 12 mies.', months: 12 },
+  { id: 'all', label: 'Cała historia' },
+  { id: 'month', label: 'Wybrany miesiąc' },
+];
+
+const issuedAt = (r) => new Date(r.issuedAt || r.statusUpdatedAt || r.createdAt);
+
+function RepairPriceStats({ repairs, selectedDate, monthLabel }) {
+  const [period, setPeriod] = useState('12m');
+  const [open, setOpen] = useState(null);
+
+  const rows = useMemo(() => {
+    const def = PRICE_PERIODS.find((p) => p.id === period);
+    let list = repairs;
+    if (def.months) {
+      const from = new Date();
+      from.setMonth(from.getMonth() - def.months);
+      list = repairs.filter((r) => issuedAt(r) >= from);
+    } else if (period === 'month') {
+      list = repairs.filter((r) => {
+        const d = issuedAt(r);
+        return d.getFullYear() === selectedDate.year && d.getMonth() === selectedDate.month;
+      });
+    }
+    return getRepairPriceStats(list);
+  }, [repairs, period, selectedDate]);
+
+  const zl = (n) => `${n} zł`;
+  const margin = (r) => (r.withPartsCount
+    ? <><span className={r.avgMargin >= 0 ? 'st-good' : 'st-bad'}>{zl(r.avgMargin)}</span> <span className="st-ranking-sub">({r.avgMarginPct}%, z {r.withPartsCount})</span></>
+    : <span className="st-ranking-sub">brak kosztów części</span>);
+
+  return (
+    <div className="st-card st-price-card">
+      <div className="st-price-head">
+        <h2 className="st-section-title">Ceny i marże wg rodzaju naprawy</h2>
+        <div className="st-price-periods" role="group" aria-label="Okres">
+          {PRICE_PERIODS.map((p) => (
+            <button key={p.id} type="button" className={`st-chip ${period === p.id ? 'st-chip-on' : ''}`} onClick={() => setPeriod(p.id)}>
+              {p.id === 'month' ? monthLabel : p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="st-price-note">
+        Tylko zlecenia wydane klientowi. Cena = ile zapłacił klient (bez napraw za 0 zł). Marża liczona tylko ze zleceń,
+        w których wpisano koszt części. Rodzaj naprawy rozpoznawany jest z opisu usterki — kliknij wiersz, żeby zobaczyć marki i przykładowe opisy.
+      </p>
+      {rows.length === 0 ? <p className="st-empty">Brak wydanych napraw w tym okresie</p> : (
+        <div className="st-price-scroll">
+          <table className="st-price-table">
+            <thead>
+              <tr>
+                <th>Rodzaj naprawy</th>
+                <th>Ile</th>
+                <th>Najniższa</th>
+                <th title="Co czwarta naprawa była tańsza – dobra podstawa do ceny „od”">Typowo od</th>
+                <th>Mediana</th>
+                <th>Średnia</th>
+                <th>Śr. koszt części</th>
+                <th>Śr. marża</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <FragmentRow key={r.id} r={r} isOpen={open === r.id} onToggle={() => setOpen(open === r.id ? null : r.id)} zl={zl} margin={margin} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FragmentRow({ r, isOpen, onToggle, zl, margin }) {
+  return (
+    <>
+      <tr className={`st-price-row ${isOpen ? 'is-open' : ''}`} onClick={onToggle} tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }} aria-expanded={isOpen}>
+        <td className="st-price-name"><span className="st-price-caret">{isOpen ? '▾' : '▸'}</span>{r.label}</td>
+        <td>{r.count}</td>
+        <td>{r.pricedCount ? zl(r.minPrice) : '—'}</td>
+        <td>{r.pricedCount ? zl(r.p25Price) : '—'}</td>
+        <td><strong>{r.pricedCount ? zl(r.medianPrice) : '—'}</strong></td>
+        <td>{r.pricedCount ? zl(r.avgPrice) : '—'}</td>
+        <td>{r.withPartsCount ? zl(r.avgParts) : '—'}</td>
+        <td>{margin(r)}</td>
+      </tr>
+      {isOpen && r.brands.map((b) => (
+        <tr key={b.brand} className="st-price-sub">
+          <td className="st-price-name">{b.brand}</td>
+          <td>{b.count}</td>
+          <td>{b.pricedCount ? zl(b.minPrice) : '—'}</td>
+          <td>{b.pricedCount ? zl(b.p25Price) : '—'}</td>
+          <td>{b.pricedCount ? zl(b.medianPrice) : '—'}</td>
+          <td>{b.pricedCount ? zl(b.avgPrice) : '—'}</td>
+          <td>{b.withPartsCount ? zl(b.avgParts) : '—'}</td>
+          <td>{margin(b)}</td>
+        </tr>
+      ))}
+      {isOpen && r.examples.length > 0 && (
+        <tr className="st-price-sub st-price-examples">
+          <td colSpan={8}>Przykładowe opisy: {r.examples.map((e) => `„${e}”`).join(', ')}</td>
+        </tr>
+      )}
+    </>
   );
 }

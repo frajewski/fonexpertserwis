@@ -17,11 +17,11 @@
   --accent-deep: #0F4FC4;
   --accent-soft: #EAF1FE;
 
-  --good:       #16A34A;
+  --good:       #15803D; /* 4,5:1 na --good-soft i 5:1 na bieli (WCAG AA) */
   --good-soft:  #E8F7EE;
   --warn:       #DC3B2F;
   --warn-soft:  #FDECEA;
-  --wait:       #B7791F;
+  --wait:       #92600F; /* 4,9:1 na --wait-soft */
   --wait-soft:  #FDF4E3;
 
   /* Typografia */

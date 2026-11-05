@@ -14,6 +14,7 @@ import {
   IconInfo, IconChevron, IconHeadset, IconCall, IconMail, IconArrow, IconPhone, IconShield, IconX, IconClock, IconTag,
 } from '../layout/icons';
 import './RepairStatusPage.css';
+import { usePageMeta } from '../utils/seo';
 
 const STEPS = [
   { key: 'przyjete', label: 'Przyjęte', Icon: IconInbox, statuses: [STATUS.ACCEPTED] },
@@ -98,9 +99,7 @@ export default function RepairStatusPage() {
     loadRepair();
   }, [id, phone, token, navigate]);
 
-  useEffect(() => {
-    if (repair?.displayNumber) document.title = `Zlecenie #${repair.displayNumber} | Fonexpert`;
-  }, [repair?.displayNumber]);
+  usePageMeta({ title: repair?.displayNumber ? `Zlecenie #${repair.displayNumber}` : 'Status naprawy', noindex: true });
 
   if (!phone && !token) return null;
 

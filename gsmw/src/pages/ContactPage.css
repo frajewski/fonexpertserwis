@@ -51,7 +51,7 @@
 .cp-map-bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; padding: 14px 18px; font-size: 14px; color: var(--ink-soft); border-top: 1px solid var(--line); }
 .cp-map-bar > span { display: inline-flex; align-items: center; gap: 8px; }
 .cp-map-links { display: inline-flex; gap: 10px; flex-wrap: wrap; }
-.cp-map-links a { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 10px; font-weight: 600; text-decoration: none; color: var(--ink); border: 1px solid var(--line); }
+.cp-map-links a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 9px 14px; border-radius: 10px; font-weight: 600; text-decoration: none; color: var(--ink); border: 1px solid var(--line); }
 .cp-map-links a:hover { border-color: var(--accent); color: var(--accent); }
 .cp-map-links .cp-map-route { background: var(--accent); border-color: var(--accent); color: #fff; }
 .cp-map-links .cp-map-route:hover { background: var(--accent-deep); color: #fff; }
@@ -87,3 +87,11 @@
   .cp-cta-btn { width: 100%; justify-content: center; }
 }
 @media (max-width: 620px) { .cp-cta .ui-btn { width: 100%; } }
+
+.cp-map-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 32px 20px; color: var(--ink);
+  background-color: #E8EEF6; background-image: linear-gradient(rgba(22, 98, 232, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(22, 98, 232, .07) 1px, transparent 1px); background-size: 32px 32px; }
+.cp-map-placeholder strong { font-size: 16.5px; }
+.cp-map-placeholder > span:not(.cp-map-pin) { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+.cp-map-placeholder small { font-size: 12.5px; color: var(--ink-soft); max-width: 340px; }
+.cp-map-pin { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; box-shadow: 0 0 0 10px rgba(22, 98, 232, .15); margin-bottom: 6px; }
+.cp-info a { display: inline-flex; align-items: center; min-height: 40px; }

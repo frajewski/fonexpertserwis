@@ -2,15 +2,70 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Fonexpert Płońsk — naprawa, skup i sprzedaż telefonów</title>
     <meta name="description" content="Serwis telefonów w Płońsku (Pasaż Kaufland): zgłoś naprawę online, sprawdź status naprawy, wyceń telefon do skupu. Nowe i używane urządzenia z gwarancją." />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0b1426" />
+    <link rel="canonical" href="https://gsm-serwis-klient.web.app/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Podgląd linku (SMS, Messenger, WhatsApp, Facebook) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:site_name" content="Fonexpert" />
+    <meta property="og:title" content="Fonexpert Płońsk — naprawa, skup i sprzedaż telefonów" />
+    <meta property="og:description" content="Zgłoś naprawę online, sprawdź status naprawy, wyceń telefon do skupu. Pasaż Kaufland, ul. Żołnierzy Wyklętych 16, Płońsk." />
+    <meta property="og:url" content="https://gsm-serwis-klient.web.app/" />
+    <meta property="og:image" content="https://gsm-serwis-klient.web.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Dane firmy dla Google (wizytówka, wyniki lokalne) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MobilePhoneStore",
+      "name": "Fonexpert — serwis telefonów",
+      "url": "https://gsm-serwis-klient.web.app/",
+      "image": "https://gsm-serwis-klient.web.app/og-image.jpg",
+      "logo": "https://gsm-serwis-klient.web.app/icon-512.png",
+      "telephone": "+48739696665",
+      "email": "kontaktfonexpert@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ul. Żołnierzy Wyklętych 16 (Pasaż Kaufland)",
+        "postalCode": "09-100",
+        "addressLocality": "Płońsk",
+        "addressCountry": "PL"
+      },
+      "geo": { "@type": "GeoCoordinates", "latitude": 52.6298634, "longitude": 20.3822619 },
+      "hasMap": "https://maps.app.goo.gl/DZZ1CN5Srx1c7DKSA",
+      "openingHoursSpecification": [
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "opens": "09:00", "closes": "21:00" }
+      ],
+      "areaServed": "Płońsk",
+      "makesOffer": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Naprawa telefonów, tabletów i laptopów" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Skup telefonów" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Sprzedaż nowych i używanych telefonów z gwarancją" } }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 16px;line-height:1.6">
+        <h1>Fonexpert — serwis telefonów w Płońsku</h1>
+        <p>Naprawa, skup i sprzedaż telefonów, tabletów i laptopów. Pasaż Kaufland, ul. Żołnierzy Wyklętych 16, 09-100 Płońsk.</p>
+        <p>Telefon: <a href="tel:+48739696665">739 696 665</a> · Pon.–Sob. 9:00–21:00, niedziele handlowe 9:00–19:00.</p>
+        <p>Zgłoszenie naprawy online i sprawdzanie statusu wymagają włączonego JavaScriptu.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

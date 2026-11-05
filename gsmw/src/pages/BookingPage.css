@@ -79,6 +79,9 @@
 .bp-rodo p { margin: 8px 0 0; }
 
 .bp-form-error { margin-top: 20px; }
+.bp-doclinks { margin: 0; padding-left: 34px; font-size: 13px; }
+.bp-doclinks a { color: var(--accent); font-weight: 600; display: inline-flex; min-height: 32px; align-items: center; }
+@media (max-width: 620px) { .bp-doclinks { padding-left: 0; } }
 .bp-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
 .bp-btn-main { min-width: 200px; }
 
@@ -112,3 +115,6 @@
   .bp-aside { grid-template-columns: 1fr; }
   .bp-rodo { padding-left: 0; }
 }
+
+.bp-price-hint { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--line)); font-size: 14.5px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.bp-price-hint small { display: block; margin-top: 4px; font-size: 12.5px; font-weight: 400; color: var(--ink-soft); }

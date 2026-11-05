@@ -7,6 +7,7 @@ import {
   IconCar, IconStore, IconWrench, IconArrow,
 } from '../layout/icons';
 import './ContactPage.css';
+import { usePageMeta } from '../utils/seo';
 
 // Pinezka wizytówki Google (maps.app.goo.gl/DZZ1CN5Srx1c7DKSA)
 const LL = `${SHOP.mapsLat},${SHOP.mapsLng}`;
@@ -43,7 +44,9 @@ const DAYS = [
 ];
 
 export default function ContactPage() {
+  usePageMeta({ title: 'Kontakt i dojazd', description: 'Fonexpert — serwis telefonów w Pasażu Kaufland, ul. Żołnierzy Wyklętych 16, Płońsk. Godziny otwarcia, telefon, mapa i trasa dojazdu.', path: '/kontakt' });
   const [state, setState] = useState(openState);
+  const [showMap, setShowMap] = useState(false);
   const today = warsawNow().day;
   useEffect(() => {
     const t = setInterval(() => setState(openState()), 60000);
@@ -66,7 +69,7 @@ export default function ContactPage() {
           <div className="cp-card-top">
             <div className="cp-avatar" aria-hidden="true">F</div>
             <div>
-              <h2 className="cp-name">FONEXPERT</h2>
+              <p className="cp-name">FONEXPERT</p>
               <p className="cp-cat">Serwis telefonów komórkowych · Płońsk</p>
             </div>
           </div>
@@ -105,14 +108,25 @@ export default function ContactPage() {
 
         {/* Mapa */}
         <section className="cp-mapbox" aria-label="Mapa dojazdu">
-          <iframe
-            className="cp-map"
-            title="Mapa dojazdu do Fonexpert, Pasaż Kaufland Płońsk"
-            src={MAP_EMBED}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-          />
+          {showMap ? (
+            <iframe
+              className="cp-map"
+              title="Mapa dojazdu do Fonexpert, Pasaż Kaufland Płońsk"
+              src={MAP_EMBED}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+            />
+          ) : (
+            // Mapa Google ładuje się dopiero po kliknięciu: szybsza strona i bez ciasteczek Google
+            <div className="cp-map cp-map-placeholder">
+              <span className="cp-map-pin"><IconPin size={30} /></span>
+              <strong>Pasaż Kaufland, ul. Żołnierzy Wyklętych 16</strong>
+              <span>09-100 Płońsk · parking przy Kauflandzie</span>
+              <button type="button" className="ui-btn ui-btn-primary" onClick={() => setShowMap(true)}>Pokaż mapę Google</button>
+              <small>Po kliknięciu załaduje się mapa Google (Google może zapisać ciasteczka).</small>
+            </div>
+          )}
           <div className="cp-map-bar">
             <span><IconPin size={18} /> Pasaż Kaufland, ul. Żołnierzy Wyklętych 16</span>
             <span className="cp-map-links">

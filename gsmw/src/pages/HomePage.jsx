@@ -4,10 +4,10 @@
 //  najczęstsze naprawy → jak to działa → dlaczego my → FAQ → kontakt.
 //  Formularz zgłoszenia żyje na /umow-naprawe (BookingPage).
 // ============================================================
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SHOP from '../shop';
-import FAQ_GROUPS from '../data/faq';
+import FAQ_GROUPS, { faqSlug } from '../data/faq';
 import StatusLookupForm from '../components/StatusLookupForm';
 import {
   IconWrench, IconArrow, IconCall, IconShield, IconTimer, IconBox, IconAward, IconCheck,
@@ -15,6 +15,8 @@ import {
   IconTablet, IconCash, IconSparkle, IconPin, IconClock, IconRoute, IconPhone,
 } from '../layout/icons';
 import './HomePage.css';
+import { usePageMeta } from '../utils/seo';
+import { PRICES, PRICE_BRANDS, PRICE_NOTE, minPriceForIssue } from '../data/prices';
 
 // Klucze = usterki z formularza (BOOKING_ISSUES) – link otwiera formularz z zaznaczoną usterką
 const POPULAR = [
@@ -38,7 +40,8 @@ const FAQ_TEASER = FAQ_GROUPS.flatMap((g) => g.items).filter(([q]) => [
 const MAP_ROUTE = `https://www.google.com/maps/dir/?api=1&destination=${SHOP.mapsLat},${SHOP.mapsLng}`;
 
 export default function HomePage() {
-  useEffect(() => { document.title = 'Fonexpert Płońsk — naprawa, skup i sprzedaż telefonów'; }, []);
+  usePageMeta({ path: '/' });
+  const [statusOpen, setStatusOpen] = useState(false);
 
   return (
     <main className="hp">
@@ -59,8 +62,14 @@ export default function HomePage() {
               <li><IconClock size={18} /> Pon.–Sob. 9:00–21:00</li>
             </ul>
           </div>
-          <div className="hp-hero-side">
-            <StatusLookupForm variant="glass" title="Masz już zlecenie?" />
+          <div className={`hp-hero-side ${statusOpen ? 'hp-status-open' : ''}`}>
+            {/* Na telefonie formularz jest zwinięty do jednego przycisku */}
+            <button type="button" className="ui-btn ui-btn-light ui-btn-block hp-status-toggle" aria-expanded={statusOpen} onClick={() => setStatusOpen(true)}>
+              <IconBox size={18} /> Masz już zlecenie? Sprawdź status
+            </button>
+            <div className="hp-status-form">
+              <StatusLookupForm variant="glass" title="Masz już zlecenie?" />
+            </div>
           </div>
         </div>
       </section>
@@ -109,13 +118,46 @@ export default function HomePage() {
             <Link to="/umow-naprawe?usterka=diagnoza" className="ui-btn ui-btn-secondary"><IconSearch size={18} /> Nie wiem, co się zepsuło</Link>
           </div>
           <div className="hp-issues">
-            {POPULAR.map(([key, title, hint, Icon]) => (
+            {POPULAR.map(([key, title, hint, Icon]) => {
+              const from = minPriceForIssue(key);
+              return (
               <Link key={key} to={`/umow-naprawe?usterka=${encodeURIComponent(key)}`} className="hp-issue">
                 <span className="ui-icon-tile"><Icon size={24} /></span>
-                <span className="hp-issue-text"><strong>{title}</strong><small>{hint}</small></span>
+                <span className="hp-issue-text"><strong>{title}</strong><small>{hint}</small>{from && <span className="hp-issue-price">od {from} zł</span>}</span>
                 <IconArrow size={18} className="hp-issue-arrow" />
               </Link>
-            ))}
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CENNIK ===== */}
+      <section className="ui-section-tight hp-prices-wrap" id="cennik">
+        <div className="ui-wrap">
+          <div className="ui-card hp-prices">
+            <div className="hp-prices-head">
+              <div>
+                <p className="ui-eyebrow">Cennik</p>
+                <h2 className="ui-h2">Ile kosztuje naprawa?</h2>
+                <p className="ui-text">{PRICE_NOTE}</p>
+              </div>
+              <a href={SHOP.phoneHref} className="ui-btn ui-btn-secondary">Zapytaj o swój model</a>
+            </div>
+            <div className="hp-price-table" role="table" aria-label="Cennik napraw – ceny od">
+              <div className="hp-price-row hp-price-th" role="row">
+                <span role="columnheader">Naprawa</span>
+                {PRICE_BRANDS.map((b) => <span key={b} role="columnheader">{b}</span>)}
+              </div>
+              {PRICES.map((p) => (
+                <Link key={p.name} to={`/umow-naprawe?usterka=${encodeURIComponent(p.issue)}`} className="hp-price-row" role="row">
+                  <strong role="rowheader">{p.name}</strong>
+                  {PRICE_BRANDS.map((b) => (
+                    <span key={b} role="cell" className="hp-price-cell"><small>{b}</small>od <b>{p.from[b]} zł</b></span>
+                  ))}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -166,7 +208,7 @@ export default function HomePage() {
             {FAQ_TEASER.map(([q, a]) => (
               <details key={q} className="hp-faq-item">
                 <summary>{q}<span className="hp-plus" aria-hidden="true" /></summary>
-                <p>{a}</p>
+                <p>{a} <Link to={`/faq#${faqSlug(q)}`} className="hp-faq-more">Link do odpowiedzi</Link></p>
               </details>
             ))}
           </div>

@@ -6,7 +6,7 @@ export const FAQ_GROUPS = [
     items: [
       ['Jak zgłosić telefon do naprawy?', 'Wypełnij formularz na naszej stronie. Wybierz markę i model telefonu, opisz problem oraz podaj dane kontaktowe. Po otrzymaniu zgłoszenia skontaktujemy się z Tobą, żeby ustalić szczegóły. Samo wysłanie formularza nie oznacza jeszcze rozpoczęcia naprawy.'],
       ['Czy muszę wiedzieć, co dokładnie zepsuło się w telefonie?', 'Nie. Wystarczy, że opiszesz, co się dzieje, np. „telefon nie ładuje” albo „ekran jest czarny, ale słychać powiadomienia”. Dokładną przyczynę ustalimy podczas diagnostyki.'],
-      ['Ile będzie kosztowała naprawa?', 'Cena zależy od modelu, uszkodzenia i potrzebnych części. Przy typowych naprawach często możemy podać orientacyjny koszt od razu. Jeśli potrzebna jest diagnostyka, przedstawimy wycenę po sprawdzeniu urządzenia. Nie rozpoczynamy dodatkowych płatnych prac bez Twojej zgody.'],
+      ['Ile będzie kosztowała naprawa?', 'Cena zależy od modelu, uszkodzenia i potrzebnych części. Ceny „od” najczęstszych napraw (wyświetlacz, bateria, gniazdo ładowania) znajdziesz w cenniku na stronie głównej. Przy typowych naprawach często możemy podać orientacyjny koszt od razu. Jeśli potrzebna jest diagnostyka, przedstawimy wycenę po sprawdzeniu urządzenia. Nie rozpoczynamy dodatkowych płatnych prac bez Twojej zgody.'],
       ['Czy samo zgłoszenie naprawy jest płatne?', 'Wysłanie formularza jest bezpłatne. Ewentualny koszt diagnostyki zależy od rodzaju usterki i zasad przyjęcia urządzenia. O opłacie poinformujemy Cię przed wykonaniem diagnostyki.'],
       ['Co jeśli naprawa okaże się za droga?', 'Nie musisz decydować się na naprawę. Wyjaśnimy koszt i zakres prac. Jeśli zrezygnujesz, ustalimy sposób odbioru urządzenia. Ewentualna opłata za wcześniej uzgodnioną diagnostykę pozostaje zgodna z warunkami przyjęcia.'],
       ['Czy mogę przynieść telefon bez wcześniejszego zgłoszenia?', 'Oczywiście — zapraszamy! Telefon przyjmiemy od ręki, bez umawiania: od poniedziałku do soboty w godz. 9:00–21:00 (w niedziele handlowe 9:00–19:00) w Pasażu Kaufland w Płońsku. Na miejscu sprawdzimy urządzenie i podamy wycenę, a proste naprawy, jak wymiana baterii czy ekranu, często wykonujemy tego samego dnia. Chcesz mieć pewność, że część będzie już czekać? Zgłoś naprawę online albo zadzwoń przed wizytą.'],
@@ -45,4 +45,7 @@ export const FAQ_GROUPS = [
     ],
   },
 ];
+// Kotwica pytania w adresie, np. /faq#ile-bedzie-kosztowala-naprawa
+export const faqSlug = (q) => q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 export default FAQ_GROUPS;

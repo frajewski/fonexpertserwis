@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /oferta/
+Disallow: /zlecenie/
+Sitemap: https://gsm-serwis-klient.web.app/sitemap.xml
