@@ -59,7 +59,7 @@ Publiczna strona serwisu. Klient **nie zakłada konta** — panel loguje go anon
 
 ## 🖥️ Panel admina (`gsm-admin-panel`)
 
-React + Vite, ten sam kod jako strona, PWA i aplikacja Android (Capacitor, szczegóły w [`gsm-admin-panel/HYBRID_APP.md`](gsm-admin-panel/HYBRID_APP.md)). Jasny/ciemny motyw (przełącznik w menu, `src/theme/theme.js`).
+React 19 + Vite, ten sam kod jako strona, PWA i aplikacja Android (Capacitor, szczegóły w [`gsm-admin-panel/HYBRID_APP.md`](gsm-admin-panel/HYBRID_APP.md)). Jasny/ciemny motyw (przełącznik w menu, `src/theme/theme.js`).
 
 | Menu | Kto | Co robi |
 |---|---|---|
@@ -228,7 +228,7 @@ pro/
 │   ├── src/styles/             tokens.css, ui.css
 │   ├── src/data/faq.js, src/shop.js, src/utils/friendlyError.js
 │   └── public/                 hero-dark.jpg
-└── packages/shared-core/       📦 wspólny store (Zustand), dostęp do Firestore, stałe (statusy, gwarancje…)
+└── packages/shared-core/       📦 src/: wspólny store (Zustand), dostęp do Firestore, stałe (statusy, gwarancje…)
 ```
 
 ---

@@ -2,13 +2,12 @@
 //  printConfirmation.js – generowanie i drukowanie potwierdzenia
 //  przyjęcia urządzenia z panelu webowego.
 //
-//  Szablon HTML jest LUSTRZANIE IDENTYCZNY z tym z apki mobilnej
-//  (RepairConfirmScreen.jsx) – ta sama struktura, te same klasy CSS –
-//  żeby wydrukowane potwierdzenie wyglądało tak samo niezależnie skąd
-//  zostało wygenerowane (telefon serwisanta czy komputer).
+//  Potwierdzenie zawiera kod QR z linkiem śledzenia
+//  (SHOP.clientUrl/?token=…) do panelu klienta.
 //
-//  Na webie nie ma expo-print – używamy natywnego window.print()
-//  przeglądarki, otwieranego w nowym oknie z wygenerowanym HTML-em.
+//  Drukowanie: window.print() w nowym oknie z wygenerowanym HTML-em.
+//  W aplikacji Android (Capacitor) drukowanie jest zablokowane
+//  (blockPrintInNativeApp) – tam używa się „Udostępnij PDF”.
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';

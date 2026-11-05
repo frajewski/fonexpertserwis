@@ -3,9 +3,7 @@
 //
 //  Cała logika żyje we współdzielonym pakiecie @gsm/shared-core – ten plik
 //  tylko WSTRZYKUJE konkretne instancje Firebase (db, auth, app)
-//  zainicjalizowane zwykłym sposobem dla web (getAuth, nie initializeAuth
-//  z AsyncStorage jak w apce mobilnej). Identyczny wzorzec w apce mobilnej
-//  (new/src/store/useStore.js), różni się tylko firebaseConfig.
+//  z ./firebase/firebaseConfig (web/PWA i Capacitor).
 // ============================================================
 
 import { getFunctions, httpsCallable } from 'firebase/functions';

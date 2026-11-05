@@ -245,8 +245,8 @@ export default function RepairDetailPage() {
       partsInvoiceNumber: partsInvoiceInput.trim(),
       deposit: parseFloat(depositEditInput) || 0,
       // Jeśli klient już zaakceptował/odrzucił poprzedni kosztorys, a kwota się
-      // zmieniła – reset do "czeka na decyzję", tak samo jak w apce mobilnej
-      // (EstimateScreen). Klient musi zaakceptować nową kwotę, nie starą.
+      // zmieniła – reset do "czeka na decyzję". Klient musi zaakceptować
+      // nową kwotę (w panelu klienta), nie starą.
       ...(changed && repair.estimateAccepted !== null ? { estimateAccepted: null } : {}),
     });
     setEditingCost(false);
@@ -775,8 +775,7 @@ export default function RepairDetailPage() {
                   </>
                 ) : (
                   // Pracownik (nie-admin) nie widzi/nie ustawia rozbicia na marżę –
-                  // wpisuje jedną kwotę łączną, zapisywaną w serviceCost (partsCost=0),
-                  // dokładnie jak w apce mobilnej.
+                  // wpisuje jedną kwotę łączną, zapisywaną w serviceCost (partsCost=0).
                   <label className="rd-cost-edit-field">
                     <span>Kwota łącznie (zł)</span>
                     <input

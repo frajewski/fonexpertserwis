@@ -7,7 +7,7 @@ Opisuje, jak **jeden kod** panelu `gsm-admin-panel` działa jako **PWA** w przeg
 |---|---|
 | Nazwa aplikacji | **FonExpert Serwis** |
 | Package / App ID | `pl.fonexpert.serwis` |
-| Wersja | `1.0.0` (versionCode `10000`) |
+| Wersja | `1.2.2` (versionCode `10202`) — źródło: `version` w `package.json` |
 | Repozytorium | https://github.com/frajewski/fonexpertserwis (folder `gsm-admin-panel/`) |
 | Projekt Firebase | `gsmserviceapp-ff8f6` |
 
@@ -17,10 +17,13 @@ Opisuje, jak **jeden kod** panelu `gsm-admin-panel` działa jako **PWA** w przeg
 
 FonExpert Serwis to panel pracownika i administratora serwisu GSM. Obsługuje:
 
-- przyjmowanie i prowadzenie zleceń napraw,
-- skup i komis telefonów,
-- magazyn części,
-- klientów, rezerwacje i koszty.
+- przyjmowanie i prowadzenie zleceń napraw (statusy, kosztorys, zdjęcia, podpisy, wydruki/PDF, proponowany termin naprawy),
+- rezerwacje ze strony klienta (akceptacja z numerem, zadatek BLIK, zamiana na zlecenie) i kalendarz terminów,
+- SMS-y do klientów przez bramkę SMS (ręczne, automatyczne przy statusach, prośby o opinię),
+- skup i komis telefonów, wyceny skupu z formularza na stronie, umowy kupna,
+- magazyn części w kategoriach, kasę dnia, statystyki, koszty, klientów i wspólne zadania.
+
+Pełny opis funkcji całego systemu (także panelu klienta `gsmw`) jest w [`../README.md`](../README.md).
 
 Panel powstał jako aplikacja webowa (React + Firebase). W ramach projektu stał się:
 
@@ -34,7 +37,8 @@ Najważniejsza zasada: **logika biznesowa i UI są wspólne**. Wersja natywna do
 ## B. Architektura
 
 ### Frontend
-- **React 18** (JavaScript, JSX) + **React Router 6** (routing SPA) + **Zustand** (stan aplikacji).
+- **React 19** (JavaScript, JSX) + **React Router 6** (routing SPA) + **Zustand** (stan aplikacji, logika we wspólnym pakiecie `packages/shared-core`).
+- Jasny i ciemny motyw (`src/theme/theme.js`, tokeny w `src/styles/tokens.css`); kolor ikon paska statusu Androida dobierany do tła.
 - **Vite 5**: dev server i build produkcyjny (`dist/`).
 - **PWA**: `vite-plugin-pwa` (Workbox, `generateSW`) generuje service worker i manifest.
 - **Capacitor 8**: natywny projekt Android (`android/`) ładuje zbudowany `dist/` do WebView.
@@ -42,8 +46,8 @@ Najważniejsza zasada: **logika biznesowa i UI są wspólne**. Wersja natywna do
 ### Backend (Firebase, bez własnego serwera)
 - **Firebase Auth**: logowanie e-mail + hasło. Role (`admin` / `worker`) są w custom claims tokenu.
 - **Cloud Firestore**: baza danych z aktualizacjami na żywo (`onSnapshot`).
-- **Cloud Storage**: zdjęcia urządzeń i umów.
-- **Cloud Functions (v2, Node 22)**: operacje zaufane (role, rejestracja urządzeń push, wysyłka push, funkcje panelu klienta).
+- **Cloud Storage**: zdjęcia zleceń i skupu oraz zdjęcia przesłane przez klientów z formularzy na stronie.
+- **Cloud Functions (v2, Node 22)**: operacje zaufane (role, rejestracja urządzeń push, wysyłka push, wysyłka SMS przez bramkę, funkcje panelu klienta).
 - **Firebase Cloud Messaging (FCM)**: powiadomienia push na Androida.
 
 ```mermaid
@@ -62,7 +66,7 @@ flowchart LR
     PWA --> CF["Cloud Functions<br/>(callable)"]
     APK --> CF
 
-    FS -- "trigger: nowe zlecenie,<br/>status, rezerwacja, magazyn" --> CF
+    FS -- "trigger: nowe zlecenie, status,<br/>rezerwacja, wycena skupu, magazyn" --> CF
     CF -- "firebase-admin" --> FCM["FCM"]
     FCM -- "push" --> APK
 
@@ -90,13 +94,14 @@ Android (Capacitor) ─┘                                            ▲
 
 | Ścieżka | Co zawiera |
 |---|---|
-| `src/pages/` | ekrany (zlecenia, skup, magazyn, konto…) – wspólne dla PWA i Androida |
+| `src/pages/` | ekrany (zlecenia, rezerwacje, kalendarz, kasa, skup, wyceny, umowa, magazyn, konto…) – wspólne dla PWA i Androida |
 | `src/native/` | warstwa natywna: haptics, status bar, splash, App Info / Device Info, przycisk Wstecz i lifecycle (`NativeShell.jsx`) |
 | `src/network/` | stan sieci (Capacitor Network albo `navigator.onLine`) i baner offline |
 | `src/push/` | rejestracja push, obsługa kliknięcia powiadomienia, powiadomienie w aplikacji |
 | `src/scanner/` | skaner kodów i walidacja IMEI / QR |
 | `src/documents/` | generowanie PDF i udostępnianie (Share Sheet / Web Share / pobranie) |
-| `src/utils/platform.js` | wykrywanie platformy: `Capacitor.isNativePlatform()` |
+| `src/utils/platform.js` | wykrywanie platformy: `Capacitor.isNativePlatform()`, blokada `window.print()` w aplikacji natywnej |
+| `src/theme/` | motyw jasny/ciemny/systemowy |
 | `android/` | natywny projekt Android (Gradle, manifest, ikony, splash) |
 | `../firebase/` | reguły Firestore/Storage, indeksy, Cloud Functions |
 
@@ -133,7 +138,7 @@ Android (Capacitor) ─┘                                            ▲
 | applicationId / namespace | `pl.fonexpert.serwis` |
 | Nazwa (launcher) | `FonExpert Serwis` (`res/values/strings.xml`) |
 | minSdk / targetSdk / compileSdk | 26 (Android 8.0) / 36 / 36 |
-| versionName / versionCode | z `package.json` → `1.0.0` / `10000` (patrz *Wersjonowanie*) |
+| versionName / versionCode | z `package.json` → `1.2.2` / `10202` (patrz *Wersjonowanie*) |
 | Ikona | adaptive icon (gradient + „F”, warstwa monochrome dla ikon tematycznych), generator: `scripts/generate-android-assets.mjs` |
 | Splash | Android 12+ SplashScreen API: granatowe tło `#11172B` + znak F |
 | Ikona powiadomień | `res/drawable/ic_stat_fonexpert.xml` (biała, wektor) |
@@ -165,15 +170,17 @@ Aplikacja **nie** prosi o dostęp do pamięci ani galerii. PDF do udostępnienia
 | Usługa | Użycie w aplikacji |
 |---|---|
 | **Auth** | logowanie e-mail/hasło, reset hasła, zmiana hasła. W aplikacji natywnej `initializeAuth` + `indexedDBLocalPersistence` (stabilne w WebView) |
-| **Firestore** | kolekcje `repairs`, `users`, `phones`, `parts`, `expenses`, `tasks`, `bookingRequests`, `meta/settings`, `counters`. Nasłuch na żywo (`onSnapshot`): zmiana na jednym urządzeniu jest od razu widoczna na drugim. Urządzenia push: `users/{uid}/devices/{deviceId}` (zapis tylko przez Cloud Function) |
-| **Storage** | zdjęcia: `repairs/{id}/…`, `trade/{id}/…`. Zapis tylko personel, obrazy < 8 MB |
-| **Cloud Functions** | `decideInitialRole`, `syncOwnRoleClaim`, `setUserRoleClaim` (role); `registerPushDevice`, `unregisterPushDevice`, `sendTestPush` (push); triggery `pushOnRepairCreated`, `pushOnRepairUpdated`, `pushOnBookingCreated`, `pushOnLowStock`, `pushOnTaskCreated`, `pushOnTaskAssigned`; funkcje panelu klienta (`lookupRepairByToken` i in.) |
+| **Firestore** | kolekcje `repairs`, `users`, `parts`, `tasks`, `bookingRequests`, `counters` (personel) oraz `phones`, `buybackRequests`, `expenses`, `meta/settings` (tylko admin). Nasłuch na żywo (`onSnapshot`): zmiana na jednym urządzeniu jest od razu widoczna na drugim. Urządzenia push: `users/{uid}/devices/{deviceId}` (zapis tylko przez Cloud Function) |
+| **Storage** | zdjęcia: `repairs/{id}/…`, `trade/{id}/…` (zapis tylko personel, obrazy < 8 MB) oraz `bookingUploads/{uid}/…` — zdjęcia od klientów (zapis przez panel klienta, odczyt tylko personel) |
+| **Cloud Functions** | `decideInitialRole`, `syncOwnRoleClaim`, `setUserRoleClaim` (role); `registerPushDevice`, `unregisterPushDevice`, `sendTestPush` (push); triggery `pushOnRepairCreated`, `pushOnRepairUpdated` (status, decyzja o kosztorysie, odpowiedź na proponowany termin), `pushOnBookingCreated`, `pushOnBuybackCreated`, `pushOnLowStock`, `pushOnTaskCreated`, `pushOnTaskAssigned`; SMS: `sendSmsToCustomer`, `sendReviewRequests`; funkcje panelu klienta (`lookupRepairByToken` i in.) |
 | **FCM** | push na Androida. Token urządzenia zapisuje backend; wysyłka **tylko** z Cloud Functions (`firebase-admin`) |
 
 ### Bezpieczeństwo
 - Brak sekretów w kodzie klienta. Konfiguracja Firebase w `firebaseConfig.js` jest publiczna z założenia, a dostęp chronią reguły i Auth.
 - Brak kluczy Admin SDK / service account w repo. Działają tylko w Cloud Functions.
 - Brak publicznego endpointu do wysyłania push: wszystkie funkcje to `onCall` z weryfikacją roli. `sendTestPush` jest tylko dla admina i tylko na jego własne urządzenia.
+- Dane bramki SMS (`SMSGATE_USER`, `SMSGATE_PASS`) są sekretami Cloud Functions, nie w kodzie. Plik `firebase/functions/.env.gsmserviceapp-ff8f6` (link do opinii, tryb SMS) jest poza gitem.
+- Kliknięcie powiadomienia otwiera tylko znane ekrany (`src/push/handlePushAction.js`: zlecenie, zadania, rezerwacje, wyceny skupu, magazyn, konto) — nigdy URL z payloadu.
 - Tokeny FCM nie są pokazywane w UI ani logowane.
 - Reguły Firestore/Storage (`../firebase/*.rules`) opierają się na rolach z custom claims. Domyślnie wszystko, co nie jest wymienione, jest zablokowane.
 - Logi produkcyjne pokazują tylko kod błędu (`src/utils/devLog.js`). Pełne obiekty błędów są widoczne wyłącznie w trybie developerskim.
@@ -219,9 +226,9 @@ Wersje z `package.json`:
 
 ### Development (przeglądarka)
 ```bash
-cd gsm-admin-panel
-npm install
-npm run dev          # http://localhost:5174
+cd ~/Desktop/pro
+npm install          # workspaces: gsm-admin-panel, gsmw, packages/shared-core
+npm run admin        # http://localhost:5174
 ```
 
 ### Build web + Android
@@ -264,7 +271,18 @@ Po zmianie `capacitor.config.ts` albo pluginów: `npx cap sync android`.
    - AAB (Google Play): `android/app/build/outputs/bundle/release/app-release.aab`
 
    Alternatywa bez pliku properties: Android Studio → *Build → Generate Signed App Bundle / APK*.
-4. Instalacja na telefonie: **najpierw odinstaluj wersję debug** (inny podpis), potem `adb install android/app/build/outputs/apk/release/app-release.apk` albo skopiuj APK na telefon.
+4. Instalacja na telefonie przez kabel USB (debugowanie USB włączone):
+   ```bash
+   ~/Library/Android/sdk/platform-tools/adb install -r app/build/outputs/apk/release/app-release.apk
+   ```
+   `-r` aktualizuje aplikację z zachowaniem danych i logowania. Jeśli na telefonie jest wersja debug (inny podpis), najpierw ją odinstaluj.
+
+### Szybka aktualizacja na telefonie (po zmianach w kodzie)
+```bash
+cd ~/Desktop/pro/gsm-admin-panel && npm version patch --no-git-tag-version && npm run build && npx cap sync android \
+  && cd android && ./gradlew assembleRelease \
+  && ~/Library/Android/sdk/platform-tools/adb install -r app/build/outputs/apk/release/app-release.apk
+```
 
 ### Wersjonowanie
 - Jedno źródło prawdy: pole `version` w `gsm-admin-panel/package.json`.
@@ -278,7 +296,7 @@ Po zmianie `capacitor.config.ts` albo pluginów: `npx cap sync android`.
 ## I. Testy
 
 ### Automatyczne (przeglądarka, podstawione pluginy Capacitor i Firebase)
-Scenariusze sprawdzone w Chromium z symulacją platformy Android:
+Scenariusze sprawdzone w Chromium z symulacją platformy Android (przy wydaniu 1.0.0; przy kolejnych wersjach powtarzana jest checklista ręczna poniżej):
 - **Splash i status bar**: splash chowany raz po sprawdzeniu sesji; kolor ikon w pionie, poziomie, z modalem i na ekranie logowania.
 - **Przycisk Wstecz**: modal → zamknięcie; zlecenie → lista; menu → zamknięcie; głęboka nawigacja; zimny start z powiadomienia; ekran główny → aplikacja w tło.
 - **Lifecycle**: formularz po pause/resume i po powrocie z aparatu; brak reloadu i wylogowania; odświeżenie sieci i zgody na push.
@@ -302,6 +320,8 @@ Scenariusze sprawdzone w Chromium z symulacją platformy Android:
 | 8 | Haptics | wibracja po zapisie, po złym skanie; w PWA brak |
 | 9 | Lifecycle | wyjście do innej aplikacji i powrót, aparat w trakcie formularza |
 | 10 | PWA | działa w Chrome, instalacja, upload zdjęcia, routing / odświeżenie podstrony |
+| 11 | Rezerwacje i SMS | nowa rezerwacja ze strony → push → akceptacja z SMS; SMS „gotowe do odbioru” przy zmianie statusu |
+| 12 | Motyw | jasny / ciemny / systemowy, czytelny pasek statusu w obu |
 
 ---
 
@@ -313,7 +333,8 @@ Scenariusze sprawdzone w Chromium z symulacją platformy Android:
 - **Proces ubity w tle podczas robienia zdjęcia** (mało RAM): formularz nie jest odtwarzany (brak obsługi `appRestoredResult`).
 - **Wstecz z wypełnionego formularza** cofa bez pytania o niezapisane dane.
 - **iOS**: projekt `ios/` istnieje, ale etap końcowy dotyczy Androida; dopracowanie iOS jest poza zakresem.
-- **Rozmiar bundla**: główny plik JS ma ok. 930 KB (245 KB gzip), głównie Firebase SDK. Biblioteki PDF i skanera są ładowane dopiero przy użyciu.
+- **Rozmiar bundla**: główny plik JS ma ok. 1,1 MB (ok. 285 KB gzip), głównie Firebase SDK. Biblioteki PDF i skanera są ładowane dopiero przy użyciu.
+- **SMS-y** wychodzą przez osobny telefon z bramką SMS (patrz `../README.md`); gdy jest offline, wiadomości czekają w kolejce.
 
 ---
 
@@ -388,12 +409,13 @@ Cały interfejs (React), routing, logika biznesowa, generowanie PDF (jsPDF/html2
 ## Technologie
 
 - **JavaScript (ES2022)** + JSX; TypeScript tylko w `capacitor.config.ts`
-- **React 18**, React Router 6, Zustand
+- **React 19**, React Router 6, Zustand
 - **Vite 5**, `vite-plugin-pwa` (Workbox)
 - **PWA**: manifest, service worker
 - **Capacitor 8** + 11 oficjalnych pluginów
 - **Android**: Gradle, SDK 36, min. Android 8.0, AndroidX SplashScreen
 - **Firebase**: Auth, Firestore, Storage, Cloud Functions (Node 22, v2), Cloud Messaging, Hosting
+- **SMS Gateway for Android** (Cloud Server API) — SMS-y do klientów
 - jsPDF + html2canvas (PDF), ML Kit (skaner, przez plugin)
 
 ---

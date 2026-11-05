@@ -1,7 +1,8 @@
 // ============================================================
 //  firebaseConfig.js – inicjalizacja Firebase dla panelu admina
-//  Ten sam projekt Firebase co apka mobilna (gsmserviceapp-ff8f6) –
-//  PRAWDZIWE logowanie (email+hasło), te same konta, ta sama baza danych.
+//  Projekt gsmserviceapp-ff8f6 (ten sam co panel klienta gsmw).
+//  Logowanie e-mail + hasło; w aplikacji Android (Capacitor) sesja
+//  trzymana w IndexedDB (initializeAuth + indexedDBLocalPersistence).
 // ============================================================
 
 import { initializeApp } from 'firebase/app';

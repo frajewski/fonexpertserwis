@@ -1,7 +1,8 @@
-// Szablony wiadomości do klienta – teksty identyczne z apką mobilną
-// (new/src/services/smsService.js), ale bez logiki wysyłki natywnej (panel
-// webowy nie ma dostępu do SIM-a, więc tu tylko generujemy treść do
-// skopiowania / otwarcia w aplikacji SMS/e-mail).
+// Szablony wiadomości do klienta (SMS/e-mail) z linkiem śledzenia.
+// Wysyłka SMS idzie przez bramkę (Cloud Function sendSmsToCustomer);
+// treść można też skopiować albo otworzyć w aplikacji SMS/e-mail.
+// Szablony 'partsArrived' i 'ready' są wysyłane automatycznie przy zmianie
+// statusu (RepairDetailPage, AUTO_SMS).
 
 import SHOP from '../constants/shopInfo';
 export const messageTemplates = (repair, customerName) => {

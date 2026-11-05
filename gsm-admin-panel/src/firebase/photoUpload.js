@@ -1,14 +1,10 @@
 // ============================================================
 //  photoUpload.js – upload zdjęć specyficzny dla przeglądarki
 //
-//  W przeciwieństwie do apki mobilnej (gdzie ImagePicker zwraca lokalny
-//  URI typu file://..., wymagający fetch()+blob() przed wgraniem), input
-//  type="file" w przeglądarce daje obiekt File, który JEST JUŻ Blob-em –
-//  można go wgrać do Storage bezpośrednio, bez konwersji.
-//
-//  Te funkcje zapisują pliki w TYCH SAMYCH ścieżkach Storage co apka
-//  mobilna (repairs/{repairId}/..., trade/{phoneId}/...), więc zdjęcie
-//  wgrane tutaj jest widoczne w apce mobilnej i odwrotnie.
+//  input type="file" (PWA) i natywny aparat (Capacitor, utils/nativeCamera.js)
+//  dają obiekt File/Blob, który po kompresji trafia do Storage:
+//  repairs/{repairId}/... (zlecenia) i trade/{phoneId}/... (skup).
+//  Zdjęcia od klientów z panelu gsmw leżą osobno w bookingUploads/<uid>/.
 // ============================================================
 
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
@@ -18,9 +14,8 @@ import { devWarn } from '../utils/devLog';
 
 // Kompresuje i skaluje zdjęcie w przeglądarce PRZED wgraniem do Storage,
 // używając natywnego Canvas API (brak potrzeby dodatkowej biblioteki).
-// Ta sama logika i te same docelowe wymiary co w apce mobilnej
-// (Full HD / 1920px szerokości, kompresja JPEG) – dla konsekwencji rozmiaru
-// plików niezależnie skąd zostały wgrane.
+// Docelowo Full HD (1920 px szerokości), kompresja JPEG – stały rozmiar
+// plików niezależnie od urządzenia, z którego wgrano zdjęcie.
 const compressImageFile = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = (e) => {

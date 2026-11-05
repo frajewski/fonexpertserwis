@@ -56,8 +56,7 @@ export default function NewRepairPage() {
   const [customerNip, setCustomerNip] = useState('');
 
   // Pracownik wpisuje jedną sumę (cenę podaną telefonicznie przez admina);
-  // admin może opcjonalnie rozwinąć rozbicie wewnętrzne do własnych rozliczeń —
-  // identyczna zasada co w apce mobilnej
+  // admin może opcjonalnie rozwinąć rozbicie wewnętrzne do własnych rozliczeń
   const [totalCostInput, setTotalCostInput] = useState('');
   const [depositInput, setDepositInput] = useState('');
   const [showBreakdown, setShowBreakdown] = useState(false);

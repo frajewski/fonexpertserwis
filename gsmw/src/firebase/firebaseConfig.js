@@ -1,11 +1,14 @@
 // ============================================================
 //  firebaseConfig.js – inicjalizacja Firebase dla panelu webowego klienta
-//  Ten sam projekt Firebase co apka mobilna (gsmserviceapp-ff8f6) –
-//  współdzielona baza danych (Firestore), ale panel webowy NIE loguje
+//  Ten sam projekt Firebase co panel admina (gsmserviceapp-ff8f6) –
+//  współdzielona baza danych (Firestore), ale panel klienta NIE loguje
 //  klienta prawdziwym kontem. Loguje się anonimowo (signInAnonymously),
 //  tylko żeby wywołania Cloud Functions miały jakiś request.auth – cała
-//  faktyczna logika dostępu i weryfikacji odbywa się w functions/index.js
-//  (lookupRepair, acceptEstimateWeb, itd.), nie w regułach Firestore.
+//  faktyczna logika dostępu i weryfikacji odbywa się w Cloud Functions
+//  (firebase/functions/index.js: lookupRepair, lookupRepairByToken,
+//  acceptEstimateWeb, respondToSlotWeb, createBookingRequestWeb,
+//  createBuybackRequestWeb…), nie w regułach Firestore. Wyjątek: upload
+//  zdjęć do Storage bookingUploads/<uid>/ (reguły w storage.rules).
 // ============================================================
 
 import { initializeApp } from 'firebase/app';

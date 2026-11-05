@@ -116,8 +116,9 @@ service cloud.firestore {
     }
 
     // ---------- REPAIRS ----------
-    // Klient (apka mobilna, zalogowany) widzi tylko swoje zlecenia, po customerId.
     // Admin/pracownik widzą wszystkie. Tworzenie nowego zlecenia: tylko personel.
+    // Gałąź isOwner() to pozostałość po dawnej aplikacji mobilnej z kontami
+    // klientów – dziś klienci nie mają kont (panel gsmw działa anonimowo).
     //
     // Panel webowy (klient bez konta, anonimowy) NIE czyta/zapisuje repairs
     // bezpośrednio przez te reguły – nie da się tu bezpiecznie zweryfikować
@@ -133,7 +134,7 @@ service cloud.firestore {
 
       allow update: if isStaff()
                     || (
-                      // Klient (apka mobilna) może zaktualizować WYŁĄCZNIE pole
+                      // Klient z kontem (dawna aplikacja) może zaktualizować WYŁĄCZNIE pole
                       // estimateAccepted (akceptacja/odrzucenie kosztorysu)
                       isOwner(resource.data.customerId)
                       && request.resource.data.diff(resource.data).affectedKeys()
@@ -144,10 +145,6 @@ service cloud.firestore {
     }
 
     // ---------- PHONES (skup) ----------
-    // Dane finansowe (buyPrice, sellPrice) chronione na poziomie reguł
-    // częściowo nie da się tu w pełni odtworzyć ukrywania pól przed pracownikiem
-    // (Firestore rules nie filtrują pól w odpowiedzi) – to wciąż obowiązek UI,
-    // tak jak teraz w apce mobilnej. Reguły blokują tylko KTO w ogóle ma dostęp.
     // Skup/komis: ceny zakupu, marże i dane sprzedających (PESEL, dowód) –
     // TYLKO Admin. Pracownik nie ma Skupu w menu i nie może czytać tej kolekcji.
     // Katalog B2B budowany jest przez Cloud Function (Admin SDK), więc działa dalej.

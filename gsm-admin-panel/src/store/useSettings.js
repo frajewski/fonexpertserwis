@@ -1,14 +1,9 @@
 // ============================================================
 //  useSettings.js – ustawienia serwisu (Zustand + Firestore)
 //
-//  WERSJA SYNCHRONIZOWANA: ustawienia żyją w dokumencie meta/settings
-//  w Firestore, nie tylko lokalnie na urządzeniu. To naprawia problem,
-//  w którym zmiana danych serwisu w apce mobilnej nie była widoczna
-//  w panelu admina (i odwrotnie) – teraz obie platformy czytają/zapisują
-//  do tego samego dokumentu.
-//
-//  Interfejs zostaje identyczny (useSettings(), updateSettings()) – żadny
-//  komponent korzystający z tego store nie wymaga zmian.
+//  Ustawienia żyją w dokumencie meta/settings w Firestore, więc zmiana
+//  na jednym urządzeniu (komputer, PWA, Android) jest od razu widoczna
+//  na pozostałych. Interfejs: useSettings(), updateSettings().
 // ============================================================
 
 import { create } from 'zustand';
@@ -34,9 +29,8 @@ const useSettings = create((set, get) => ({
   _loaded: false,
 
   // Wywołane raz przy starcie apki (patrz App.js) – wczytuje aktualne
-  // ustawienia z Firestore i nasłuchuje zmian na żywo (np. admin zmienił
-  // adres serwisu z panelu webowego, apka mobilna powinna to zobaczyć
-  // bez restartu)
+  // ustawienia z Firestore i nasłuchuje zmian na żywo (zmiana na komputerze
+  // jest widoczna w aplikacji na telefonie bez restartu)
   startSettingsListener: () => {
     if (unsubSettings) return; // już nasłuchuje, nie duplikuj
 

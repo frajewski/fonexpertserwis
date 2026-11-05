@@ -1,18 +1,14 @@
 // ============================================================
 //  firestoreDb.js – Firestore jako trwała baza danych (WSPÓŁDZIELONE)
-//  @gsm/shared-core – ten plik jest IDENTYCZNY dla apki mobilnej i panelu
-//  webowego. Eksportuje FABRYKĘ (createFirestoreDb), nie gotowe funkcje –
-//  to jest zmiana względem poprzedniej wersji, gdzie firestoreDb.js
-//  importował bezpośrednio `db` z firebaseConfig.js. Tutaj `db` jest
-//  WSTRZYKIWANE jako argument, bo każda platforma inicjalizuje Firebase
-//  inaczej (apka mobilna: initializeAuth + AsyncStorage; panel webowy:
-//  zwykłe getAuth()) – to jedyny sposób, żeby ta sama logika działała
-//  na obu platformach bez duplikacji.
+//  @gsm/shared-core – logika bazy dla panelu admina. Eksportuje FABRYKĘ
+//  (createFirestoreDb), a `db` jest WSTRZYKIWANE jako argument, żeby pakiet
+//  nie zależał od konkretnej inicjalizacji Firebase.
 //
-//  WAŻNE OGRANICZENIE: funkcje dotykające zdjęć (upload/kompresja) NIE są
-//  tutaj – są platformowo-specyficzne (expo-image-manipulator na mobile,
-//  Canvas API na webie) i żyją osobno w każdym projekcie
-//  (new/src/firebase/photoStorage.js, gsm-admin-panel/src/firebase/photoUpload.js).
+//  Upload i kompresja zdjęć NIE są tutaj – żyją w
+//  gsm-admin-panel/src/firebase/photoUpload.js.
+//
+//  WEB_PANEL_URL (adres panelu klienta w linkach śledzenia) musi być zgodny
+//  z SHOP.clientUrl w gsm-admin-panel/src/constants/shopInfo.js.
 //
 //  Użycie:
 //    import { createFirestoreDb } from '@gsm/shared-core/firestoreDb';

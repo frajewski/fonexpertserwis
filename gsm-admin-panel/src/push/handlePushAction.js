@@ -5,6 +5,7 @@
 //    service_order → { orderId }   → /zlecenia/{orderId}
 //    task          → { taskId }    → /pulpit (lista zadań)
 //    booking       → { bookingId } → /rezerwacje
+//    buyback       → { buybackId } → /wyceny (tylko admin)
 //    inventory     → { partId }    → /magazyn
 //    test          → {}            → /moje-konto
 //
@@ -24,6 +25,7 @@ const ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 const ROUTES = {
   task: () => '/pulpit',
   booking: () => '/rezerwacje',
+  buyback: () => '/wyceny',
   inventory: () => '/magazyn',
   test: () => '/moje-konto',
 };
