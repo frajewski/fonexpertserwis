@@ -12,6 +12,7 @@
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';
+import SHOP from '../constants/shopInfo';
 import { signatureBlockHtml } from '../signature/signatureData';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
@@ -20,7 +21,7 @@ const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—'
 export function buildRepairConfirmationHtml(repair, customer, shopSettings) {
   const total = (repair.partsCost || 0) + (repair.serviceCost || 0);
   const trackingUrl = repair.trackingToken
-    ? `https://gsm-serwis-klient.web.app/?token=${repair.trackingToken}`
+    ? `${SHOP.clientUrl}/?token=${repair.trackingToken}`
     : null;
   const qrCodeUrl = trackingUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=130x130&margin=0&data=${encodeURIComponent(trackingUrl)}`

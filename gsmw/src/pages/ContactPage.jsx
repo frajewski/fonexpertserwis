@@ -52,15 +52,15 @@ export default function ContactPage() {
 
   return (
     <main className="cp">
-      <section className="cp-hero">
-        <div className="cp-wrap">
-          <p className="cp-kicker">Kontakt</p>
-          <h1 className="cp-title">Zajrzyj do nas w <span className="cp-accent">Pasażu Kaufland</span></h1>
-          <p className="cp-sub">Serwis telefonów, tabletów i laptopów w Płońsku. Przyjdź bez umawiania albo zgłoś naprawę online — oddzwonimy.</p>
+      <section className="ui-hero ui-hero-compact ui-hero-overlap">
+        <div className="ui-wrap ui-hero-inner">
+          <p className="ui-eyebrow">Kontakt</p>
+          <h1 className="ui-h1">Zajrzyj do nas w <span className="ui-accent">Pasażu Kaufland</span></h1>
+          <p className="ui-lead">Serwis telefonów, tabletów i laptopów w Płońsku. Zgłoś naprawę online albo zadzwoń przed wizytą — przygotujemy się na Twoje urządzenie.</p>
         </div>
       </section>
 
-      <div className="cp-wrap cp-main">
+      <div className="ui-wrap ui-overlap cp-main">
         {/* Wizytówka */}
         <article className="cp-card" aria-label="Wizytówka Fonexpert">
           <div className="cp-card-top">
@@ -124,7 +124,7 @@ export default function ContactPage() {
       </div>
 
       {/* Dojazd */}
-      <section className="cp-wrap cp-tips" aria-label="Jak do nas trafić">
+      <section className="ui-wrap cp-tips" aria-label="Jak do nas trafić">
         <div className="cp-tip">
           <span className="cp-tip-ic"><IconStore size={24} /></span>
           <div><strong>Pasaż Kaufland</strong><p>Punkt znajdziesz w galerii handlowej przy Kauflandzie — wejdź głównym wejściem do pasażu.</p></div>
@@ -139,13 +139,13 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="cp-wrap">
+      <section className="ui-wrap">
         <div className="cp-cta">
           <div>
             <h2>Masz zepsuty telefon?</h2>
             <p>Opisz usterkę i dodaj zdjęcia — odezwiemy się z wyceną.</p>
           </div>
-          <Link to="/umow-naprawe" className="cp-cta-btn">Zgłoś naprawę online <IconArrow size={18} /></Link>
+          <Link to="/umow-naprawe" className="ui-btn ui-btn-cta ui-btn-lg">Zgłoś naprawę online <IconArrow size={18} /></Link>
         </div>
       </section>
     </main>

@@ -66,6 +66,13 @@ function repairToPublicData(doc) {
     estimateAccepted: data.estimateAccepted ?? null,
     warrantyMonths: Number(data.warrantyMonths || 0),
     warrantyEndDate: data.warrantyEndDate || null,
+    // Historia etapów dla klienta: tylko data i status (bez autora zmiany i notatek wewnętrznych)
+    history: Array.isArray(data.history)
+      ? data.history
+          .filter((h) => h && h.date && h.status)
+          .map((h) => ({ date: String(h.date), status: String(h.status) }))
+          .slice(-30)
+      : [],
     // Proponowany termin wizyty/naprawy – tylko to, co klient ma zobaczyć
     proposedSlot: data.proposedSlot && data.proposedSlot.at
       ? {
@@ -607,7 +614,7 @@ exports.createBuybackRequestWeb = onCall(
 /**
  * Funkcja używana przez panel webowy:
  * wyszukiwanie zlecenia po bezpiecznym tokenie z linku śledzenia.
- * Przykład linku: https://gsmserviceapp-ff8f6.web.app/?token=abc123
+ * Przykład linku: <adres panelu klienta>/?token=abc123
  */
 exports.lookupRepairByToken = onCall(
   {

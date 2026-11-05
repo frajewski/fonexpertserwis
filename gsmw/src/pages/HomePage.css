@@ -1,0 +1,103 @@
+/* ===== Strona główna ===== */
+.hp { color: var(--ink); }
+
+/* Hero: tekst + szybkie sprawdzenie statusu */
+.hp-hero { position: relative; color: #fff; overflow: hidden; background:
+  linear-gradient(90deg, #070D1F 0%, rgba(8, 16, 38, .94) 38%, rgba(10, 20, 48, .6) 66%, rgba(10, 20, 48, .35) 100%),
+  linear-gradient(0deg, rgba(7, 13, 31, .9) 0%, rgba(7, 13, 31, 0) 40%),
+  url('/hero-dark.jpg') right center / cover no-repeat, #0A1430; }
+.hp-hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr); gap: 56px; align-items: center; padding-top: 64px; padding-bottom: 72px; }
+.hp-hero .ui-eyebrow { color: #8CC4F5; }
+.hp-hero .ui-h1 { color: #fff; }
+.hp-hero .ui-lead { color: #D2DCEB; max-width: 540px; }
+.hp-hero-btns { margin-top: 30px; }
+.hp-trust { list-style: none; margin: 30px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 22px; }
+.hp-trust li { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 600; color: #D6DEEE; }
+.hp-trust svg { color: #4ADE80; }
+
+/* Usługi – nachodzą na hero */
+.hp-services-wrap { padding-top: 0; }
+.hp-services { margin-top: -36px; position: relative; z-index: 2; }
+.hp-services .ui-link { margin-top: auto; padding-top: 4px; }
+.hp-services .ui-text { font-size: 14.5px; }
+
+/* Najczęstsze naprawy */
+.hp-popular { padding-top: 40px; }
+.hp-issues { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.hp-issue { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; transition: border-color .15s, transform .15s, box-shadow .15s; }
+.hp-issue:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgba(22, 98, 232, .45); }
+.hp-issue-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.hp-issue strong { font-size: 15px; }
+.hp-issue small { font-size: 13px; color: var(--ink-soft); line-height: 1.35; }
+.hp-issue-arrow { color: var(--ink-faint); flex-shrink: 0; transition: transform .15s, color .15s; }
+.hp-issue:hover .hp-issue-arrow { color: var(--accent); transform: translateX(3px); }
+
+/* Jak to działa */
+.hp-how { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 56px; align-items: center; }
+.hp-how-btn { margin-top: 26px; }
+.hp-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; position: relative; }
+.hp-steps li { display: flex; gap: 18px; align-items: flex-start; padding: 20px 22px; border-radius: 16px; background: var(--paper); border: 1px solid var(--line); }
+.hp-steps li > span { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; background: var(--accent); color: #fff; font-weight: 800; font-size: 17px; }
+.hp-steps strong { display: block; font-size: 16.5px; margin: 2px 0 4px; }
+.hp-steps p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
+
+/* Dlaczego my */
+.hp-why { list-style: none; margin: 0; padding: 0; }
+.hp-why li { display: flex; flex-direction: column; gap: 10px; padding: 24px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+.hp-why strong { font-size: 16.5px; margin-top: 4px; }
+.hp-why .ui-text { font-size: 14.5px; }
+
+/* FAQ */
+.hp-faq { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 56px; align-items: start; }
+.hp-faq-link { margin-top: 20px; }
+.hp-faq-list { display: flex; flex-direction: column; gap: 10px; }
+.hp-faq-item { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
+.hp-faq-item[open] { background: var(--surface); box-shadow: 0 10px 26px -18px rgba(15, 23, 42, .3); }
+.hp-faq-item summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 20px; font-size: 16px; font-weight: 600; }
+.hp-faq-item summary::-webkit-details-marker { display: none; }
+.hp-faq-item p { margin: 0; padding: 0 20px 18px; font-size: 15px; line-height: 1.65; color: var(--ink-soft); }
+.hp-plus { position: relative; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); flex-shrink: 0; }
+.hp-plus::before, .hp-plus::after { content: ''; position: absolute; left: 50%; top: 50%; width: 11px; height: 2px; border-radius: 2px; background: var(--accent); transform: translate(-50%, -50%); transition: transform .2s; }
+.hp-plus::after { transform: translate(-50%, -50%) rotate(90deg); }
+.hp-faq-item[open] .hp-plus::after { transform: translate(-50%, -50%) rotate(0); }
+
+/* Odwiedź nas */
+.hp-visit { display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap; padding: 36px 40px; border-radius: 22px; color: #fff; background: var(--hero-bg); }
+.hp-visit .ui-eyebrow { color: #8CC4F5; }
+.hp-visit .ui-h2 { color: #fff; margin-bottom: 16px; }
+.hp-visit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.hp-visit-list li { display: flex; gap: 12px; align-items: flex-start; font-size: 15.5px; line-height: 1.5; color: #D6DEEE; }
+.hp-visit-list svg { color: #85BFFF; flex-shrink: 0; margin-top: 2px; }
+.hp-visit-list a { color: #fff; font-weight: 700; }
+.hp-hours { display: block; }
+.hp-visit-btns { justify-content: flex-end; }
+.hp-visit-link { color: #A5CDFF; width: 100%; justify-content: flex-end; }
+
+@media (max-width: 1060px) {
+  .hp-hero-grid { grid-template-columns: 1fr; gap: 36px; padding-top: 48px; padding-bottom: 72px; }
+  .hp-hero-side { max-width: 520px; }
+  .hp-issues { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hp-how, .hp-faq { grid-template-columns: 1fr; gap: 28px; }
+}
+@media (max-width: 620px) {
+  .hp-hero-grid { padding-top: 32px; padding-bottom: 64px; gap: 28px; }
+  .hp-hero-btns .ui-btn { width: 100%; }
+  .hp-trust { gap: 8px 16px; }
+  .hp-trust li { font-size: 13.5px; }
+  .hp-hero-side .slf-glass { padding: 20px 18px; }
+  .hp-services { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: -40px; }
+  .hp-services .ui-card-pad { padding: 16px 14px; gap: 8px; }
+  .hp-services .ui-text { display: none; }
+  .hp-services .ui-h3 { font-size: 16px; }
+  .hp-services .ui-link { font-size: 13.5px; }
+  .hp-services .ui-icon-tile { width: 40px; height: 40px; }
+  .hp-issues { grid-template-columns: 1fr; gap: 10px; }
+  .hp-issue { padding: 13px 14px; }
+  .hp-issue .ui-icon-tile { width: 42px; height: 42px; }
+  .hp-steps li { padding: 16px; gap: 14px; }
+  .hp-why li { padding: 20px 18px; }
+  .hp-visit { padding: 26px 20px; }
+  .hp-visit-btns { width: 100%; }
+  .hp-visit-btns .ui-btn { width: 100%; }
+  .hp-visit-link { justify-content: center; }
+}

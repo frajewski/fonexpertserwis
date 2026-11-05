@@ -26,6 +26,7 @@ import { statusPillClass } from '../utils/statusPill';
 import AssignCustomer from '../components/AssignCustomer';
 import '../components/AssignCustomer.css';
 import './RepairDetailPage.css';
+import SHOP from '../constants/shopInfo';
 
 const SMS_KIND_LABELS = { manual: '✏️ Własna treść', review: '⭐ Prośba o opinię', slot: '📅 Propozycja terminu' };
 const fmtSlot = (iso) => (iso ? new Date(iso).toLocaleString('pl-PL', { weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) : '');
@@ -652,7 +653,7 @@ export default function RepairDetailPage() {
                           await updateRepair(id, {
                             proposedSlot: { at: at.toISOString(), status: 'pending', proposedAt: new Date().toISOString(), by: currentUser?.name || '' },
                           });
-                          const link = repair.trackingToken ? ` Potwierdź albo poproś o inny termin: https://gsm-serwis-klient.web.app/?token=${repair.trackingToken}` : '';
+                          const link = repair.trackingToken ? ` Potwierdź albo poproś o inny termin: ${SHOP.clientUrl}/?token=${repair.trackingToken}` : '';
                           setMessageBody(`Dzień dobry ${customer.name || ''}! Proponujemy termin naprawy ${repair.brand} ${repair.model}: ${fmtSlot(at.toISOString())}.${link} Fonexpert`.replace('Dzień dobry !', 'Dzień dobry!'));
                           setSmsKind('slot');
                           setSlotInput('');

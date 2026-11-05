@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LookupPage from './pages/LookupPage';
 import BookingPage from './pages/BookingPage';
+import HomePage from './pages/HomePage';
 import B2bCatalogPage from './pages/B2bCatalogPage';
 import RepairStatusPage from './pages/RepairStatusPage';
 import DevicesPage from './pages/DevicesPage';
@@ -13,7 +14,7 @@ import SiteLayout from './layout/SiteLayout';
 function HomeRoute() {
   const location = useLocation();
   const token = new URLSearchParams(location.search).get('token');
-  return token ? <RepairStatusPage /> : <BookingPage />;
+  return token ? <RepairStatusPage /> : <HomePage />;
 }
 
 export default function App() {

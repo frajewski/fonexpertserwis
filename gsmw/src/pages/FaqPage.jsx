@@ -39,11 +39,11 @@ export default function FaqPage() {
 
   return (
     <main className="fq">
-      <section className="fq-hero">
-        <div className="fq-wrap">
-          <p className="fq-kicker">FAQ</p>
-          <h1 className="fq-title">Najczęściej zadawane <span className="fq-accent">pytania</span></h1>
-          <p className="fq-sub">Oddajesz telefon do naprawy po raz pierwszy? Wyjaśniamy prostym językiem, jak wygląda zgłoszenie, wycena i naprawa urządzenia.</p>
+      <section className="ui-hero ui-hero-compact">
+        <div className="ui-wrap ui-hero-inner">
+          <p className="ui-eyebrow">FAQ</p>
+          <h1 className="ui-h1">Najczęściej zadawane <span className="ui-accent">pytania</span></h1>
+          <p className="ui-lead fq-sub">Oddajesz telefon do naprawy po raz pierwszy? Wyjaśniamy prostym językiem, jak wygląda zgłoszenie, wycena i naprawa urządzenia.</p>
           <label className="fq-search">
             <IconSearch size={20} />
             <input type="search" placeholder="Szukaj, np. bateria, gwarancja, dane…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Szukaj w pytaniach" />
@@ -81,8 +81,8 @@ export default function FaqPage() {
         <aside className="fq-help">
           <h2>Nie znalazłeś odpowiedzi?</h2>
           <p>Opisz problem w formularzu albo zadzwoń — pomożemy.</p>
-          <Link to="/umow-naprawe" className="fq-btn fq-btn-primary">Zgłoś naprawę <IconArrow size={18} /></Link>
-          <a href={SHOP.phoneHref} className="fq-btn fq-btn-ghost"><IconCall size={18} /> {SHOP.phone}</a>
+          <Link to="/umow-naprawe" className="ui-btn ui-btn-cta ui-btn-block">Zgłoś naprawę <IconArrow size={18} /></Link>
+          <a href={SHOP.phoneHref} className="ui-btn ui-btn-light ui-btn-block"><IconCall size={18} /> {SHOP.phone}</a>
         </aside>
       </div>
     </main>

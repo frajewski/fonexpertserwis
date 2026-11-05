@@ -1,102 +1,58 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { findRepairByLookup, normalizeDisplayNumber, normalizePhone } from '../firebase/firestoreApi';
+// /status – wyszukiwanie zlecenia po numerze i telefonie
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import StatusLookupForm from '../components/StatusLookupForm';
+import SHOP from '../shop';
+import { IconTag, IconBox, IconCall, IconArrow, IconWrench } from '../layout/icons';
 import './LookupPage.css';
 
 export default function LookupPage() {
-  const navigate = useNavigate();
-  const [displayNumber, setDisplayNumber] = useState('');
-  const [phone, setPhone] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!displayNumber.trim() || !phone.trim()) {
-      setError('Podaj numer zlecenia i numer telefonu.');
-      return;
-    }
-    setLoading(true);
-    setError('');
-
-    try {
-      const cleanDisplayNumber = normalizeDisplayNumber(displayNumber);
-      const cleanPhone = normalizePhone(phone);
-      const repair = await findRepairByLookup(cleanDisplayNumber, cleanPhone);
-
-      if (!repair) {
-        setError('Nie znaleziono zlecenia. Sprawdź numer zlecenia i telefon — muszą być zgodne z tymi podanymi przy przyjęciu urządzenia.');
-        return;
-      }
-
-      navigate(`/zlecenie/${repair.id}`, { state: { phone: cleanPhone } });
-    } catch (err) {
-      console.error('Błąd wyszukiwania zlecenia:', err);
-      setError(err.message || 'Nie udało się połączyć z bazą zleceń.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  useEffect(() => { document.title = 'Sprawdź status naprawy | Fonexpert Płońsk'; }, []);
   return (
-    <div className="lk-page">
-
-      <main className="lk-main">
-        <div className="lk-hero">
-          <span className="lk-eyebrow">Śledzenie naprawy</span>
-          <h1 className="lk-title">
-            Sprawdź,<br />co dzieje się<br />z Twoim telefonem
-          </h1>
-          <p className="lk-sub">
-            Wpisz numer zlecenia z potwierdzenia przyjęcia i numer telefonu —
-            bez logowania, bez instalowania aplikacji.
-          </p>
+    <main className="lk">
+      <section className="ui-hero ui-hero-compact ui-hero-overlap">
+        <div className="ui-wrap ui-hero-inner">
+          <p className="ui-eyebrow">Śledzenie naprawy</p>
+          <h1 className="ui-h1">Sprawdź, co dzieje się z <span className="ui-accent">Twoim telefonem</span></h1>
+          <p className="ui-lead">Bez logowania i bez instalowania aplikacji — wystarczy numer zlecenia i telefon.</p>
         </div>
+      </section>
 
-        <form className="lk-card" onSubmit={handleSubmit}>
-          <label className="lk-field">
-            <span className="lk-field-label">Numer zlecenia</span>
-            <input
-              className="lk-input lk-input-mono"
-              type="text"
-              placeholder="np. 14/2026"
-              value={displayNumber}
-              onChange={(e) => setDisplayNumber(e.target.value)}
-              autoComplete="off"
-            />
-            <span className="lk-hint">Znajdziesz go na potwierdzeniu przyjęcia urządzenia</span>
-          </label>
+      <div className="ui-wrap ui-overlap lk-grid">
+        <StatusLookupForm variant="card" title="Wpisz dane zlecenia" />
 
-          <label className="lk-field">
-            <span className="lk-field-label">Numer telefonu</span>
-            <input
-              className="lk-input"
-              type="tel"
-              placeholder="500 000 000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              autoComplete="off"
-            />
-            <span className="lk-hint">Ten, który podałeś przy przyjęciu naprawy</span>
-          </label>
+        <aside className="lk-aside">
+          <div className="ui-card ui-card-pad lk-tip">
+            <span className="ui-icon-tile"><IconTag size={22} /></span>
+            <div>
+              <h2 className="ui-h3">Gdzie znajdę numer zlecenia?</h2>
+              <p className="ui-text">Na potwierdzeniu przyjęcia (np. <b className="lk-mono">14/2026</b>) i w SMS-ie, który od nas dostałeś.</p>
+            </div>
+          </div>
+          <div className="ui-card ui-card-pad lk-tip">
+            <span className="ui-icon-tile ui-icon-tile-green"><IconBox size={22} /></span>
+            <div>
+              <h2 className="ui-h3">Masz link z SMS-a?</h2>
+              <p className="ui-text">Otwórz go — status pokaże się od razu, bez wpisywania danych. Możesz też zeskanować kod QR z potwierdzenia.</p>
+            </div>
+          </div>
+          <div className="ui-card ui-card-pad lk-tip">
+            <span className="ui-icon-tile"><IconCall size={22} /></span>
+            <div>
+              <h2 className="ui-h3">Nie możesz znaleźć zlecenia?</h2>
+              <p className="ui-text">Zadzwoń — sprawdzimy je za Ciebie.</p>
+              <a href={SHOP.phoneHref} className="ui-link lk-call">{SHOP.phone} <IconArrow size={16} /></a>
+            </div>
+          </div>
+        </aside>
+      </div>
 
-          {error && <div className="lk-error">{error}</div>}
-
-          <button className="lk-submit" type="submit" disabled={loading}>
-            {loading ? 'Szukam…' : 'Sprawdź status'}
-          </button>
-        </form>
-
-        <div className="lk-alt">
-          <span className="lk-alt-line" />
-          <span>lub</span>
-          <span className="lk-alt-line" />
+      <div className="ui-wrap">
+        <div className="lk-new">
+          <span><IconWrench size={20} /> Nie masz jeszcze zlecenia?</span>
+          <Link to="/umow-naprawe" className="ui-btn ui-btn-primary">Zgłoś naprawę online <IconArrow size={18} /></Link>
         </div>
-
-        <button className="lk-booking-link" onClick={() => navigate('/umow-naprawe')}>
-          Umów nową naprawę online →
-        </button>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

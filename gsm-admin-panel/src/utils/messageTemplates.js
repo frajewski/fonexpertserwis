@@ -3,13 +3,14 @@
 // webowy nie ma dostępu do SIM-a, więc tu tylko generujemy treść do
 // skopiowania / otwarcia w aplikacji SMS/e-mail).
 
+import SHOP from '../constants/shopInfo';
 export const messageTemplates = (repair, customerName) => {
   const total = (repair.partsCost || 0) + (repair.serviceCost || 0);
   // Ten sam mechanizm co QR na wydruku – budujemy link na nowo z tokena,
   // żeby działało też dla starszych zleceń niezależnie od zapisanego
   // (czasem błędnego) pola trackingUrl w bazie.
   const trackingUrl = repair.trackingToken
-    ? `https://gsm-serwis-klient.web.app/?token=${repair.trackingToken}`
+    ? `${SHOP.clientUrl}/?token=${repair.trackingToken}`
     : null;
   const trackingLine = trackingUrl ? ` Status online: ${trackingUrl}` : '';
 

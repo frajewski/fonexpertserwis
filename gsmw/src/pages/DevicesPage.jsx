@@ -7,10 +7,12 @@
 // ============================================================
 import { useEffect, useRef, useState } from 'react';
 import { createBuybackRequest, uploadBookingPhotos } from '../firebase/firestoreApi';
+import friendlyError, { isValidPlPhone } from '../utils/friendlyError';
+import { Link } from 'react-router-dom';
 import SHOP from '../shop';
 import {
   IconPhone, IconTablet, IconLaptop, IconWatch, IconDots, IconShield, IconCheck, IconArrow,
-  IconImage, IconClose, IconSparkle, IconRecycle, IconCash, IconCall, IconSearch, IconTag,
+  IconImage, IconClose, IconSparkle, IconRecycle, IconCash, IconCall, IconSearch, IconTag, IconInfo, IconChevron,
 } from '../layout/icons';
 import './BookingPage.css';
 import './DevicesPage.css';
@@ -56,9 +58,12 @@ export default function DevicesPage() {
   const formRef = useRef(null);
   const [form, setForm] = useState(EMPTY);
   const [photos, setPhotos] = useState([]);
+  const [showDetails, setShowDetails] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState('');
   const [done, setDone] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const prev = document.title;
@@ -67,7 +72,11 @@ export default function DevicesPage() {
     return () => { document.title = prev; };
   }, []);
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const setField = (key) => (e) => {
+    const value = e.target.value;
+    setForm((f) => ({ ...f, [key]: value }));
+    if (errors[key]) setErrors((x) => ({ ...x, [key]: '' }));
+  };
   const brand = form.brand === OTHER ? form.brandOther.trim() : form.brand;
   const toggleAcc = (a) => setForm((f) => ({ ...f, accessories: f.accessories.includes(a) ? f.accessories.filter((x) => x !== a) : [...f.accessories, a] }));
   const addPhotos = (fileList) => {
@@ -77,18 +86,42 @@ export default function DevicesPage() {
   const removePhoto = (i) => setPhotos((prev) => { URL.revokeObjectURL(prev[i].url); return prev.filter((_, k) => k !== i); });
   const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let msg = '';
-    if (!brand || !form.model.trim()) msg = 'Podaj markę i model urządzenia.';
-    else if (!form.condition) msg = 'Wybierz stan urządzenia.';
-    else if (!form.name.trim() || !form.phone.trim()) msg = 'Podaj imię i numer telefonu — oddzwonimy z wyceną.';
-    else if (!form.acceptPrivacy) msg = 'Zaznacz zgodę na przetwarzanie danych.';
-    setError(msg);
-    if (msg) return;
+  const validate = () => {
+    const e = {};
+    if (!brand) e.brand = form.brand === OTHER ? 'Wpisz markę.' : 'Wybierz markę.';
+    if (!form.model.trim()) e.model = 'Wpisz model, np. iPhone 13.';
+    if (!form.condition) e.condition = 'Wybierz stan urządzenia.';
+    if (!form.name.trim()) e.name = 'Podaj imię.';
+    if (!form.phone.trim()) e.phone = 'Podaj numer telefonu — oddzwonimy z wyceną.';
+    else if (!isValidPlPhone(form.phone)) e.phone = 'Numer telefonu powinien mieć 9 cyfr.';
+    if (form.batteryHealth && (Number(form.batteryHealth) < 1 || Number(form.batteryHealth) > 100)) e.batteryHealth = 'Podaj wartość od 1 do 100.';
+    if (!form.acceptPrivacy) e.acceptPrivacy = 'Zaznacz zgodę, żeby wysłać zapytanie.';
+    return e;
+  };
+
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
+    const e = validate();
+    setErrors(e);
+    setFormError('');
+    if (Object.keys(e).length) {
+      const first = Object.keys(e)[0];
+      if (first === 'batteryHealth') setShowDetails(true);
+      setTimeout(() => {
+        const el = formRef.current?.querySelector(`[data-field="${first}"]`);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el?.querySelector('input, select, textarea, button')?.focus({ preventScroll: true });
+      }, 30);
+      return;
+    }
     setSubmitting(true);
     try {
-      const photoPaths = await uploadBookingPhotos(photos.map((p) => p.file));
+      let photoPaths = [];
+      if (photos.length) {
+        setProgress(`Wysyłam zdjęcia (${photos.length})…`);
+        photoPaths = await uploadBookingPhotos(photos.map((p) => p.file));
+      }
+      setProgress('Wysyłam zapytanie…');
       await createBuybackRequest({
         photoPaths,
         deviceType: form.deviceType, brand, model: form.model, storage: form.storage,
@@ -99,24 +132,27 @@ export default function DevicesPage() {
       scrollToForm();
     } catch (err) {
       console.error('Błąd wysyłania wyceny:', err);
-      setError(err.message || 'Nie udało się wysłać zapytania.');
+      setFormError(friendlyError(err, 'Nie udało się wysłać zapytania. Spróbuj ponownie albo zadzwoń.'));
     } finally {
       setSubmitting(false);
+      setProgress('');
     }
   };
+
+  const reset = () => { photos.forEach((p) => URL.revokeObjectURL(p.url)); setPhotos([]); setForm((f) => ({ ...EMPTY, name: f.name, phone: f.phone })); setDone(false); setErrors({}); };
 
   return (
     <main className="dv">
       {/* HERO */}
-      <section className="dv-hero">
-        <div className="dv-wrap dv-hero-grid">
+      <section className="ui-hero">
+        <div className="ui-wrap ui-hero-inner dv-hero-grid">
           <div>
-            <p className="dv-kicker">Sprzedaż i skup</p>
-            <h1 className="dv-title">Telefony <span className="dv-accent">nowe i używane</span> — sprawdzone, z gwarancją</h1>
-            <p className="dv-sub">Sprzedajemy nowe i używane urządzenia, a Twój stary telefon możemy odkupić. Każdy sprzęt przed sprzedażą przechodzi u nas testy.</p>
-            <div className="dv-hero-btns">
-              <button type="button" className="bp-cta" onClick={scrollToForm}><IconCash size={22} /> Wyceń swój telefon <IconArrow size={20} /></button>
-              <a href={SHOP.phoneHref} className="dv-ghost"><IconCall size={18} /> Zapytaj o dostępność</a>
+            <p className="ui-eyebrow">Skup i sprzedaż</p>
+            <h1 className="ui-h1">Telefony <span className="ui-accent">nowe i używane</span> — sprawdzone, z gwarancją</h1>
+            <p className="ui-lead">Sprzedajemy nowe i używane urządzenia, a Twój stary telefon możemy odkupić. Każdy sprzęt przed sprzedażą przechodzi u nas testy.</p>
+            <div className="ui-btn-row dv-hero-btns">
+              <button type="button" className="ui-btn ui-btn-cta ui-btn-lg" onClick={scrollToForm}><IconCash size={20} /> Wyceń swój telefon <IconArrow size={18} /></button>
+              <a href={SHOP.phoneHref} className="ui-btn ui-btn-light ui-btn-lg"><IconCall size={18} /> Zapytaj o dostępność</a>
             </div>
           </div>
           <ul className="dv-hero-stats" aria-label="Gwarancja">
@@ -128,179 +164,226 @@ export default function DevicesPage() {
       </section>
 
       {/* OFERTA */}
-      <section className="dv-wrap dv-offer">
-        <article className="dv-card">
-          <span className="dv-card-ic dv-ic-blue"><IconSparkle size={28} /></span>
-          <h2>Nowe urządzenia</h2>
-          <p className="dv-badge dv-badge-blue"><IconShield size={16} /> Gwarancja od 12 do 24 miesięcy</p>
-          <p>Fabrycznie nowe telefony, tablety i akcesoria. Pomożemy dobrać model do Twoich potrzeb.</p>
-        </article>
-        <article className="dv-card">
-          <span className="dv-card-ic dv-ic-green"><IconRecycle size={28} /></span>
-          <h2>Używane urządzenia</h2>
-          <p className="dv-badge dv-badge-green"><IconShield size={16} /> Gwarancja od 1 do 6 miesięcy</p>
-          <p>Sprawdzone telefony w niższej cenie. Przed sprzedażą każdy egzemplarz testujemy, a o stanie wizualnym i kondycji baterii mówimy otwarcie.</p>
-        </article>
-        <article className="dv-card">
-          <span className="dv-card-ic dv-ic-amber"><IconCash size={28} /></span>
-          <h2>Skup telefonów</h2>
-          <p className="dv-badge dv-badge-amber"><IconTag size={16} /> Bezpłatna wycena</p>
-          <p>Odkupimy Twój telefon, tablet lub laptopa — także uszkodzony. Wyślij zapytanie poniżej, a odezwiemy się z propozycją ceny.</p>
-        </article>
-      </section>
-      <p className="dv-wrap dv-note">Dokładny okres gwarancji zależy od urządzenia — podajemy go przy zakupie i na dokumencie sprzedaży.</p>
-
-      {/* TESTY */}
-      <section className="dv-wrap">
-        <div className="dv-tests">
-          <div className="dv-tests-head">
-            <span className="dv-card-ic dv-ic-blue"><IconSearch size={28} /></span>
-            <div>
-              <h2>Każde urządzenie testujemy, zanim trafi do sprzedaży</h2>
-              <p>Dzięki temu eliminujemy ewentualne problemy, zanim telefon trafi w Twoje ręce.</p>
-            </div>
+      <section className="ui-section-tight">
+        <div className="ui-wrap">
+          <div className="ui-grid ui-grid-3">
+            <article className="ui-card ui-card-pad dv-card">
+              <span className="ui-icon-tile"><IconSparkle size={24} /></span>
+              <h2 className="ui-h3">Nowe urządzenia</h2>
+              <p className="ui-badge"><IconShield size={15} /> Gwarancja 12–24 miesiące</p>
+              <p className="ui-text">Fabrycznie nowe telefony, tablety i akcesoria. Pomożemy dobrać model do Twoich potrzeb.</p>
+            </article>
+            <article className="ui-card ui-card-pad dv-card">
+              <span className="ui-icon-tile ui-icon-tile-green"><IconRecycle size={24} /></span>
+              <h2 className="ui-h3">Używane urządzenia</h2>
+              <p className="ui-badge ui-badge-green"><IconShield size={15} /> Gwarancja 1–6 miesięcy</p>
+              <p className="ui-text">Sprawdzone telefony w niższej cenie. Przed sprzedażą każdy egzemplarz testujemy, a o stanie wizualnym i kondycji baterii mówimy otwarcie.</p>
+            </article>
+            <article className="ui-card ui-card-pad dv-card">
+              <span className="ui-icon-tile ui-icon-tile-amber"><IconCash size={24} /></span>
+              <h2 className="ui-h3">Skup telefonów</h2>
+              <p className="ui-badge dv-badge-amber"><IconTag size={15} /> Bezpłatna wycena</p>
+              <p className="ui-text">Odkupimy Twój telefon, tablet lub laptopa — także uszkodzony. Wyślij zapytanie, a odezwiemy się z propozycją ceny.</p>
+            </article>
           </div>
-          <ul className="dv-tests-list">
-            {TESTS.map((t) => <li key={t}><span><IconCheck size={14} /></span>{t}</li>)}
-          </ul>
+          <p className="dv-note">Dokładny okres gwarancji zależy od urządzenia — podajemy go przy zakupie i na dokumencie sprzedaży.</p>
         </div>
       </section>
 
-      {/* JAK DZIAŁA SKUP */}
-      <section className="dv-wrap dv-how">
-        <h2 className="dv-h2">Jak sprzedać nam telefon?</h2>
-        <ol className="dv-steps">
-          <li><span>1</span><div><strong>Wyślij zapytanie</strong><p>Podaj model, stan i dodaj zdjęcia — zajmie to 2 minuty.</p></div></li>
-          <li><span>2</span><div><strong>Otrzymasz wycenę</strong><p>Oddzwonimy lub wyślemy SMS z propozycją ceny.</p></div></li>
-          <li><span>3</span><div><strong>Przynieś urządzenie</strong><p>Sprawdzimy je na miejscu i podpiszemy umowę kupna — weź dokument tożsamości.</p></div></li>
-        </ol>
+      {/* TESTY */}
+      <section className="ui-section-tight dv-tests-sec">
+        <div className="ui-wrap">
+          <div className="ui-card ui-card-pad dv-tests">
+            <div className="dv-tests-head">
+              <span className="ui-icon-tile"><IconSearch size={24} /></span>
+              <div>
+                <h2 className="ui-h3">Każde urządzenie testujemy, zanim trafi do sprzedaży</h2>
+                <p className="ui-text">Dzięki temu eliminujemy ewentualne problemy, zanim telefon trafi w Twoje ręce.</p>
+              </div>
+            </div>
+            <ul className="dv-tests-list">
+              {TESTS.map((t) => <li key={t}><span><IconCheck size={13} /></span>{t}</li>)}
+            </ul>
+          </div>
+        </div>
       </section>
 
-      {/* FORMULARZ */}
-      <section className="dv-wrap" ref={formRef} id="wycena" style={{ scrollMarginTop: 90 }}>
-        <div className="bp-card dv-form-card">
-          {done ? (
-            <div className="bp-done">
-              <span className="bp-done-icon"><IconCheck size={34} /></span>
-              <h2>Zapytanie wysłane</h2>
-              <p>Dziękujemy! Przejrzymy dane i zdjęcia, a następnie odezwiemy się telefonicznie lub SMS-em z wyceną.</p>
-              <p>Pamiętaj: wycena z formularza jest wstępna — ostateczną cenę potwierdzamy po sprawdzeniu urządzenia na miejscu.</p>
-              <button type="button" className="bp-btn bp-btn-ghost" onClick={() => { setDone(false); setForm(EMPTY); setPhotos([]); }}>Wyceń kolejne urządzenie</button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} noValidate>
-              <h2 className="bp-card-title"><IconCash size={34} className="bp-blue" /> Bezpłatna wycena urządzenia</h2>
-              <div className="bp-pane">
+      {/* SKUP: kroki + formularz */}
+      <section className="ui-section" id="wycena" ref={formRef} style={{ scrollMarginTop: 80 }}>
+        <div className="ui-wrap dv-buy">
+          <div className="dv-buy-intro">
+            <p className="ui-eyebrow">Skup telefonów</p>
+            <h2 className="ui-h2">Sprzedaj nam telefon w 3 krokach</h2>
+            <ol className="dv-steps">
+              <li><span>1</span><div><strong>Wyślij zapytanie</strong><p>Model i stan wystarczą — zdjęcia możesz dodać, jeśli chcesz.</p></div></li>
+              <li><span>2</span><div><strong>Otrzymasz wycenę</strong><p>Oddzwonimy lub wyślemy SMS z propozycją ceny.</p></div></li>
+              <li><span>3</span><div><strong>Przynieś urządzenie</strong><p>Sprawdzimy je na miejscu i podpiszemy umowę kupna — weź dokument tożsamości.</p></div></li>
+            </ol>
+            <p className="dv-fine"><IconInfo size={16} /> Wycena z formularza jest wstępna i niewiążąca — ostateczną cenę ustalamy po sprawdzeniu urządzenia.</p>
+          </div>
 
-              <h3 className="bp-q">Rodzaj urządzenia</h3>
-              <div className="bp-tiles dv-tiles-5">
-                {DEVICE_TYPES.map(([t, Icon]) => (
-                  <button key={t} type="button" className={`bp-tile bp-tile-sm ${form.deviceType === t ? 'bp-tile-on' : ''}`} aria-pressed={form.deviceType === t} onClick={() => setForm((f) => ({ ...f, deviceType: t, brand: '' }))}>
-                    {form.deviceType === t && <span className="bp-tile-check"><IconCheck size={14} /></span>}
-                    <Icon size={28} />
-                    <span>{t}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="bp-row">
-                <label className="bp-field">
-                  <span>Marka</span>
-                  <select value={form.brand} onChange={set('brand')}>
-                    <option value="">Wybierz markę</option>
-                    {BRANDS[form.deviceType].map((b) => <option key={b} value={b}>{b}</option>)}
-                    <option value={OTHER}>Inna…</option>
-                  </select>
-                </label>
-                <label className="bp-field">
-                  <span>Model</span>
-                  <input value={form.model} onChange={set('model')} placeholder="np. iPhone 13, Galaxy S23" />
-                </label>
-              </div>
-              {form.brand === OTHER && (
-                <label className="bp-field"><span>Jaka marka?</span><input value={form.brandOther} onChange={set('brandOther')} placeholder="Wpisz markę" /></label>
-              )}
-              <div className="bp-row">
-                <label className="bp-field">
-                  <span>Pamięć (opcjonalnie)</span>
-                  <select value={form.storage} onChange={set('storage')}>
-                    <option value="">Nie wiem / nie dotyczy</option>
-                    {STORAGES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </label>
-                <label className="bp-field">
-                  <span>Kondycja baterii % (opcjonalnie)</span>
-                  <input type="number" inputMode="numeric" min="1" max="100" value={form.batteryHealth} onChange={set('batteryHealth')} placeholder="np. 87" />
-                </label>
-              </div>
-
-              <h3 className="bp-q">Stan urządzenia</h3>
-              <div className="dv-conds" role="radiogroup" aria-label="Stan urządzenia">
-                {CONDITIONS.map(([c, hint]) => (
-                  <button key={c} type="button" role="radio" aria-checked={form.condition === c} className={`dv-cond ${form.condition === c ? 'dv-cond-on' : ''}`} onClick={() => setForm((f) => ({ ...f, condition: c }))}>
-                    <span className="dv-radio" />
-                    <span><strong>{c}</strong><small>{hint}</small></span>
-                  </button>
-                ))}
-              </div>
-
-              <h3 className="bp-q">W zestawie (opcjonalnie)</h3>
-              <div className="dv-chips">
-                {ACCESSORIES.map((a) => (
-                  <button key={a} type="button" aria-pressed={form.accessories.includes(a)} className={`dv-chip ${form.accessories.includes(a) ? 'dv-chip-on' : ''}`} onClick={() => toggleAcc(a)}>
-                    {form.accessories.includes(a) && <IconCheck size={14} />}{a}
-                  </button>
-                ))}
-              </div>
-
-              <label className="bp-field">
-                <span>Dodatkowe informacje (opcjonalnie)</span>
-                <textarea rows={3} value={form.description} onChange={set('description')} placeholder="Np. wymieniana bateria, rysa na tylnej szybce, brak blokady operatora" />
-              </label>
-
-              <div className="bp-field">
-                <span>Zdjęcia urządzenia (opcjonalnie, do 5) — przód, tył, ramki</span>
-                <div className="bp-photos">
-                  {photos.map((p, i) => (
-                    <div key={p.url} className="bp-photo">
-                      <img src={p.url} alt={`Zdjęcie ${i + 1}`} />
-                      <button type="button" aria-label="Usuń zdjęcie" onClick={() => removePhoto(i)}><IconClose size={14} /></button>
-                    </div>
-                  ))}
-                  {photos.length < 5 && (
-                    <label className="bp-photo-add">
-                      <IconImage size={26} />
-                      <span>Dodaj zdjęcie</span>
-                      <input type="file" accept="image/*" multiple hidden onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }} />
-                    </label>
-                  )}
+          <div className="ui-card bp-card dv-form-card">
+            {done ? (
+              <div className="ui-success">
+                <span className="ui-success-icon"><IconCheck size={34} /></span>
+                <h2>Zapytanie wysłane</h2>
+                <p>{[brand, form.model, form.storage].filter(Boolean).join(' ')} — {form.condition.toLowerCase()}</p>
+                <ol className="ui-next">
+                  <li><span>1</span>Przejrzymy dane{photos.length ? ' i zdjęcia' : ''} i odezwiemy się telefonicznie lub SMS-em na numer {form.phone}.</li>
+                  <li><span>2</span>Jeśli cena Ci odpowiada, przynieś urządzenie i dokument tożsamości do {SHOP.addressLine1}.</li>
+                </ol>
+                <div className="ui-btn-row">
+                  <Link to="/" className="ui-btn ui-btn-secondary">Strona główna</Link>
+                  <button type="button" className="ui-btn ui-btn-primary" onClick={reset}>Wyceń kolejne urządzenie</button>
                 </div>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="bp-pane">
+                <h3 className="dv-form-title"><IconCash size={26} /> Bezpłatna wycena</h3>
 
-              <h3 className="bp-q">Twoje dane</h3>
-              <div className="bp-row">
-                <label className="bp-field"><span>Imię</span><input value={form.name} onChange={set('name')} placeholder="Jan" autoComplete="name" /></label>
-                <label className="bp-field"><span>Telefon</span><input type="tel" value={form.phone} onChange={set('phone')} placeholder="500 000 000" autoComplete="tel" /></label>
-              </div>
+                <fieldset className="bp-group">
+                  <legend className="bp-q">Rodzaj urządzenia</legend>
+                  <div className="bp-types dv-types">
+                    {DEVICE_TYPES.map(([t, Icon]) => (
+                      <button key={t} type="button" className={`bp-type ${form.deviceType === t ? 'bp-type-on' : ''}`} aria-pressed={form.deviceType === t} onClick={() => setForm((f) => ({ ...f, deviceType: t, brand: '' }))}>
+                        <Icon size={20} /> {t}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
 
-              <details className="bp-rodo">
-                <summary>Informacja o przetwarzaniu danych osobowych (RODO)</summary>
-                <p>Administratorem Twoich danych jest Fonexpert Filip Rajewski, Bogusławice 29A, 09-100 Płońsk, NIP 5671935602, tel. {SHOP.phone}. Dane z formularza (imię, telefon, dane i zdjęcia urządzenia) przetwarzamy, aby przygotować wycenę i skontaktować się z Tobą (telefon, SMS) — na podstawie art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy).</p>
-                <p>Dane zapytania, które nie zakończyło się zakupem, przechowujemy do 12 miesięcy. Odbiorcami danych mogą być dostawcy usług informatycznych (hosting i baza danych Google Firebase, wysyłka SMS); dane mogą być przetwarzane poza EOG na podstawie standardowych klauzul umownych. Masz prawo dostępu do danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania, sprzeciwu oraz skargi do Prezesa UODO. Podanie danych jest dobrowolne, ale bez nich nie przygotujemy wyceny.</p>
-              </details>
-              <label className="bp-accept">
-                <input type="checkbox" checked={form.acceptPrivacy} onChange={(e) => setForm((f) => ({ ...f, acceptPrivacy: e.target.checked }))} />
-                <span>Zapoznałem/am się z informacją o przetwarzaniu danych i chcę otrzymać wycenę.</span>
-              </label>
+                <div className="bp-row">
+                  <div className={`ui-field ${errors.brand ? 'ui-field-error' : ''}`} data-field="brand">
+                    <label className="ui-label" htmlFor="dv-brand">Marka</label>
+                    {form.brand === OTHER ? (
+                      <div className="bp-other">
+                        <input id="dv-brand" className="ui-input" value={form.brandOther} onChange={setField('brandOther')} placeholder="Wpisz markę" autoFocus onInput={() => errors.brand && setErrors((x) => ({ ...x, brand: '' }))} />
+                        <button type="button" className="ui-btn ui-btn-secondary ui-btn-sm" onClick={() => setForm((f) => ({ ...f, brand: '', brandOther: '' }))}>Lista</button>
+                      </div>
+                    ) : (
+                      <select id="dv-brand" className="ui-select" value={form.brand} onChange={setField('brand')}>
+                        <option value="">Wybierz markę</option>
+                        {BRANDS[form.deviceType].map((b) => <option key={b} value={b}>{b}</option>)}
+                        <option value={OTHER}>Inna…</option>
+                      </select>
+                    )}
+                    {errors.brand && <span className="ui-field-msg">{errors.brand}</span>}
+                  </div>
+                  <div className={`ui-field ${errors.model ? 'ui-field-error' : ''}`} data-field="model">
+                    <label className="ui-label" htmlFor="dv-model">Model</label>
+                    <input id="dv-model" className="ui-input" value={form.model} onChange={setField('model')} placeholder="np. iPhone 13, Galaxy S23" autoComplete="off" />
+                    {errors.model && <span className="ui-field-msg">{errors.model}</span>}
+                  </div>
+                </div>
 
-              </div>
-              {error && <div className="bp-error" role="alert">{error}</div>}
-              <div className="bp-actions">
-                <button type="submit" className="bp-btn bp-btn-primary bp-btn-wide" disabled={submitting}>{submitting ? 'Wysyłam…' : 'Wyślij do wyceny'} {!submitting && <IconArrow size={18} />}</button>
-              </div>
-              <p className="dv-fine">Wycena z formularza jest wstępna i niewiążąca — ostateczną cenę ustalamy po sprawdzeniu urządzenia.</p>
-            </form>
-          )}
+                <fieldset className="bp-group" data-field="condition">
+                  <legend className="bp-q">Stan urządzenia</legend>
+                  <div className={`dv-conds ${errors.condition ? 'dv-conds-error' : ''}`} role="radiogroup" aria-label="Stan urządzenia">
+                    {CONDITIONS.map(([c, hint]) => (
+                      <button key={c} type="button" role="radio" aria-checked={form.condition === c} className={`dv-cond ${form.condition === c ? 'dv-cond-on' : ''}`}
+                        onClick={() => { setForm((f) => ({ ...f, condition: c })); setErrors((x) => ({ ...x, condition: '' })); }}>
+                        <span className="dv-radio" />
+                        <span><strong>{c}</strong><small>{hint}</small></span>
+                      </button>
+                    ))}
+                  </div>
+                  {errors.condition && <span className="ui-field-msg">{errors.condition}</span>}
+                </fieldset>
+
+                <div className="bp-row">
+                  <div className={`ui-field ${errors.name ? 'ui-field-error' : ''}`} data-field="name">
+                    <label className="ui-label" htmlFor="dv-name">Imię</label>
+                    <input id="dv-name" className="ui-input" value={form.name} onChange={setField('name')} placeholder="Jan" autoComplete="given-name" />
+                    {errors.name && <span className="ui-field-msg">{errors.name}</span>}
+                  </div>
+                  <div className={`ui-field ${errors.phone ? 'ui-field-error' : ''}`} data-field="phone">
+                    <label className="ui-label" htmlFor="dv-phone">Telefon</label>
+                    <input id="dv-phone" className="ui-input" type="tel" inputMode="tel" value={form.phone} onChange={setField('phone')} placeholder="500 000 000" autoComplete="tel" />
+                    {errors.phone && <span className="ui-field-msg">{errors.phone}</span>}
+                  </div>
+                </div>
+
+                <div className={`bp-more ${showDetails ? 'bp-more-open' : ''}`}>
+                  <button type="button" className="bp-more-toggle" aria-expanded={showDetails} onClick={() => setShowDetails((v) => !v)}>
+                    <span><strong>Dodaj szczegóły</strong> <small>pamięć, bateria, zestaw, zdjęcia — dokładniejsza wycena</small></span>
+                    {photos.length > 0 && <span className="ui-badge">{photos.length} zdj.</span>}
+                    <IconChevron size={18} className="bp-more-chev" />
+                  </button>
+                  {showDetails && (
+                    <div className="bp-more-body">
+                      <div className="bp-row">
+                        <div className="ui-field">
+                          <label className="ui-label" htmlFor="dv-storage">Pamięć</label>
+                          <select id="dv-storage" className="ui-select" value={form.storage} onChange={setField('storage')}>
+                            <option value="">Nie wiem / nie dotyczy</option>
+                            {STORAGES.map((x) => <option key={x} value={x}>{x}</option>)}
+                          </select>
+                        </div>
+                        <div className={`ui-field ${errors.batteryHealth ? 'ui-field-error' : ''}`} data-field="batteryHealth">
+                          <label className="ui-label" htmlFor="dv-bat">Kondycja baterii (%)</label>
+                          <input id="dv-bat" className="ui-input" type="number" inputMode="numeric" min="1" max="100" value={form.batteryHealth} onChange={setField('batteryHealth')} placeholder="np. 87" />
+                          {errors.batteryHealth ? <span className="ui-field-msg">{errors.batteryHealth}</span> : <span className="ui-hint">iPhone: Ustawienia → Bateria → Kondycja.</span>}
+                        </div>
+                      </div>
+                      <div className="ui-field">
+                        <span className="ui-label">W zestawie</span>
+                        <div className="dv-chips">
+                          {ACCESSORIES.map((a) => (
+                            <button key={a} type="button" aria-pressed={form.accessories.includes(a)} className={`dv-chip ${form.accessories.includes(a) ? 'dv-chip-on' : ''}`} onClick={() => toggleAcc(a)}>
+                              {form.accessories.includes(a) && <IconCheck size={14} />}{a}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="ui-field">
+                        <label className="ui-label" htmlFor="dv-desc">Dodatkowe informacje</label>
+                        <textarea id="dv-desc" className="ui-textarea" rows={3} value={form.description} onChange={setField('description')} placeholder="Np. wymieniana bateria, rysa na tylnej szybce, brak blokady operatora" />
+                      </div>
+                      <div className="ui-field">
+                        <span className="ui-label">Zdjęcia <small>(do 5) — przód, tył, ramki</small></span>
+                        <div className="bp-photos">
+                          {photos.map((p, i) => (
+                            <div key={p.url} className="bp-photo">
+                              <img src={p.url} alt={`Zdjęcie ${i + 1}`} />
+                              <button type="button" aria-label={`Usuń zdjęcie ${i + 1}`} onClick={() => removePhoto(i)}><IconClose size={14} /></button>
+                            </div>
+                          ))}
+                          {photos.length < 5 && (
+                            <label className="bp-photo-add">
+                              <IconImage size={24} />
+                              <span>Dodaj</span>
+                              <input type="file" accept="image/*" multiple hidden onChange={(e) => { addPhotos(e.target.files); e.target.value = ''; }} />
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className={`bp-terms ${errors.acceptPrivacy ? 'bp-terms-error' : ''}`} data-field="acceptPrivacy">
+                  <label className="bp-accept">
+                    <input type="checkbox" checked={form.acceptPrivacy} onChange={(e) => { setForm((f) => ({ ...f, acceptPrivacy: e.target.checked })); setErrors((x) => ({ ...x, acceptPrivacy: '' })); }} />
+                    <span>Zapoznałem/am się z informacją o przetwarzaniu danych i chcę otrzymać wycenę.</span>
+                  </label>
+                  {errors.acceptPrivacy && <span className="ui-field-msg">{errors.acceptPrivacy}</span>}
+                  <details className="bp-rodo">
+                    <summary>Informacja o przetwarzaniu danych osobowych (RODO)</summary>
+                    <p>Administratorem Twoich danych jest Fonexpert Filip Rajewski, Bogusławice 29A, 09-100 Płońsk, NIP 5671935602, tel. {SHOP.phone}. Dane z formularza (imię, telefon, dane i zdjęcia urządzenia) przetwarzamy, aby przygotować wycenę i skontaktować się z Tobą (telefon, SMS) — na podstawie art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy).</p>
+                    <p>Dane zapytania, które nie zakończyło się zakupem, przechowujemy do 12 miesięcy. Odbiorcami danych mogą być dostawcy usług informatycznych (hosting i baza danych Google Firebase, wysyłka SMS); dane mogą być przetwarzane poza EOG na podstawie standardowych klauzul umownych. Masz prawo dostępu do danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania, sprzeciwu oraz skargi do Prezesa UODO. Podanie danych jest dobrowolne, ale bez nich nie przygotujemy wyceny.</p>
+                  </details>
+                </div>
+
+                {formError && <div className="ui-alert ui-alert-error" role="alert"><IconInfo size={18} /><div><strong>Nie udało się wysłać</strong>{formError}</div></div>}
+
+                <div className="bp-actions dv-actions">
+                  <button type="submit" className="ui-btn ui-btn-primary bp-btn-main" disabled={submitting} aria-busy={submitting}>
+                    {submitting ? <><span className="ui-spinner" aria-hidden="true" /> {progress || 'Wysyłam…'}</> : <>Wyślij do wyceny <IconArrow size={18} /></>}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </section>
     </main>

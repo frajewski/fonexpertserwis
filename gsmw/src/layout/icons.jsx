@@ -43,3 +43,10 @@ export const IconWatch = I(<><rect x="6.5" y="6" width="11" height="12" rx="3" /
 export const IconCash = I(<><rect x="2.5" y="6" width="19" height="12" rx="2" /><circle cx="12" cy="12" r="2.6" /><path d="M6 9.5v5M18 9.5v5" /></>);
 export const IconSparkle = I(<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z" />);
 export const IconRecycle = I(<><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8" /><path d="M4 3.5V8h4.5" /><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16" /><path d="M20 20.5V16h-4.5" /></>);
+export const IconInbox = I(<><path d="M4 4.5h16v11l-3 4H7l-3-4z" /><path d="M4 14h5l2 3h2l2-3h5" /></>);
+export const IconCopy = I(<><rect x="8" y="8" width="12" height="13" rx="2" /><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2" /></>);
+export const IconInfo = I(<><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5h.01" /></>);
+export const IconCalendar = I(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 2.5v5M17 2.5v5M3 10h18" /></>);
+export const IconChevron = I(<path d="m6 9 6 6 6-6" />);
+export const IconCheckCircle = I(<><circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" /></>);
+export const IconX = I(<><circle cx="12" cy="12" r="9" /><path d="m9 9 6 6M15 9l-6 6" /></>);

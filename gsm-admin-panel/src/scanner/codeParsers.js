@@ -1,3 +1,4 @@
+import SHOP, { LEGACY_CLIENT_HOSTS } from '../constants/shopInfo';
 // ============================================================
 //  codeParsers.js – rozpoznawanie zeskanowanych kodów (czyste funkcje,
 //  bez aparatu i bez Firebase – łatwe do testowania)
@@ -50,8 +51,9 @@ export const extractImei = (raw) => {
 };
 
 // Format linku generowanego w potwierdzeniu przyjęcia (printConfirmation.js
-// i firestoreDb.js): https://gsm-serwis-klient.web.app/?token=<trackingToken>
-const TRACKING_HOSTS = ['gsm-serwis-klient.web.app'];
+// i firestoreDb.js): <SHOP.clientUrl>/?token=<trackingToken>
+// Akceptujemy aktualny host i stare (wydrukowane wcześniej QR).
+const TRACKING_HOSTS = [...new Set([new URL(SHOP.clientUrl).hostname, ...LEGACY_CLIENT_HOSTS])];
 const TRACKING_TOKEN_RE = /^[a-z0-9]{4,16}-[a-z0-9]{4,16}$/; // np. "m1abc2d3-k9x8y7z6w5v4"
 
 /** @returns {{ token: string } | null} */

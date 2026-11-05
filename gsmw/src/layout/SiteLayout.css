@@ -1,6 +1,6 @@
 .sl-root { min-height: 100vh; display: flex; flex-direction: column; background: var(--paper); }
 .sl-content { flex: 1; }
-.sl-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+.sl-wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
 
 .sl-header { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
 .sl-header-row { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 16px; }

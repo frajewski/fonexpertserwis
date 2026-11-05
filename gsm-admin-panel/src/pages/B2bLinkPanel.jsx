@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase/firebaseConfig';
+import SHOP from '../constants/shopInfo';
 import { isOnlineNow, OFFLINE_MESSAGE } from '../network/networkStatus';
 import { failMessage } from '../utils/friendlyError';
 
-const CLIENT_BASE = 'https://gsm-serwis-klient.web.app';
+const CLIENT_BASE = SHOP.clientUrl;
 
 export default function B2bLinkPanel() {
   const [open, setOpen] = useState(false);

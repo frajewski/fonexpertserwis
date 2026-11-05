@@ -1,0 +1,13 @@
+.slf { display: flex; flex-direction: column; gap: 14px; }
+.slf-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 14px 36px -18px rgba(15, 23, 42, .18); }
+.slf-head { margin-bottom: 2px; }
+.slf-title { margin: 0 0 4px; font-family: var(--font-display); font-size: 21px; }
+.slf-sub { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+
+/* Wariant na ciemnym tle (hero strony głównej) */
+.slf-glass { padding: 26px; border-radius: 20px; background: rgba(10, 20, 44, .62); border: 1px solid rgba(255, 255, 255, .16); box-shadow: 0 30px 60px -24px rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: #fff; }
+.slf-glass .slf-sub { color: #B9C6DB; }
+.slf-glass .ui-label { color: #E2E8F0; }
+.slf-glass .ui-input { background: rgba(255, 255, 255, .96); }
+.slf-glass .ui-field-msg { color: #FCA5A5; }
+.slf-glass .ui-field-error .ui-input { box-shadow: 0 0 0 3px rgba(248, 113, 113, .35); }

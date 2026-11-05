@@ -60,11 +60,12 @@ function unwrapFunctionsError(err) {
   }
 
   if (code === 'functions/unauthenticated') {
-    return { message: 'Panel nie może zalogować sesji anonimowej Firebase. Sprawdź, czy Anonymous Auth jest włączone w Firebase Authentication.' };
+    console.error('Brak sesji anonimowej (Anonymous Auth?)', err);
+    return { message: 'Usługa jest chwilowo niedostępna. Spróbuj za chwilę.' };
   }
 
   if (code === 'functions/permission-denied') {
-    return { message: 'Brak dostępu do zlecenia. Najczęściej numer telefonu nie zgadza się z numerem zapisanym przy zleceniu.' };
+    return { notFound: true, message: 'Numer telefonu nie zgadza się z numerem podanym przy przyjęciu.' };
   }
 
   if (code === 'functions/not-found' || code === 'functions/internal' || code === 'functions/unavailable') {
@@ -72,10 +73,12 @@ function unwrapFunctionsError(err) {
   }
 
   if (code === 'functions/unknown') {
-    return { message: 'Cloud Function nie odpowiada poprawnie. Sprawdź w Firebase, czy funkcje lookupRepair oraz lookupRepairsByPhone są wdrożone i mają poprawny region.' };
+    console.error('Funkcja nie odpowiada poprawnie (wdrożenie/region?)', err);
+    return { message: 'Usługa jest chwilowo niedostępna. Spróbuj za chwilę.' };
   }
 
-  return { message: `${message}${code ? ` (${code})` : ''}` };
+  console.error('Błąd funkcji:', code, message);
+  return { message };
 }
 
 export async function findRepairByLookup(displayNumber, phone) {

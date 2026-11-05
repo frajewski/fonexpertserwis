@@ -1,6 +1,6 @@
 /* ===== FAQ ===== */
 .fq { color: var(--ink); padding-bottom: 56px; }
-.fq-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+.fq-wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
 
 .fq-hero { background: radial-gradient(120% 140% at 85% 0%, #17306B 0%, #0A1430 55%, #070D1F 100%); color: #fff; padding: 52px 0 44px; }
 .fq-kicker { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #7FB0FF; }
@@ -60,3 +60,6 @@
   .fq-item p { padding: 0 16px 16px; }
 }
 .fq-search input:focus-visible { outline: none; }
+
+.fq-sub { margin-bottom: 26px; }
+.fq-help .ui-btn + .ui-btn { margin-top: 10px; }

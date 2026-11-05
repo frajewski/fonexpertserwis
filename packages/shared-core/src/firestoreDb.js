@@ -41,6 +41,7 @@ import {
 import { STATUS } from '../constants/statuses.js';
 import { BOOKING_STATUS } from '../constants/bookingStatuses.js';
 
+// Adres panelu klienta – musi się zgadzać z clientUrl w gsm-admin-panel/src/constants/shopInfo.js
 const WEB_PANEL_URL = 'https://gsm-serwis-klient.web.app';
 const RECENT_DAYS = 30;
 

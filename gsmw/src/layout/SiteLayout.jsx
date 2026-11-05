@@ -1,6 +1,6 @@
 // Wspólny nagłówek i stopka panelu klienta (bez katalogu B2B)
 import { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import SHOP from '../shop';
 import { IconPhone, IconCall, IconMail, IconPin, IconClock, IconMenu, IconClose } from './icons';
 import './SiteLayout.css';
@@ -28,6 +28,10 @@ const NAV = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { pathname, search } = useLocation();
+  // Strona statusu (/?token=… albo /zlecenie/:id) podświetla „Sprawdź status”, nie „Stronę główną”
+  const onStatus = pathname.startsWith('/zlecenie') || (pathname === '/' && new URLSearchParams(search).has('token'));
+  const navActive = (n, isActive) => (n.to === '/status' ? isActive || onStatus : n.to === '/' ? isActive && !onStatus : isActive);
   return (
     <header className="sl-header">
       <div className="sl-wrap sl-header-row">
@@ -37,7 +41,7 @@ export function SiteHeader() {
         </button>
         <nav className={`sl-nav ${open ? 'sl-nav-open' : ''}`} aria-label="Menu główne">
           {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} onClick={() => setOpen(false)} className={({ isActive }) => `sl-nav-link ${isActive ? 'sl-nav-active' : ''}`}>
+            <NavLink key={n.to} to={n.to} end={n.end} onClick={() => setOpen(false)} className={({ isActive }) => `sl-nav-link ${navActive(n, isActive) ? 'sl-nav-active' : ''}`}>
               {n.label}
             </NavLink>
           ))}

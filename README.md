@@ -74,6 +74,9 @@ Dwa tryby: **kupno** i **komis**. Skala stanu Grade A+ do D, nowy/używany. Dane
 ### 🤝 U komisantów (`/komisanci`, tylko Admin)
 Własne telefony oddane innym osobom w komis (status `U komisanta`). Komisant zatrzymuje nadwyżkę, a Ty ustalasz kwotę, którą chcesz uzyskać („Cena dla komisanta”, ustawiana też w karcie telefonu). Lista grupowana po komisantach, formularz przekazania z wieloma telefonami, **druk protokołu przekazania**, „💰 Zapłacił” (rejestruje sprzedaż), „↩ Zwrot”, edycja danych komisanta i przenoszenie telefonu między komisantami, alert przy ≥30 dniach. Telefony u komisantów nie trafiają do katalogu B2B.
 
+### 🌐 Panel klienta – układ i komponenty (`gsmw`)
+Wspólne komponenty w `gsmw/src/styles/ui.css` (kontener `ui-wrap` = `--wrap` 1200 px, sekcje, hero, karty, przyciski `ui-btn-cta/primary/secondary/light`, pola `ui-field`, komunikaty `ui-alert`, stany ładowania i sukcesu). Hierarchia przycisków: jeden gradientowy CTA na ekran, potem primary/secondary/link. Strony: `/` (HomePage: hero + szybkie sprawdzenie statusu, usługi, najczęstsze naprawy, jak to działa, FAQ, dojazd), `/umow-naprawe` (2 kroki; `?usterka=…`/`?typ=…` zaznacza usterkę), `/status`, `/skup-i-sprzedaz`, `/faq`, `/kontakt`, `/zlecenie/:id`. Błędy dla klienta przez `utils/friendlyError.js`.
+
 ### 🏷 Wyceny skupu (`/wyceny`, tylko admin)
 Zapytania z zakładki „Skup i sprzedaż” w panelu klienta (`gsmw` → `/skup-i-sprzedaz`): typ, marka, model, pamięć, stan, kondycja baterii, akcesoria, opis i do 5 zdjęć. Zapis wyłącznie przez funkcję `createBuybackRequestWeb` (kolekcja `buybackRequests`, maks. 5 zapytań na sesję na dobę); odczyt i obsługa tylko admin. W panelu: licznik nowych w menu, push do admina, wpisanie ceny → podgląd i edycja SMS z wyceną (status „Wycenione”), „Kupione” / „Odrzuć”, usuwanie, historia SMS.
 
