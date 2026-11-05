@@ -12,10 +12,11 @@ import StatusLookupForm from '../components/StatusLookupForm';
 import {
   IconWrench, IconArrow, IconCall, IconShield, IconTimer, IconBox, IconAward, IconCheck,
   IconCrack, IconBattery, IconPlug, IconBack, IconDrop, IconPower, IconCamera, IconSpeaker, IconSearch,
-  IconTablet, IconCash, IconSparkle, IconPin, IconClock, IconRoute, IconPhone,
+  IconTablet, IconCash, IconSparkle, IconExternal, IconPin, IconClock, IconRoute, IconPhone,
 } from '../layout/icons';
 import './HomePage.css';
 import { usePageMeta } from '../utils/seo';
+import { REVIEWS } from '../data/reviews';
 import { PRICES, PRICE_BRANDS, PRICE_NOTE, minPriceForIssue } from '../data/prices';
 
 // Klucze = usterki z formularza (BOOKING_ISSUES) – link otwiera formularz z zaznaczoną usterką
@@ -191,6 +192,31 @@ export default function HomePage() {
             <li><span className="ui-icon-tile ui-icon-tile-green"><IconShield size={24} /></span><strong>Wycena przed naprawą</strong><p className="ui-text">Zawsze znasz koszt, zanim zaczniemy dodatkowe prace.</p></li>
             <li><span className="ui-icon-tile"><IconBox size={24} /></span><strong>Powiadomienia SMS</strong><p className="ui-text">Informujemy o każdym ważnym etapie i gotowości do odbioru.</p></li>
             <li><span className="ui-icon-tile"><IconAward size={24} /></span><strong>Sprawdzone części</strong><p className="ui-text">Przede wszystkim oryginalne części, a zamienniki tylko sprawdzone.</p></li>
+          </ul>
+        </div>
+      </section>
+
+      {/* ===== OPINIE ===== */}
+      <section className="ui-section-tight hp-reviews-wrap" aria-labelledby="hp-reviews-title">
+        <div className="ui-wrap">
+          <div className="ui-section-head">
+            <div>
+              <p className="ui-eyebrow">Opinie z Google</p>
+              <h2 className="ui-h2" id="hp-reviews-title">Co mówią nasi klienci</h2>
+              <p className="ui-lead">Prawdziwe opinie z naszej wizytówki Google — bez poprawek.</p>
+            </div>
+            <a href={SHOP.googleProfileUrl} target="_blank" rel="noopener noreferrer" className="ui-btn ui-btn-secondary">
+              Wszystkie opinie w Google <IconExternal size={16} />
+            </a>
+          </div>
+          <ul className="hp-reviews">
+            {REVIEWS.map((r) => (
+              <li key={r.author} className="hp-review">
+                <span className="hp-review-stars" role="img" aria-label={`Ocena ${r.rating} na 5`}>{'★'.repeat(r.rating)}</span>
+                <blockquote className="hp-review-text">„{r.text}”</blockquote>
+                <p className="hp-review-author"><span aria-hidden="true" className="hp-review-avatar">{r.author[0]}</span><span className="hp-review-who">{r.author}<small>opinia z Google</small></span></p>
+              </li>
+            ))}
           </ul>
         </div>
       </section>
