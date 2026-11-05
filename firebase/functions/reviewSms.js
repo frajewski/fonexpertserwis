@@ -17,7 +17,8 @@
 
 const admin = require("firebase-admin");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
+const crypto = require("crypto");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const { FieldValue } = require("firebase-admin/firestore");
 
@@ -35,7 +36,13 @@ const REVIEW_SMS_MODE = defineString("REVIEW_SMS_MODE", { default: "dry" });
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MIN_DAYS_AFTER_ISSUE = 3;
 const MAX_DAYS_AFTER_ISSUE = 6; // okno 3–6 dni = 3 próby, a stare zlecenia nigdy nie dostaną SMS-a
-const SMSGATE_URL = "https://api.sms-gate.app/3rdparty/v1/messages";
+const SMSGATE_API = "https://api.sms-gate.app/3rdparty/v1";
+const SMSGATE_URL = `${SMSGATE_API}/messages`;
+const PROJECT_ID = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || "gsmserviceapp-ff8f6";
+const INBOUND_URL = `https://us-central1-${PROJECT_ID}.cloudfunctions.net/smsInboundWebhook`;
+const WEBHOOK_ID = "fonexpert-inbound";
+// Odpowiedź klienta oznaczająca rezygnację z SMS-ów (prośby o opinię)
+const STOP_RE = /^\s*(stop|stop sms|wypisz|rezygnuj[eę]?|nie wysy[lł]a[jc])\b/i;
 
 // Do formatu +48XXXXXXXXX; null jeśli numer wygląda niepoprawnie
 function toE164PL(raw = "") {
@@ -77,6 +84,24 @@ async function sendViaGateway(user, pass, phone, text) {
     const body = await res.text().catch(() => "");
     throw new Error(`SMS gateway HTTP ${res.status}: ${body.slice(0, 200)}`);
   }
+}
+
+const basicAuth = (user, pass) => "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
+
+async function gatewayRequest(user, pass, path, options = {}) {
+  const res = await fetch(`${SMSGATE_API}${path}`, {
+    ...options,
+    headers: { "Content-Type": "application/json", Authorization: basicAuth(user, pass), ...(options.headers || {}) },
+  });
+  const text = await res.text().catch(() => "");
+  if (!res.ok) throw new Error(`SMS gateway HTTP ${res.status}: ${text.slice(0, 200)}`);
+  try { return text ? JSON.parse(text) : null; } catch { return null; }
+}
+
+async function isOptedOut(phone) {
+  if (!phone) return false;
+  const snap = await db.collection("smsOptOut").doc(phone).get();
+  return snap.exists;
 }
 
 // Wpis do historii SMS dokumentu (zlecenie / rezerwacja). Błąd zapisu historii
@@ -146,6 +171,10 @@ exports.sendReviewRequests = onSchedule(
         continue;
       }
       seenPhones.add(phone);
+      if (await isOptedOut(phone)) {
+        skipped++;
+        continue;
+      }
 
       if (mode !== "live") {
         wouldSend++;
@@ -212,3 +241,95 @@ exports.sendSmsToCustomer = onCall(
     return { ok: true };
   }
 );
+
+
+// ------------------------------------------------------------
+//  Status bramki (panel admina): kiedy telefon z bramką był ostatnio
+//  online i ile wiadomości czeka / się nie udało w ostatniej dobie.
+// ------------------------------------------------------------
+exports.smsGatewayStatus = onCall(
+  { region: "us-central1", secrets: [SMSGATE_USER, SMSGATE_PASS] },
+  async (request) => {
+    const role = request.auth?.token?.role;
+    if (role !== "admin" && role !== "worker") throw new HttpsError("permission-denied", "Tylko personel.");
+    const user = SMSGATE_USER.value();
+    const pass = SMSGATE_PASS.value();
+    const result = { checkedAt: new Date().toISOString(), devices: [], pending: null, failed: null, error: null };
+    try {
+      const devices = await gatewayRequest(user, pass, "/devices");
+      result.devices = (Array.isArray(devices) ? devices : []).map((d) => ({
+        name: d.name || "Telefon", lastSeen: d.lastSeen || d.updatedAt || null,
+      }));
+    } catch (err) {
+      result.error = "Nie udało się połączyć z bramką SMS (sprawdź login/hasło w sekretach).";
+      console.warn("smsGatewayStatus devices:", err.message);
+      return result;
+    }
+    try {
+      const from = new Date(Date.now() - DAY_MS).toISOString();
+      const msgs = await gatewayRequest(user, pass, `/messages?from=${encodeURIComponent(from)}&limit=200`);
+      const list = Array.isArray(msgs) ? msgs : [];
+      result.pending = list.filter((m) => ["Pending", "Processed"].includes(m.state)).length;
+      result.failed = list.filter((m) => m.state === "Failed").length;
+    } catch (err) {
+      console.warn("smsGatewayStatus messages:", err.message); // starsze wersje API – status bez liczników
+    }
+    const inbound = await db.collection("meta").doc("smsWebhook").get();
+    result.inboundConnected = inbound.exists && !!inbound.data().registeredAt;
+    return result;
+  }
+);
+
+// ------------------------------------------------------------
+//  Rejestracja odbioru SMS (admin, jednorazowo): bramka będzie wysyłać
+//  przychodzące SMS-y do smsInboundWebhook. Klucz w URL chroni endpoint;
+//  trzymamy go w meta/smsWebhook (niedostępne z aplikacji – reguły).
+// ------------------------------------------------------------
+exports.registerSmsInbound = onCall(
+  { region: "us-central1", secrets: [SMSGATE_USER, SMSGATE_PASS] },
+  async (request) => {
+    if (request.auth?.token?.role !== "admin") throw new HttpsError("permission-denied", "Tylko admin.");
+    const key = crypto.randomBytes(24).toString("hex");
+    try {
+      await gatewayRequest(SMSGATE_USER.value(), SMSGATE_PASS.value(), "/webhooks", {
+        method: "POST",
+        body: JSON.stringify({ id: WEBHOOK_ID, url: `${INBOUND_URL}?key=${key}`, event: "sms:received" }),
+      });
+    } catch (err) {
+      console.error("registerSmsInbound:", err.message);
+      throw new HttpsError("unavailable", "Bramka SMS nie przyjęła rejestracji. Sprawdź, czy telefon z bramką jest online.");
+    }
+    await db.collection("meta").doc("smsWebhook").set({ key, registeredAt: new Date().toISOString(), url: INBOUND_URL });
+    return { ok: true };
+  }
+);
+
+// ------------------------------------------------------------
+//  Odbiór SMS-ów od klientów (webhook bramki, zdarzenie sms:received).
+//  Każda odpowiedź trafia do smsInbox (panel admina, push), a „STOP”
+//  dopisuje numer do smsOptOut – wtedy nie wysyłamy próśb o opinię.
+// ------------------------------------------------------------
+exports.smsInboundWebhook = onRequest({ region: "us-central1" }, async (req, res) => {
+  if (req.method !== "POST") { res.status(405).send("Method not allowed"); return; }
+  const cfg = await db.collection("meta").doc("smsWebhook").get();
+  const key = String(req.query.key || "");
+  if (!cfg.exists || !key || key.length !== String(cfg.data().key || "").length
+      || !crypto.timingSafeEqual(Buffer.from(key), Buffer.from(String(cfg.data().key)))) {
+    res.status(403).send("Forbidden");
+    return;
+  }
+  const body = req.body || {};
+  if (body.event !== "sms:received") { res.status(200).send("ignored"); return; }
+  const p = body.payload || {};
+  const phone = toE164PL(p.phoneNumber || p.sender || "") || String(p.phoneNumber || "").slice(0, 20);
+  const text = String(p.message || p.text || "").slice(0, 1000);
+  const receivedAt = p.receivedAt || new Date().toISOString();
+  if (!phone || !text) { res.status(200).send("empty"); return; }
+
+  const isStop = STOP_RE.test(text);
+  await db.collection("smsInbox").add({ phone, text, receivedAt, isStop, read: false, createdAt: new Date().toISOString() });
+  if (isStop) {
+    await db.collection("smsOptOut").doc(phone).set({ phone, at: new Date().toISOString(), text });
+  }
+  res.status(200).send("ok");
+});

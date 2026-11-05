@@ -10,20 +10,14 @@
 //  z klientami skonsultuj treść z osobą uprawnioną — zwłaszcza oświadczenia
 //  o własności, rękojmię, klauzulę RODO i odstąpienie od umowy.
 //
-//  Dane Kupującego (Twojej firmy) są zahardkodowane – to Twoje stałe
-//  dane rejestrowe, nie zmieniają się między transakcjami.
+//  Dane Kupującego (Twojej firmy): COMPANY w constants/shopInfo.js.
 // ============================================================
 
 import { blockPrintInNativeApp, isNativeApp } from './platform';
 import { signatureBlockHtml } from '../signature/signatureData';
+import { COMPANY } from '../constants/shopInfo';
 
-const BUYER = {
-  name: 'Fonexpert Filip Rajewski',
-  address: 'Bogusławice 29A, 09-100 Płońsk',
-  nip: '5671935602',
-  regon: '542082892',
-  phone: '739 696 665',
-};
+const BUYER = COMPANY;
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmtDate = (iso) => (iso ? new Date(iso) : new Date()).toLocaleDateString('pl-PL');

@@ -4,6 +4,7 @@ import useStore from '../store/useStore';
 import STATUS, { terminalStatuses } from '../constants/statuses';
 import { getStaleRepairs, filterDeliveredToday, filterDeliveredThisMonth, calcProfit, calcRevenue } from '../utils/calcProfit';
 import { getTradeProfitToday, getTradeProfitThisMonth } from '../utils/calcTradeStats';
+import { SmsGatewayStatus, SmsInbox } from '../components/SmsGateway';
 import './DashboardPage.css';
 
 const currentYearMonth = () => new Date().toISOString().slice(0, 7);
@@ -166,6 +167,9 @@ export default function DashboardPage() {
           <p className="db-empty">Brak zadań na dziś/jutro.</p>
         )}
       </div>
+
+      <SmsGatewayStatus compact />
+      <SmsInbox />
 
       {alertsCount > 0 && (
         <div className="db-alerts">

@@ -6,13 +6,9 @@
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';
+import { COMPANY } from '../constants/shopInfo';
 
-const OWNER = {
-  name: 'Fonexpert Filip Rajewski',
-  address: 'Bogusławice 29A, 09-100 Płońsk',
-  nip: '5671935602',
-  phone: '739 696 665',
-};
+const OWNER = COMPANY;
 
 const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmtDate = (iso) => (iso ? new Date(iso) : new Date()).toLocaleDateString('pl-PL');

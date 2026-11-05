@@ -6,6 +6,7 @@
 //    task          → { taskId }    → /pulpit (lista zadań)
 //    booking       → { bookingId } → /rezerwacje
 //    buyback       → { buybackId } → /wyceny (tylko admin)
+//    sms           → { msgId }     → /pulpit (odpowiedzi SMS od klientów)
 //    inventory     → { partId }    → /magazyn
 //    test          → {}            → /moje-konto
 //
@@ -26,6 +27,7 @@ const ROUTES = {
   task: () => '/pulpit',
   booking: () => '/rezerwacje',
   buyback: () => '/wyceny',
+  sms: () => '/pulpit',
   inventory: () => '/magazyn',
   test: () => '/moje-konto',
 };

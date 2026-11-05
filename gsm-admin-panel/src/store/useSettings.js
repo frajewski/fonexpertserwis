@@ -14,8 +14,8 @@ const SETTINGS_DOC = doc(db, 'meta', 'settings');
 
 const DEFAULTS = {
   shopName:    'Fonexpert',
-  shopAddress: 'ul. Przykładowa 1, Płońsk',
-  shopPhone:   '+48 500 100 200',
+  shopAddress: 'ul. Żołnierzy Wyklętych 16 (Pasaż Kaufland), 09-100 Płońsk',
+  shopPhone:   '739 696 665',
   showCompletionDate: true,
   showScreenLockPattern: true,
   qrContent: '',

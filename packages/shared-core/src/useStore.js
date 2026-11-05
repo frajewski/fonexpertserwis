@@ -18,9 +18,9 @@ import { create } from 'zustand';
 import { createFirestoreDb } from './firestoreDb.js';
 import { createFirebaseAuthService } from './firebaseAuthService.js';
 import { createUserProfileService } from './userProfileService.js';
-import { ROLES } from '../constants/roles.js';
-import { BOOKING_STATUS } from '../constants/bookingStatuses.js';
-import STATUS from '../constants/statuses.js';
+import { ROLES } from './constants/roles.js';
+import { BOOKING_STATUS } from './constants/bookingStatuses.js';
+import STATUS from './constants/statuses.js';
 
 export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
   const firestoreDb = createFirestoreDb(db);

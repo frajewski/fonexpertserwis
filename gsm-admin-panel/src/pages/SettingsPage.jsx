@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import useSettings from '../store/useSettings';
 import { devError } from '../utils/devLog';
+import { SmsGatewayStatus, SmsOptOutList } from '../components/SmsGateway';
+import BackupCard from '../components/BackupCard';
 import './SettingsPage.css';
 
 export default function SettingsPage() {
@@ -50,8 +52,9 @@ export default function SettingsPage() {
       <h1 className="se-title">Ustawienia</h1>
 
       <div className="se-notice">
-        ℹ️ Te ustawienia są współdzielone z aplikacją mobilną — zmiana tutaj
-        jest widoczna wszędzie, w czasie rzeczywistym.
+        ℹ️ Ustawienia są wspólne dla komputera, PWA i aplikacji na telefonie — zmiana
+        tutaj jest widoczna wszędzie w czasie rzeczywistym. Dane rejestrowe na wydrukach
+        (nazwa, adres, NIP) są w <code>src/constants/shopInfo.js</code>.
       </div>
 
       <form className="se-card" onSubmit={handleSave}>
@@ -75,6 +78,9 @@ export default function SettingsPage() {
 
         <button className="se-submit" type="submit">{saved ? '✓ Zapisano' : 'Zapisz'}</button>
       </form>
+      <SmsGatewayStatus />
+      <SmsOptOutList />
+      <BackupCard />
     </div>
   );
 }

@@ -170,9 +170,9 @@ Aplikacja **nie** prosi o dostęp do pamięci ani galerii. PDF do udostępnienia
 | Usługa | Użycie w aplikacji |
 |---|---|
 | **Auth** | logowanie e-mail/hasło, reset hasła, zmiana hasła. W aplikacji natywnej `initializeAuth` + `indexedDBLocalPersistence` (stabilne w WebView) |
-| **Firestore** | kolekcje `repairs`, `users`, `parts`, `tasks`, `bookingRequests`, `counters` (personel) oraz `phones`, `buybackRequests`, `expenses`, `meta/settings` (tylko admin). Nasłuch na żywo (`onSnapshot`): zmiana na jednym urządzeniu jest od razu widoczna na drugim. Urządzenia push: `users/{uid}/devices/{deviceId}` (zapis tylko przez Cloud Function) |
+| **Firestore** | kolekcje `repairs`, `users`, `parts`, `tasks`, `bookingRequests`, `counters`, `meta/settings`, `smsInbox` (personel) oraz `phones`, `buybackRequests`, `expenses`, `smsOptOut` (tylko admin). Nasłuch na żywo (`onSnapshot`): zmiana na jednym urządzeniu jest od razu widoczna na drugim. Urządzenia push: `users/{uid}/devices/{deviceId}` (zapis tylko przez Cloud Function) |
 | **Storage** | zdjęcia: `repairs/{id}/…`, `trade/{id}/…` (zapis tylko personel, obrazy < 8 MB) oraz `bookingUploads/{uid}/…` — zdjęcia od klientów (zapis przez panel klienta, odczyt tylko personel) |
-| **Cloud Functions** | `decideInitialRole`, `syncOwnRoleClaim`, `setUserRoleClaim` (role); `registerPushDevice`, `unregisterPushDevice`, `sendTestPush` (push); triggery `pushOnRepairCreated`, `pushOnRepairUpdated` (status, decyzja o kosztorysie, odpowiedź na proponowany termin), `pushOnBookingCreated`, `pushOnBuybackCreated`, `pushOnLowStock`, `pushOnTaskCreated`, `pushOnTaskAssigned`; SMS: `sendSmsToCustomer`, `sendReviewRequests`; funkcje panelu klienta (`lookupRepairByToken` i in.) |
+| **Cloud Functions** | `decideInitialRole`, `syncOwnRoleClaim`, `setUserRoleClaim` (role); `registerPushDevice`, `unregisterPushDevice`, `sendTestPush` (push); triggery `pushOnRepairCreated`, `pushOnRepairUpdated` (status, decyzja o kosztorysie, odpowiedź na proponowany termin), `pushOnBookingCreated`, `pushOnBuybackCreated`, `pushOnSmsReceived`, `pushOnLowStock`, `pushOnTaskCreated`, `pushOnTaskAssigned`; SMS: `sendSmsToCustomer`, `sendReviewRequests`, `smsGatewayStatus`, `registerSmsInbound`, `smsInboundWebhook`; kopie bazy: `weeklyBackup`, `runBackupNow`; funkcje panelu klienta (`lookupRepairByToken` i in.) |
 | **FCM** | push na Androida. Token urządzenia zapisuje backend; wysyłka **tylko** z Cloud Functions (`firebase-admin`) |
 
 ### Bezpieczeństwo
@@ -180,7 +180,7 @@ Aplikacja **nie** prosi o dostęp do pamięci ani galerii. PDF do udostępnienia
 - Brak kluczy Admin SDK / service account w repo. Działają tylko w Cloud Functions.
 - Brak publicznego endpointu do wysyłania push: wszystkie funkcje to `onCall` z weryfikacją roli. `sendTestPush` jest tylko dla admina i tylko na jego własne urządzenia.
 - Dane bramki SMS (`SMSGATE_USER`, `SMSGATE_PASS`) są sekretami Cloud Functions, nie w kodzie. Plik `firebase/functions/.env.gsmserviceapp-ff8f6` (link do opinii, tryb SMS) jest poza gitem.
-- Kliknięcie powiadomienia otwiera tylko znane ekrany (`src/push/handlePushAction.js`: zlecenie, zadania, rezerwacje, wyceny skupu, magazyn, konto) — nigdy URL z payloadu.
+- Kliknięcie powiadomienia otwiera tylko znane ekrany (`src/push/handlePushAction.js`: zlecenie, zadania, rezerwacje, wyceny skupu, odpowiedzi SMS, magazyn, konto) — nigdy URL z payloadu.
 - Tokeny FCM nie są pokazywane w UI ani logowane.
 - Reguły Firestore/Storage (`../firebase/*.rules`) opierają się na rolach z custom claims. Domyślnie wszystko, co nie jest wymienione, jest zablokowane.
 - Logi produkcyjne pokazują tylko kod błędu (`src/utils/devLog.js`). Pełne obiekty błędów są widoczne wyłącznie w trybie developerskim.

@@ -10,13 +10,7 @@
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';
-
-const SHOP = {
-  name: 'Fonexpert Filip Rajewski',
-  address: 'Bogusławice 29A, 09-100 Płońsk',
-  nip: '5671935602',
-  phone: '739 696 665',
-};
+import { COMPANY as SHOP } from '../constants/shopInfo';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 

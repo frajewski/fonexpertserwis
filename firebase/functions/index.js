@@ -804,3 +804,4 @@ exports.setUserRoleClaim = onCall(
 Object.assign(exports, require("./b2b"));
 Object.assign(exports, require("./push"));
 Object.assign(exports, require("./reviewSms"));
+Object.assign(exports, require("./backup"));

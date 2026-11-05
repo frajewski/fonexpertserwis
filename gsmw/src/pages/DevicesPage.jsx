@@ -369,7 +369,7 @@ export default function DevicesPage() {
                   {errors.acceptPrivacy && <span className="ui-field-msg">{errors.acceptPrivacy}</span>}
                   <details className="bp-rodo">
                     <summary>Informacja o przetwarzaniu danych osobowych (RODO)</summary>
-                    <p>Administratorem Twoich danych jest Fonexpert Filip Rajewski, Bogusławice 29A, 09-100 Płońsk, NIP 5671935602, tel. {SHOP.phone}. Dane z formularza (imię, telefon, dane i zdjęcia urządzenia) przetwarzamy, aby przygotować wycenę i skontaktować się z Tobą (telefon, SMS) — na podstawie art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy).</p>
+                    <p>Administratorem Twoich danych jest {SHOP.legalName}, {SHOP.legalAddress}, NIP {SHOP.nip}, tel. {SHOP.phone}. Dane z formularza (imię, telefon, dane i zdjęcia urządzenia) przetwarzamy, aby przygotować wycenę i skontaktować się z Tobą (telefon, SMS) — na podstawie art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy).</p>
                     <p>Dane zapytania, które nie zakończyło się zakupem, przechowujemy do 12 miesięcy. Odbiorcami danych mogą być dostawcy usług informatycznych (hosting i baza danych Google Firebase, wysyłka SMS); dane mogą być przetwarzane poza EOG na podstawie standardowych klauzul umownych. Masz prawo dostępu do danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania, sprzeciwu oraz skargi do Prezesa UODO. Podanie danych jest dobrowolne, ale bez nich nie przygotujemy wyceny.</p>
                   </details>
                 </div>

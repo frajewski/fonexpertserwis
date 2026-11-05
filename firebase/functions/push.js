@@ -293,6 +293,16 @@ exports.pushOnBuybackCreated = onDocumentCreated({ document: "buybackRequests/{b
     { type: "buyback", buybackId: event.params.buybackId });
 });
 
+exports.pushOnSmsReceived = onDocumentCreated({ document: "smsInbox/{msgId}", region: REGION }, async (event) => {
+  const m = event.data && event.data.data();
+  if (!m) return;
+  const staff = await getUserIdsByRoles(STAFF_ROLES);
+  const who = String(m.phone || "").replace(/^\+48/, "");
+  await notifyOnce(event, staff,
+    { title: m.isStop ? `Klient ${who} wypisał się z SMS-ów` : `SMS od klienta ${who}`, body: String(m.text || "").slice(0, 120) },
+    { type: "sms", msgId: event.params.msgId });
+});
+
 exports.pushOnLowStock = onDocumentUpdated({ document: "parts/{partId}", region: REGION }, async (event) => {
   const before = event.data.before.data() || {};
   const after = event.data.after.data() || {};

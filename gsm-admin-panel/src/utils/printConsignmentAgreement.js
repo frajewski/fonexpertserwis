@@ -8,13 +8,9 @@
 
 import { blockPrintInNativeApp } from './platform';
 import { signatureBlockHtml } from '../signature/signatureData';
+import { COMPANY } from '../constants/shopInfo';
 
-const BUYER = {
-  name: 'Fonexpert Filip Rajewski',
-  address: 'Bogusławice 29A, 09-100 Płońsk',
-  nip: '5671935602',
-  regon: '542082892',
-};
+const BUYER = COMPANY;
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : new Date().toLocaleDateString('pl-PL');
 

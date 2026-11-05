@@ -224,18 +224,30 @@
   .b2b-item-right { align-items: flex-start; flex-direction: row; justify-content: space-between; width: 100%; }
 }
 
-/* Duży inicjał marki zamiast gradientu/logo - domyślny wygląd kafelka,
-   dopóki nie wgrasz prawdziwego zdjęcia konkretnego telefonu tej marki */
+/* Stała grafika marki: gradient w kolorach marki + nazwa + zarys telefonu */
 .b2b-tile-art {
-  background: #EFEAE0;
+  position: relative;
+  overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  padding: 14px 16px;
 }
-.b2b-tile-initial {
+.b2b-tile-wordmark {
+  position: relative;
+  z-index: 1;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 56px;
+  font-size: 26px;
   font-weight: 700;
-  color: var(--b2b-accent-a);
-  opacity: 0.85;
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+.b2b-tile-phone {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 46px;
+  height: 78px;
+  color: rgba(255, 255, 255, 0.55);
+  transform: rotate(10deg);
 }

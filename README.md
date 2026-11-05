@@ -51,7 +51,7 @@ Publiczna strona serwisu. Klient **nie zakłada konta** — panel loguje go anon
 | `/kontakt` | Wizytówka (status „otwarte/zamknięte” wg czasu w Polsce), mapa Google, trasa, link do opinii |
 | `/oferta/:token` | Prywatny katalog B2B (bez nagłówka strony, `noindex`) |
 
-**Gdzie zmieniać treści:** dane kontaktowe, godziny, link do wizytówki i pinezka mapy — `gsmw/src/shop.js`; FAQ — `gsmw/src/data/faq.js`; lista testów urządzeń — `TESTS` w `pages/DevicesPage.jsx`; najczęstsze naprawy na stronie głównej — `POPULAR` w `pages/HomePage.jsx`.
+**Gdzie zmieniać treści:** dane kontaktowe, godziny, dane rejestrowe do klauzul RODO, link do wizytówki i pinezka mapy — `gsmw/src/shop.js`; FAQ — `gsmw/src/data/faq.js`; lista testów urządzeń — `TESTS` w `pages/DevicesPage.jsx`; najczęstsze naprawy na stronie głównej — `POPULAR` w `pages/HomePage.jsx`.
 
 **Wygląd:** wspólne komponenty w `gsmw/src/styles/ui.css` (kontener `ui-wrap` = `--wrap` 1200 px, hero, sekcje, karty, przyciski, pola, komunikaty, stany ładowania i sukcesu), kolory w `styles/tokens.css`. Hierarchia przycisków: jeden gradientowy `ui-btn-cta` na ekran, potem `ui-btn-primary`, `ui-btn-secondary`, `ui-link`. Błędy pokazywane klientowi przechodzą przez `utils/friendlyError.js` (bez technicznych komunikatów Firebase).
 
@@ -63,7 +63,7 @@ React 19 + Vite, ten sam kod jako strona, PWA i aplikacja Android (Capacitor, sz
 
 | Menu | Kto | Co robi |
 |---|---|---|
-| **Pulpit** `/pulpit` | admin, pracownik | Zysk dziś, alerty, wspólna lista zadań, skróty |
+| **Pulpit** `/pulpit` | admin, pracownik | Zysk dziś, alerty (w tym „bramka SMS offline”), odpowiedzi SMS od klientów, wspólna lista zadań, skróty |
 | **Zlecenia** `/` | admin, pracownik | Lista z filtrami i wyszukiwaniem po telefonie; karta zlecenia (szczegóły niżej) |
 | **Rezerwacje** `/rezerwacje` | admin, pracownik | Zgłoszenia ze strony: szczegóły, zdjęcia, akceptacja z numerem `R001/2026` i SMS-em, zadatek BLIK, zamiana na zlecenie; usuwanie tylko admin |
 | **Kalendarz** `/kalendarz` | admin, pracownik | Tydzień: proponowane/potwierdzone terminy napraw i preferowane terminy z rezerwacji |
@@ -76,7 +76,7 @@ React 19 + Vite, ten sam kod jako strona, PWA i aplikacja Android (Capacitor, sz
 | **Klienci** `/klienci` | admin, pracownik | Karta klienta z historią zleceń |
 | **Statystyki** `/statystyki` | admin | Zysk naprawy + skup po kosztach, dowolny miesiąc z historii, marki, marże, wykres roczny |
 | **Koszty firmy** `/koszty` | admin | Księgowość, ZUS, podatki, reklama… odejmowane od zysku |
-| **Użytkownicy**, **Ustawienia** | admin | Role kont; dane serwisu (Firestore `meta/settings`) |
+| **Użytkownicy**, **Ustawienia** | admin | Role kont; dane serwisu (`meta/settings`); stan bramki SMS, podłączenie odbioru odpowiedzi, lista wypisanych (STOP); kopie zapasowe bazy |
 
 **Karta zlecenia:**
 - Kosztorys (łącznie − części = usługa), zadatek i „do zapłaty”, części z magazynu, typ dokumentu (paragon/faktura), zdjęcia i podpisy.
@@ -104,7 +104,7 @@ React 19 + Vite, ten sam kod jako strona, PWA i aplikacja Android (Capacitor, sz
 
 **Skup online:** formularz `/skup-i-sprzedaz` → `createBuybackRequestWeb` (maks. 5 zapytań na sesję na dobę) → push do admina → „Wyceny skupu”: cena i SMS → klient przychodzi z dowodem → „Umowa skupu”.
 
-**Katalog B2B:** telefon oznaczony „W ofercie B2B” z ceną hurtową trafia przez `syncB2bCatalog` do publicznej kolekcji `b2bCatalog/{token}/items` (tylko marka, model, pamięć, kolor, grade, cena, zdjęcie). Link generujesz w Skupie („🔗 Link B2B”) i możesz go unieważnić. Klient widzi listę na żywo i rezerwuje przez WhatsApp.
+**Katalog B2B:** kafelki marek mają stałe grafiki (kolor marki + nazwa), niezależne od zdjęć telefonów. Telefon oznaczony „W ofercie B2B” z ceną hurtową trafia przez `syncB2bCatalog` do publicznej kolekcji `b2bCatalog/{token}/items` (tylko marka, model, pamięć, kolor, grade, cena, zdjęcie). Link generujesz w Skupie („🔗 Link B2B”) i możesz go unieważnić. Klient widzi listę na żywo i rezerwuje przez WhatsApp.
 
 ---
 
@@ -115,7 +115,10 @@ SMS-y wychodzą z numeru właściciela przez telefon z Androidem i aplikacją **
 | Funkcja (`firebase/functions/reviewSms.js`) | Do czego |
 |---|---|
 | `sendSmsToCustomer` (callable, admin i pracownik) | Wszystkie SMS-y z panelu: zlecenia, rezerwacje, wyceny skupu (te tylko admin). Wpis trafia do `smsLog` dokumentu |
-| `sendReviewRequests` (codziennie 11:00 czasu polskiego) | Jednorazowa prośba o opinię Google 3–6 dni po odbiorze; pomija zlecenia z `noReviewSms` |
+| `sendReviewRequests` (codziennie 11:00 czasu polskiego) | Jednorazowa prośba o opinię Google 3–6 dni po odbiorze; pomija zlecenia z `noReviewSms` i numery wypisane (STOP) |
+| `smsGatewayStatus` (callable, personel) | Kiedy telefon z bramką był online, ile SMS-ów czeka i ile się nie udało (24 h) — Pulpit pokazuje ostrzeżenie, gdy telefon jest offline > 30 min |
+| `registerSmsInbound` (callable, admin) | Jednorazowo rejestruje w bramce webhook `sms:received` (przycisk w Ustawieniach) |
+| `smsInboundWebhook` (HTTP, chroniony kluczem z `meta/smsWebhook`) | Odbiera SMS-y od klientów → `smsInbox` (Pulpit + push); „STOP”/„wypisz” → `smsOptOut` |
 
 **Konfiguracja:**
 ```bash
@@ -124,6 +127,8 @@ printf '%s' 'LOGIN' | firebase functions:secrets:set SMSGATE_USER --data-file -
 printf '%s' 'HASLO' | firebase functions:secrets:set SMSGATE_PASS --data-file -
 ```
 `REVIEW_URL` i `REVIEW_SMS_MODE` (`off` / `dry` / `live`) są w `firebase/functions/.env.gsmserviceapp-ff8f6` — ten plik ma pierwszeństwo przed `.env` i **nie może trafić do gita**.
+
+**Odpowiedzi klientów i STOP:** po kliknięciu „Podłącz odbiór odpowiedzi SMS” w Ustawieniach każda odpowiedź klienta trafia na Pulpit (z nazwiskiem, jeśli numer jest w bazie) i jako push. Odpowiedź zaczynająca się od „STOP”, „wypisz”, „rezygnuję” dopisuje numer do listy wypisanych — taki klient nie dostaje próśb o opinię (SMS-y o jego naprawie wysyłasz dalej ręcznie). Numer usuniesz z listy w Ustawieniach.
 
 **Telefon z bramką:** aplikacja uruchomiona z włączonym Cloud Server, internet, bateria „Bez ograniczeń”, „Start on boot” włączone. Wysłanych SMS-ów nie widać w Wiadomościach Google — status jest w zakładce MESSAGES aplikacji bramki.
 
@@ -137,9 +142,10 @@ printf '%s' 'HASLO' | firebase functions:secrets:set SMSGATE_PASS --data-file -
 |---|---|
 | Panel klienta | `lookupRepair` (numer + telefon), `lookupRepairsByPhone`, `lookupRepairByToken`, `acceptEstimateWeb`, `rejectEstimateWeb`, `respondToSlotWeb`, `createBookingRequestWeb`, `createBuybackRequestWeb` |
 | Role | `decideInitialRole`, `syncOwnRoleClaim`, `setUserRoleClaim` |
-| Push (FCM) | `registerPushDevice`, `unregisterPushDevice`, `sendTestPush`, `pushOnRepairCreated`, `pushOnRepairUpdated`, `pushOnBookingCreated`, `pushOnBuybackCreated`, `pushOnLowStock`, `pushOnTaskCreated`, `pushOnTaskAssigned` |
+| Push (FCM) | `registerPushDevice`, `unregisterPushDevice`, `sendTestPush`, `pushOnRepairCreated`, `pushOnRepairUpdated`, `pushOnBookingCreated`, `pushOnBuybackCreated`, `pushOnSmsReceived`, `pushOnLowStock`, `pushOnTaskCreated`, `pushOnTaskAssigned` |
 | B2B | `syncB2bCatalog`, `getB2bLink`, `regenerateB2bLink` |
-| SMS | `sendSmsToCustomer`, `sendReviewRequests` |
+| SMS | `sendSmsToCustomer`, `sendReviewRequests`, `smsGatewayStatus`, `registerSmsInbound`, `smsInboundWebhook` |
+| Kopie | `weeklyBackup` (niedziela 3:00), `runBackupNow` (admin) |
 
 **Firestore:**
 
@@ -152,10 +158,13 @@ printf '%s' 'HASLO' | firebase functions:secrets:set SMSGATE_PASS --data-file -
 | `buybackRequests` | Zapytania o wycenę | tylko admin; zapis tylko przez funkcję |
 | `users`, `tasks`, `expenses` | Konta i role, zadania, koszty | wg reguł |
 | `counters` | Numery zleceń `N/ROK` i rezerwacji | personel |
-| `meta/settings` | Ustawienia serwisu | admin |
+| `meta/settings` | Ustawienia serwisu | personel |
+| `smsInbox`, `smsOptOut` | SMS-y od klientów, numery wypisane (STOP) | zapis tylko funkcja; inbox czyta personel, listę STOP admin |
 | `b2bConfig`, `b2bCatalog/{token}/items` | Token B2B, okrojony katalog | zapis tylko funkcje; katalog czyta każdy z losowym tokenem w ścieżce |
 
-**Storage:** `repairs/` (zdjęcia zleceń), `trade/` (zdjęcia skupu), `bookingUploads/<uid>/` (zdjęcia od klientów: zapis tylko do własnego folderu sesji, odczyt tylko personel).
+**Storage:** `repairs/` (zdjęcia zleceń), `trade/` (zdjęcia skupu), `bookingUploads/<uid>/` (zdjęcia od klientów: zapis tylko do własnego folderu sesji, odczyt tylko personel), `backups/` (kopie bazy, odczyt tylko admin).
+
+**Kopie zapasowe:** funkcja `backup.js` zapisuje wszystkie kolekcje (bez `b2bCatalog` i tokenów push) do `backups/firestore-RRRR-MM-DD-GGMM.json` co niedzielę o 3:00 i na żądanie („Zrób kopię teraz” w Ustawieniach); trzymanych jest 12 ostatnich. Zdjęcia nie wchodzą do kopii (zostają w Storage).
 
 **Zasady bezpieczeństwa:** rola jest custom claimem w tokenie Auth; panel klienta nie czyta Firestore bezpośrednio, tylko przez funkcje, które sprawdzają token albo zgodność telefonu i zwracają okrojone dane; sam numer zlecenia nie wystarcza do podglądu.
 
@@ -212,7 +221,7 @@ cd ~/Desktop/pro/gsm-admin-panel && npm version patch && npm run build && npx ca
 ```
 pro/
 ├── firebase/                   🔥 backend
-│   ├── functions/              index.js, b2b.js, push.js, reviewSms.js (+ .env.* poza gitem)
+│   ├── functions/              index.js, b2b.js, push.js, reviewSms.js (SMS), backup.js (+ .env.* poza gitem)
 │   ├── firestore.rules, firestore.indexes.json, storage.rules
 │   └── firebase.json
 ├── gsm-admin-panel/            🖥️ panel admina (web, PWA, Android)
@@ -236,9 +245,8 @@ pro/
 ## ⚠️ Znane ograniczenia
 
 - **Dokumenty prawne** (umowy kupna i komisu, karta gwarancyjna, zasady zadatku, RODO) są przygotowane bez prawnika — warto je przejrzeć z prawnikiem.
-- **Dane firmy w wydrukach** (nazwa, adres, NIP) są wpisane osobno w kilku plikach `gsm-admin-panel/src/utils/print*.js`.
-- **Bramka SMS zależy od jednego telefonu** — gdy Android uśpi aplikację albo zabraknie internetu, SMS-y czekają w kolejce. Odpowiedzi „STOP” nie są obsługiwane.
-- **Zdjęcia na kafelkach katalogu B2B** to pierwsze zdjęcie telefonu danej marki — znikają, gdy ten telefon zostanie sprzedany.
-- **iOS (PWA)** nie dostaje powiadomień push tak jak Android.
-- **Backup bazy** — brak eksportu całej bazy jednym przyciskiem.
+- **Dane rejestrowe firmy są w dwóch plikach:** `COMPANY` w `gsm-admin-panel/src/constants/shopInfo.js` (wszystkie wydruki) i `gsmw/src/shop.js` (klauzule RODO na stronie) — przy zmianie adresu albo NIP-u popraw oba.
+- **Bramka SMS zależy od jednego telefonu** — gdy jest offline, SMS-y czekają w kolejce. Panel to wykrywa (ostrzeżenie na Pulpicie), ale nie wyśle SMS-a inną drogą.
+- **iOS (PWA)** nie dostaje powiadomień push; push działa w aplikacji Android i w przeglądarce na komputerze nie jest włączony.
+- **Kopie zapasowe są w tym samym projekcie Firebase** — dla pełnego bezpieczeństwa pobieraj co jakiś czas kopię na komputer albo dysk.
 - **Hero panelu klienta** (`gsmw/public/hero-dark.jpg`) ma niską rozdzielczość — warto podmienić na własne zdjęcie z serwisu.

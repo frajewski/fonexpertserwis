@@ -63,6 +63,13 @@ service firebase.storage {
       allow read, delete: if isStaff();
     }
 
+    // Kopie zapasowe bazy (Cloud Function backup.js) – pobiera tylko admin,
+    // zapis wyłącznie z funkcji (Admin SDK omija reguły).
+    match /backups/{fileName} {
+      allow read: if isSignedIn() && request.auth.token.role == 'admin';
+      allow write: if false;
+    }
+
     // Domyślnie: brak dostępu do czegokolwiek nieujętego wyżej
     match /{allPaths=**} {
       allow read, write: if false;

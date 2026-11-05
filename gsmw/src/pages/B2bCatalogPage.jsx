@@ -31,6 +31,28 @@ const COLOR_MAP = {
 };
 const colorToHex = (name) => COLOR_MAP[(name || '').toLowerCase().trim()] || '#5B6273';
 
+// Kolory kafelków marek – stałe, bez logotypów (same nazwy marek)
+const BRAND_COLORS = {
+  apple: ['#2B2F36', '#5A6170'],
+  samsung: ['#0B3D91', '#2F6BDB'],
+  xiaomi: ['#C2410C', '#F97316'],
+  motorola: ['#0F5257', '#16A3A3'],
+  google: ['#1E5A3A', '#2E9C5B'],
+  huawei: ['#9F1239', '#E11D48'],
+  honor: ['#0E5E7E', '#22A3C9'],
+  oneplus: ['#7F1D1D', '#DC2626'],
+  oppo: ['#14532D', '#22A35A'],
+  realme: ['#8A6A00', '#E5B800'],
+  nothing: ['#111111', '#4B4B4B'],
+  sony: ['#1F2937', '#4B5563'],
+  nokia: ['#123B7A', '#2A63C4'],
+};
+function brandGradient(brand) {
+  const key = String(brand || '').toLowerCase().replace(/\s+/g, '');
+  const [a, b] = BRAND_COLORS[key] || ['#0B1F4D', '#1662E8'];
+  return `linear-gradient(135deg, ${a} 0%, ${b} 100%)`;
+}
+
 export default function B2bCatalogPage() {
   const { token } = useParams();
   const [items, setItems] = useState(null);
@@ -85,7 +107,6 @@ export default function B2bCatalogPage() {
         count: list.length,
         min: Math.min(...list.map((i) => Number(i.price) || 0)),
         max: Math.max(...list.map((i) => Number(i.price) || 0)),
-        photo: list.find((i) => i.photo)?.photo || null,
       }))
       .sort((a, b) => b.count - a.count);
   }, [items]);
@@ -171,19 +192,20 @@ export default function B2bCatalogPage() {
                 key={g.brand}
                 className="b2b-brand-tile"
                 onClick={() => openBrand(g.brand)}
-                style={
-                  g.photo
-                    ? { backgroundImage: `url(${g.photo})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                    : undefined
-                }
               >
-                <div className="b2b-tile-art" style={g.photo ? { background: 'transparent' } : undefined}>
-                  {!g.photo && <span className="b2b-tile-initial">{g.brand.charAt(0).toUpperCase()}</span>}
+                {/* Stała grafika marki (gradient + nazwa) – nie zależy od zdjęć
+                    konkretnych telefonów, więc nie znika po sprzedaży egzemplarza */}
+                <div className="b2b-tile-art" style={{ background: brandGradient(g.brand) }}>
+                  <span className="b2b-tile-wordmark">{g.brand}</span>
+                  <svg className="b2b-tile-phone" viewBox="0 0 60 100" aria-hidden="true">
+                    <rect x="4" y="3" width="52" height="94" rx="10" fill="none" stroke="currentColor" strokeWidth="3" />
+                    <rect x="22" y="9" width="16" height="4" rx="2" fill="currentColor" />
+                  </svg>
                 </div>
                 <div className="b2b-tile-info">
                   <div className="b2b-tile-name-row">
-                    <span className="b2b-tile-name">{g.brand}</span>
-                    <span className="b2b-tile-count">{g.count} szt.</span>
+                    <span className="b2b-tile-name">{g.count} szt.</span>
+                    <span className="b2b-tile-count">w ofercie</span>
                   </div>
                   <div className="b2b-tile-price">
                     Ceny hurtowe: <strong>{g.min === g.max ? fmtPrice(g.min) : `${fmtPrice(g.min)} – ${fmtPrice(g.max)}`}</strong>
