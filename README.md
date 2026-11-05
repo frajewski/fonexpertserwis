@@ -244,9 +244,15 @@ pro/
 
 ## ⚠️ Znane ograniczenia
 
-- **Dokumenty prawne** (umowy kupna i komisu, karta gwarancyjna, zasady zadatku, RODO) są przygotowane bez prawnika — warto je przejrzeć z prawnikiem.
-- **Dane rejestrowe firmy są w dwóch plikach:** `COMPANY` w `gsm-admin-panel/src/constants/shopInfo.js` (wszystkie wydruki) i `gsmw/src/shop.js` (klauzule RODO na stronie) — przy zmianie adresu albo NIP-u popraw oba.
-- **Bramka SMS zależy od jednego telefonu** — gdy jest offline, SMS-y czekają w kolejce. Panel to wykrywa (ostrzeżenie na Pulpicie), ale nie wyśle SMS-a inną drogą.
-- **iOS (PWA)** nie dostaje powiadomień push; push działa w aplikacji Android i w przeglądarce na komputerze nie jest włączony.
-- **Kopie zapasowe są w tym samym projekcie Firebase** — dla pełnego bezpieczeństwa pobieraj co jakiś czas kopię na komputer albo dysk.
-- **Hero panelu klienta** (`gsmw/public/hero-dark.jpg`) ma niską rozdzielczość — warto podmienić na własne zdjęcie z serwisu.
+- **Dokumenty prawne** (umowy kupna i komisu, karta gwarancyjna, zasady zadatku, klauzule RODO) nie były przeglądane przez prawnika.
+- **SMS-y idą przez jeden telefon z bramką** — gdy jest offline, wiadomości czekają w kolejce (panel pokazuje to na Pulpicie, ale nie wyśle SMS-a inną drogą).
+- **Brak powiadomień push na iPhonie** — push działa w aplikacji Android; w PWA na iOS i w przeglądarce na komputerze nie jest włączony.
+- **Zdjęcie w hero panelu klienta** (`gsmw/public/hero-dark.jpg`) ma niską rozdzielczość — do podmiany na własne zdjęcie z serwisu.
+
+### Rozwiązane (listopad 2026)
+
+- Dane rejestrowe firmy na wydrukach są w jednym miejscu: `COMPANY` w `gsm-admin-panel/src/constants/shopInfo.js` (strona klienta: `gsmw/src/shop.js` — przy zmianie adresu albo NIP-u popraw oba).
+- Bramka SMS: status telefonu i kolejki w panelu, ostrzeżenie na Pulpicie, odbiór odpowiedzi klientów i obsługa „STOP”.
+- Kafelki marek w katalogu B2B mają stałe grafiki — nie znikają po sprzedaży telefonu.
+- Kopie zapasowe bazy: automatycznie co tydzień i na żądanie w Ustawieniach (warto czasem pobrać kopię na komputer, bo leży w tym samym projekcie Firebase).
+- Ceny zakupu i dane sprzedających (`phones`) są zablokowane dla pracownika w regułach bazy, nie tylko w interfejsie.
