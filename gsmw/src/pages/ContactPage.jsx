@@ -56,7 +56,7 @@ export default function ContactPage() {
         <div className="ui-wrap ui-hero-inner">
           <p className="ui-eyebrow">Kontakt</p>
           <h1 className="ui-h1">Zajrzyj do nas w <span className="ui-accent">Pasażu Kaufland</span></h1>
-          <p className="ui-lead">Serwis telefonów, tabletów i laptopów w Płońsku. Zgłoś naprawę online albo zadzwoń przed wizytą — przygotujemy się na Twoje urządzenie.</p>
+          <p className="ui-lead">Serwis telefonów, tabletów i laptopów w Płońsku. Wpadnij bez umawiania — a jeśli zgłosisz naprawę online, przygotujemy części przed Twoją wizytą.</p>
         </div>
       </section>
 

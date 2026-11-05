@@ -20,12 +20,12 @@ import './HomePage.css';
 const POPULAR = [
   ['Zbity ekran / wyświetlacz', 'Wymiana ekranu', 'Pęknięta szyba, plamy, brak dotyku', IconCrack],
   ['Bateria', 'Wymiana baterii', 'Szybko się rozładowuje lub puchnie', IconBattery],
-  ['Gniazdo ładowania', 'Gniazdo ładowania', 'Nie ładuje albo ładuje „pod kątem”', IconPlug],
-  ['Tylna szybka / obudowa', 'Tylna szybka', 'Pęknięte plecki, obicia obudowy', IconBack],
-  ['Zalanie', 'Zalanie', 'Kontakt z wodą lub innym płynem', IconDrop],
-  ['Nie włącza się', 'Nie włącza się', 'Czarny ekran, brak reakcji', IconPower],
-  ['Aparat', 'Aparat', 'Rozmyte zdjęcia, pęknięte oczko', IconCamera],
-  ['Głośnik / mikrofon', 'Głośnik i mikrofon', 'Nie słychać rozmówcy lub Ciebie', IconSpeaker],
+  ['Gniazdo ładowania', 'Naprawa gniazda ładowania', 'Nie ładuje albo ładuje tylko pod kątem', IconPlug],
+  ['Tylna szybka / obudowa', 'Wymiana tylnej szybki', 'Pęknięte plecki, obita obudowa', IconBack],
+  ['Zalanie', 'Naprawa po zalaniu', 'Kontakt z wodą lub innym płynem', IconDrop],
+  ['Nie włącza się', 'Naprawa zasilania', 'Telefon się nie włącza, czarny ekran', IconPower],
+  ['Aparat', 'Naprawa aparatu', 'Rozmyte zdjęcia, pęknięte oczko', IconCamera],
+  ['Głośnik / mikrofon', 'Głośnik i mikrofon', 'Nie słychać rozmówcy albo Ciebie', IconSpeaker],
 ];
 
 const FAQ_TEASER = FAQ_GROUPS.flatMap((g) => g.items).filter(([q]) => [
@@ -102,9 +102,9 @@ export default function HomePage() {
         <div className="ui-wrap">
           <div className="ui-section-head">
             <div>
-              <p className="ui-eyebrow">Najczęstsze naprawy</p>
-              <h2 className="ui-h2">Co dolega Twojemu telefonowi?</h2>
-              <p className="ui-lead">Wybierz usterkę — formularz otworzy się z nią od razu zaznaczoną.</p>
+              <p className="ui-eyebrow">Naprawy telefonów</p>
+              <h2 className="ui-h2">Najczęściej naprawiamy</h2>
+              <p className="ui-lead">Kliknij usterkę, a formularz zgłoszenia otworzy się z nią od razu zaznaczoną.</p>
             </div>
             <Link to="/umow-naprawe?usterka=diagnoza" className="ui-btn ui-btn-secondary"><IconSearch size={18} /> Nie wiem, co się zepsuło</Link>
           </div>
