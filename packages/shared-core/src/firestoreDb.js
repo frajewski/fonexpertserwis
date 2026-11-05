@@ -152,7 +152,8 @@ export function createFirestoreDb(db) {
     await Promise.all([
       fixCollection('repairs'),
       fixCollection('bookingRequests'),
-      fixCollection('phones'),
+      // phones czyta tylko Admin – u innych ról pomijamy bez przerywania scalania
+      fixCollection('phones').catch((err) => console.warn('Pominięto phones przy scalaniu konta:', err?.code)),
     ]);
 
     await deleteDoc(doc(db, 'users', oldId));
@@ -325,7 +326,7 @@ export function createFirestoreDb(db) {
     const q = query(collection(db, 'phones'), orderBy('boughtAt', 'desc'));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    });
+    }, (err) => { console.warn('phones: brak dostępu lub błąd', err?.code); callback([]); });
   };
 
   // ---------- MAGAZYN CZĘŚCI ZAMIENNYCH ----------
@@ -416,7 +417,7 @@ export function createFirestoreDb(db) {
     const q = query(collection(db, 'expenses'), orderBy('month', 'desc'));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    });
+    }, (err) => { console.warn('expenses: brak dostępu lub błąd', err?.code); callback([]); });
   };
 
   // ---------- ZADANIA (todo) ----------

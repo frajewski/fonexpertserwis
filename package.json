@@ -2,13 +2,11 @@
   "name": "gsm-system",
   "private": true,
   "workspaces": [
-    "new",
     "gsm-admin-panel",
     "gsmw",
     "packages/*"
   ],
   "scripts": {
-    "mobile": "npm run start --workspace=new",
     "admin": "npm run dev --workspace=gsm-admin-panel",
     "client": "npm run dev --workspace=gsmw"
   },

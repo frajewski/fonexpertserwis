@@ -148,10 +148,11 @@ service cloud.firestore {
     // częściowo nie da się tu w pełni odtworzyć ukrywania pól przed pracownikiem
     // (Firestore rules nie filtrują pól w odpowiedzi) – to wciąż obowiązek UI,
     // tak jak teraz w apce mobilnej. Reguły blokują tylko KTO w ogóle ma dostęp.
+    // Skup/komis: ceny zakupu, marże i dane sprzedających (PESEL, dowód) –
+    // TYLKO Admin. Pracownik nie ma Skupu w menu i nie może czytać tej kolekcji.
+    // Katalog B2B budowany jest przez Cloud Function (Admin SDK), więc działa dalej.
     match /phones/{phoneId} {
-      allow read: if isStaff();
-      allow create, update: if isStaff();
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if isAdmin();
     }
 
     // Magazyn generycznych części zamiennych (nie konkretne telefony jak

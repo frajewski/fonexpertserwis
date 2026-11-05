@@ -88,7 +88,7 @@ React + Vite, ten sam kod jako strona, PWA i aplikacja Android (Capacitor, szcze
 
 **Statusy zlecenia:** Przyjęte → W diagnozie → Zamów części → W naprawie → Oczekuje na części → Czeka na klienta → Gotowe do odbioru → Odebrane (albo Anulowane). Przy „Czeka na klienta” i „Gotowe do odbioru” panel proponuje SMS („części dotarły”, „gotowe do odbioru”), każdy najwyżej raz na zlecenie. Statusy są w `packages/shared-core/src/constants/statuses.js`; każda zmiana trafia do `history` zlecenia (data, status, kto).
 
-**Pracownik** nie widzi cen zakupu ani wartości finansowych: nie ma dostępu do Skupu, Wycen, Umowy, Komisantów, Kasy, Statystyk, Kosztów, Użytkowników i Ustawień.
+**Pracownik** nie widzi cen zakupu ani wartości finansowych: nie ma dostępu do Skupu, Wycen, Umowy, Komisantów, Kasy, Statystyk, Kosztów, Użytkowników i Ustawień. Blokują to też reguły bazy — kolekcje `phones`, `buybackRequests` i `expenses` czyta tylko admin.
 
 ---
 
@@ -146,7 +146,7 @@ printf '%s' 'HASLO' | firebase functions:secrets:set SMSGATE_PASS --data-file -
 | Kolekcja | Zawartość | Dostęp |
 |---|---|---|
 | `repairs` | Zlecenia (z `history`, `smsLog`, `proposedSlot`, `trackingToken`) | personel |
-| `phones` | Skup i komis | personel; usuwa admin (menu Skup widzi tylko admin) |
+| `phones` | Skup i komis (ceny zakupu, dane sprzedających) | tylko admin |
 | `parts` | Magazyn części | personel |
 | `bookingRequests` | Rezerwacje ze strony | personel; usuwa admin |
 | `buybackRequests` | Zapytania o wycenę | tylko admin; zapis tylko przez funkcję |
@@ -178,8 +178,9 @@ printf '%s' 'HASLO' | firebase functions:secrets:set SMSGATE_PASS --data-file -
 
 **Lokalnie:**
 ```bash
-cd ~/Desktop/pro/gsm-admin-panel && npm install && npm run dev   # panel admina
-cd ~/Desktop/pro/gsmw && npm install && npm run dev              # panel klienta
+cd ~/Desktop/pro && npm install    # workspaces: gsm-admin-panel, gsmw, packages/shared-core
+npm run admin                      # panel admina (vite)
+npm run client                     # panel klienta (vite)
 ```
 
 **Wdrożenie (zawsze z właściwego folderu):**
@@ -238,8 +239,6 @@ pro/
 - **Dane firmy w wydrukach** (nazwa, adres, NIP) są wpisane osobno w kilku plikach `gsm-admin-panel/src/utils/print*.js`.
 - **Bramka SMS zależy od jednego telefonu** — gdy Android uśpi aplikację albo zabraknie internetu, SMS-y czekają w kolejce. Odpowiedzi „STOP” nie są obsługiwane.
 - **Zdjęcia na kafelkach katalogu B2B** to pierwsze zdjęcie telefonu danej marki — znikają, gdy ten telefon zostanie sprzedany.
-- **Ceny zakupu przed pracownikiem są ukryte tylko w interfejsie** — reguły Firestore pozwalają personelowi czytać `phones`. Pełne ukrycie wymagałoby osobnej kolekcji na ceny zakupu dostępnej tylko dla admina.
-- **Root `package.json`** wymienia workspace `new` (stara aplikacja mobilna), którego nie ma w repo — instaluj zależności osobno w `gsm-admin-panel/` i `gsmw/`.
 - **iOS (PWA)** nie dostaje powiadomień push tak jak Android.
 - **Backup bazy** — brak eksportu całej bazy jednym przyciskiem.
 - **Hero panelu klienta** (`gsmw/public/hero-dark.jpg`) ma niską rozdzielczość — warto podmienić na własne zdjęcie z serwisu.

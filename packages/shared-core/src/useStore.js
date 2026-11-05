@@ -194,16 +194,23 @@ export function createUseStore({ db, auth, app, getFunctions, httpsCallable }) {
       const user = get().currentUser;
       get().stopListening();
 
-      const isStaff = user?.role === ROLES.ADMIN || user?.role === ROLES.WORKER;
+      const isAdmin = user?.role === ROLES.ADMIN;
+      const isStaff = isAdmin || user?.role === ROLES.WORKER;
 
       unsubUsers = subscribeToUsers((users) => set({ users }));
       unsubRepairs = subscribeToRepairs(user, (repairs) => set({ repairs }));
       unsubBookings = subscribeToBookings(user, (bookings) => set({ bookings }));
 
       if (isStaff) {
-        unsubPhones = subscribeToPhones((phones) => set({ phones }));
+        // Skup (ceny zakupu, dane sprzedających) i koszty firmy – tylko Admin;
+        // reguły Firestore i tak odmówiłyby pracownikowi odczytu.
+        if (isAdmin) {
+          unsubPhones = subscribeToPhones((phones) => set({ phones }));
+          unsubExpenses = subscribeToExpenses((expenses) => set({ expenses }));
+        } else {
+          set({ phones: [], expenses: [] });
+        }
         unsubParts = subscribeToParts((parts) => set({ parts }));
-        unsubExpenses = subscribeToExpenses((expenses) => set({ expenses }));
         unsubTasks = subscribeToTasks((tasks) => set({ tasks }));
       } else {
         set({ phones: [], parts: [], expenses: [], tasks: [] });
