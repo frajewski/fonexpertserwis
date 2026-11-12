@@ -12,6 +12,8 @@ import { triggerHaptic } from '../native/haptics';
 import { failMessage } from '../utils/friendlyError';
 import SignatureField from '../signature/SignaturePad';
 import { stampSignature } from '../signature/signatureData';
+import TermsCheckbox from '../components/TermsCheckbox';
+import { termsAcceptance } from '../utils/termsConsent';
 import './NewRepairPage.css';
 
 const normalizePhone = (v) => (v || '').replace(/\D/g, '').replace(/^48/, '');
@@ -87,6 +89,7 @@ export default function NewRepairPage() {
 
   const [loading, setLoading] = useState(false);
   const [intakeSignature, setIntakeSignature] = useState(null); // podpis klienta przy przyjęciu (opcjonalny)
+  const [termsAccepted, setTermsAccepted] = useState(false); // akceptacja regulaminu przez klienta (przed podpisem)
   const [error, setError] = useState('');
 
   const handleAddWalkInCustomer = async () => {
@@ -119,6 +122,10 @@ export default function NewRepairPage() {
     if (!model.trim())       { setError('Podaj model urządzenia.'); return; }
     if (!description.trim()) { setError('Opisz usterkę.'); return; }
     if (!selectedCustomerId) { setError('Wybierz klienta.'); return; }
+    if (intakeSignature && !termsAccepted) {
+      setError('Klient podpisał się na ekranie – zaznacz też akceptację regulaminu (klient powinien ją zaznaczyć przed podpisem).');
+      return;
+    }
     if (documentType === DOCUMENT_TYPE.INVOICE && !customerNip.trim()) {
       setError('Faktura wymaga podania NIP klienta.');
       return;
@@ -155,6 +162,7 @@ export default function NewRepairPage() {
         screenLock: screenLock.trim(),
         documentType,
         customerNip: customerNip.trim(),
+        termsAccepted: termsAccepted ? termsAcceptance() : null,
         ...(intakeSignature ? { signatures: { intake: stampSignature(intakeSignature, currentUser?.name) } } : {}),
       });
 
@@ -384,12 +392,13 @@ export default function NewRepairPage() {
 
         {/* PODPIS KLIENTA */}
         <section className="nr-card">
-          <h2 className="nr-section-title">Podpis klienta</h2>
+          <h2 className="nr-section-title">Regulamin i podpis klienta</h2>
+          <TermsCheckbox checked={termsAccepted} onChange={setTermsAccepted} disabled={loading} />
           <SignatureField
             value={intakeSignature}
             onChange={setIntakeSignature}
             label="Podpis klienta – przyjęcie"
-            hint="Klient potwierdza przekazanie urządzenia, opis usterki i wstępny kosztorys. Podpis trafi na potwierdzenie przyjęcia (PDF / wydruk)."
+            hint="Klient potwierdza przekazanie urządzenia, opis usterki i wstępny kosztorys. Podpis trafi na potwierdzenie przyjęcia (PDF / wydruk). Bez zaznaczenia regulaminu tutaj klient zaznacza je ręcznie na wydruku."
             disabled={loading}
           />
         </section>

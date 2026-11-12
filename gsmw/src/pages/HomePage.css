@@ -157,3 +157,10 @@ a.hp-price-row:hover { background: var(--paper); }
   .hp-reviews { grid-template-columns: 1fr; }
   .hp-reviews-wrap .ui-section-head { flex-direction: column; align-items: stretch; }
 }
+
+/* Telefon: zdjęcie w tle hero mocniej przyciemnione, żeby tekst był czytelny */
+@media (max-width: 620px) {
+  .hp-hero { background:
+    linear-gradient(180deg, rgba(7, 13, 31, .9) 0%, rgba(7, 13, 31, .8) 60%, rgba(7, 13, 31, .92) 100%),
+    url('/hero-dark.jpg') 70% center / cover no-repeat, #0A1430; }
+}

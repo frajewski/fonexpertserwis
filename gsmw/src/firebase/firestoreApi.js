@@ -13,6 +13,7 @@ const rejectEstimateWebFn = httpsCallable(functions, 'rejectEstimateWeb');
 const createBookingRequestWebFn = httpsCallable(functions, 'createBookingRequestWeb');
 const createBuybackRequestWebFn = httpsCallable(functions, 'createBuybackRequestWeb');
 const respondToSlotWebFn = httpsCallable(functions, 'respondToSlotWeb');
+const acceptTermsWebFn = httpsCallable(functions, 'acceptTermsWeb');
 
 export const lookupRepairByToken = async (token) => {
   try {
@@ -121,6 +122,17 @@ export async function rejectEstimate(repairId, phone, token) {
   await ensureAnonymousAuth();
   await rejectEstimateWebFn({ repairId, phone: normalizePhone(phone), token: token || undefined });
   return { id: repairId, estimateAccepted: false, status: 'Odwołane' };
+}
+
+// Akceptacja Regulaminu serwisu (wersja, którą klient widział – serwer ją sprawdza)
+export async function acceptTerms(repairId, phone, token, version) {
+  await ensureAnonymousAuth();
+  try {
+    const { data } = await acceptTermsWebFn({ repairId, phone: phone ? normalizePhone(phone) : undefined, token: token || undefined, version });
+    return data?.termsAccepted || { version, at: new Date().toISOString() };
+  } catch (err) {
+    throw new Error(unwrapFunctionsError(err).message);
+  }
 }
 
 export async function respondToSlot(repairId, phone, token, accept, note, counterAt) {

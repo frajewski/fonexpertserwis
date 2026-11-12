@@ -47,6 +47,11 @@ function getRepairPhone(repairData = {}) {
   );
 }
 
+// Aktualna wersja Regulaminu serwisu (data „Obowiązuje od”).
+// Trzymaj w zgodzie z: gsm-admin-panel/src/constants/shopInfo.js (TERMS.version)
+// oraz gsmw/src/data/regulamin.js (REGULAMIN_VERSION).
+const TERMS_VERSION = "26.10.2026";
+
 function repairToPublicData(doc) {
   const data = doc.data() || {};
 
@@ -64,6 +69,11 @@ function repairToPublicData(doc) {
     partsCost: Number(data.partsCost || 0),
     serviceCost: Number(data.serviceCost || 0),
     estimateAccepted: data.estimateAccepted ?? null,
+    // Akceptacja regulaminu serwisu (online z linku SMS albo w punkcie)
+    termsAccepted: data.termsAccepted && data.termsAccepted.at
+      ? { version: String(data.termsAccepted.version || ""), at: String(data.termsAccepted.at) }
+      : null,
+    termsVersion: TERMS_VERSION,
     warrantyMonths: Number(data.warrantyMonths || 0),
     warrantyEndDate: data.warrantyEndDate || null,
     // Historia etapów dla klienta: tylko data i status (bez autora zmiany i notatek wewnętrznych)
@@ -405,6 +415,50 @@ exports.acceptEstimateWeb = onCall(
 /**
  * Odrzucenie kosztorysu z panelu webowego.
  */
+/**
+ * Akceptacja Regulaminu serwisu przez klienta na stronie statusu
+ * (link z SMS-a z tokenem albo nr zlecenia + telefon).
+ * data: { repairId?, phone?, token?, version }
+ * Zapisuje { version, at, via } w repair.termsAccepted + wpis w historii.
+ */
+exports.acceptTermsWeb = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    try {
+      const { repairId, phone, token, version } = request.data || {};
+      if (!request.auth) {
+        throw new HttpsError("unauthenticated", "Brak sesji użytkownika.");
+      }
+      if (String(version || "") !== TERMS_VERSION) {
+        throw new HttpsError("failed-precondition", "Regulamin został zaktualizowany. Odśwież stronę i przeczytaj aktualną wersję.");
+      }
+
+      const repairRef = await resolveRepairForDecision({ repairId, phone, token, checkEstimate: false });
+      const snap = await repairRef.get();
+      const current = (snap.data() || {}).termsAccepted;
+      if (current && current.at && current.version === TERMS_VERSION) {
+        return { ok: true, termsAccepted: { version: current.version, at: current.at }, already: true };
+      }
+
+      const now = new Date().toISOString();
+      const termsAccepted = {
+        version: TERMS_VERSION,
+        at: now,
+        via: token ? "online-link" : "online-numer-telefon",
+      };
+      await repairRef.update({
+        termsAccepted,
+        history: FieldValue.arrayUnion({ date: now, status: "Klient zaakceptował regulamin online" }),
+      });
+      return { ok: true, termsAccepted: { version: TERMS_VERSION, at: now } };
+    } catch (err) {
+      console.error("acceptTermsWeb error:", err);
+      if (err instanceof HttpsError) throw err;
+      throw new HttpsError("internal", err.message || "Błąd serwera.");
+    }
+  }
+);
+
 exports.rejectEstimateWeb = onCall(
   {
     region: "us-central1",
@@ -802,6 +856,7 @@ exports.setUserRoleClaim = onCall(
   }
 );
 Object.assign(exports, require("./b2b"));
+Object.assign(exports, require("./shopOffer"));
 Object.assign(exports, require("./push"));
 Object.assign(exports, require("./reviewSms"));
 Object.assign(exports, require("./backup"));

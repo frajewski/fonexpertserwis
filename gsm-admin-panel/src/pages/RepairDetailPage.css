@@ -339,3 +339,8 @@
 .rd-slot-alert-note { color: var(--ink-soft); margin-top: 2px; }
 .rd-slot-alert-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .rd-btn-inline { width: auto; padding: 9px 14px; }
+
+/* Status akceptacji regulaminu */
+.rd-terms { margin-top: 12px; padding: 9px 12px; border-radius: 10px; font-size: 13px; line-height: 1.45; }
+.rd-terms-ok { background: var(--good-soft); color: var(--good); font-weight: 600; }
+.rd-terms-no { background: var(--warn-soft, #FFF4E5); color: var(--ink); }

@@ -178,6 +178,7 @@ export default function TradePage() {
           {isAdmin && (
             <button className="tr-import-btn" onClick={() => navigate('/skup/kalkulator')}>🧮 Kalkulator wyceny</button>
           )}
+          <button className="tr-import-btn" onClick={() => navigate('/skup/zdjecia-modeli')}>🖼️ Zdjęcia modeli</button>
           <button className="tr-import-btn" onClick={() => navigate('/skup/import')}>📋 Importuj z arkusza</button>
           {isAdmin && <B2bLinkPanel />}
           {isAdmin && <button className="tr-import-btn" onClick={() => navigate('/umowa')}>📝 Umowa skupu</button>}
@@ -336,6 +337,7 @@ export default function TradePage() {
                 {p.storage && <span className="tr-storage">{p.storage}</span>}
                 {p.color && <span className="tr-color">{p.color}</span>}
                 {p.b2bListed && <span className="tr-b2b-badge">🏷️ B2B</span>}
+                {p.webListed && p.status !== 'Sprzedany' && <span className="tr-b2b-badge">🌐 Strona</span>}
               </div>
 
               {(p.hasIcloudLock || p.hasCarrierLock || p.isReported) && (

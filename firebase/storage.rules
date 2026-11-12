@@ -4,6 +4,7 @@
 //  Struktura plików:
 //    /repairs/{repairId}/{fileName}       – zdjęcia urządzenia / po naprawie
 //    /trade/{phoneId}/{fileName}          – zdjęcia umowy zakupu (skup)
+//    /modelPhotos/{fileName}              – zdjęcia poglądowe modeli (oferta na stronie)
 //
 //  Zasada: każdy zalogowany może wgrywać/czytać zdjęcia (te same osoby,
 //  które mają dostęp do odpowiadającego dokumentu Firestore – personel
@@ -61,6 +62,14 @@ service firebase.storage {
     match /bookingUploads/{uid}/{fileName} {
       allow create: if isSignedIn() && request.auth.uid == uid && isValidImage();
       allow read, delete: if isStaff();
+    }
+
+    // Zdjęcia poglądowe modeli (biblioteka) – wgrywa personel, oferta
+    // na stronie pokazuje je przez publiczny link z tokenem (getDownloadURL)
+    match /modelPhotos/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isStaff() && isValidImage();
+      allow delete: if isStaff();
     }
 
     // Kopie zapasowe bazy (Cloud Function backup.js) – pobiera tylko admin,

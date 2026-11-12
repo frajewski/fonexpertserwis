@@ -5,13 +5,15 @@
 //  Osobne od printConfirmation.js (to jest potwierdzenie PRZYJĘCIA) –
 //  część klientów prosi o dokument w momencie odbioru, nie przyjęcia.
 //
-//  ⚠️ Skrócony regulamin gwarancji poniżej to SZKIC, nie treść
-//  zweryfikowaną przez prawnika. Przed użyciem z klientami skonsultuj
-//  warunki gwarancji/rękojmi z osobą uprawnioną.
+//  Warunki gwarancji poniżej streszczają §8 Regulaminu serwisu
+//  (zaakceptowanego przez prawnika 11.2026). Zmieniasz regulamin →
+//  zaktualizuj też ten skrót.
 // ============================================================
 
 import { blockPrintInNativeApp } from './platform';
 import { signatureBlockHtml } from '../signature/signatureData';
+import { consentCss, consentLineHtml, repairWarrantyTermsText } from './termsConsent';
+import { TERMS } from '../constants/shopInfo';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : new Date().toLocaleDateString('pl-PL');
 
@@ -45,6 +47,7 @@ export function buildPickupConfirmationHtml(repair, customer, shopSettings) {
           .sign { text-align: center; width: 40%; }
           .signLine { border-top: 1px solid #999; margin-bottom: 6px; }
           .signLabel { font-size: 10.5px; color: #777; }
+          ${consentCss}
           @media print { @page { margin: 16mm; } }
         </style>
       </head>
@@ -78,11 +81,14 @@ export function buildPickupConfirmationHtml(repair, customer, shopSettings) {
           <h3>Skrócone warunki gwarancji</h3>
           <ol>
             <li>Gwarancja obejmuje wyłącznie wykonaną usługę oraz wymienione podzespoły, w zakresie i przez okres wskazany powyżej.</li>
-            <li>Gwarancja nie obejmuje: uszkodzeń mechanicznych, zalania, ingerencji osób trzecich w urządzenie po jego wydaniu, oraz usterek niezwiązanych z zakresem wykonanej naprawy.</li>
+            <li>Gwarancja nie obejmuje: uszkodzeń mechanicznych powstałych po odbiorze, zalania lub zawilgocenia, ingerencji osób trzecich po naprawie, naturalnego zużycia (np. spadku pojemności baterii) oraz usterek oprogramowania niezwiązanych z naprawą.</li>
             <li>Warunkiem skorzystania z gwarancji jest okazanie niniejszego potwierdzenia wraz z dokumentem zakupu (paragon lub faktura). W przypadku faktury przesłanej do KSeF okazanie papierowej kopii nie jest wymagane.</li>
-            <li>Pełny regulamin serwisu dostępny jest w punkcie serwisowym.</li>
+            <li>Gwarancja nie wyłącza, nie ogranicza ani nie zawiesza uprawnień Konsumenta wynikających z przepisów prawa.</li>
+            <li>Pełny Regulamin serwisu dostępny jest w punkcie serwisowym i na stronie ${TERMS.url.replace(/^https?:\/\//, '')}. Reklamacje: osobiście lub e-mailem, rozpatrujemy w ciągu 14 dni (§9).</li>
           </ol>
         </div>
+
+        ${consentLineHtml(repairWarrantyTermsText(), repair.pickupTermsAccepted)}
 
         <div class="signRow">
           ${signatureBlockHtml(repair.signatures?.pickup, 'Podpis klienta (odbiór)')}

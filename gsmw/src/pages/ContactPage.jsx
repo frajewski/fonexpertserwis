@@ -137,6 +137,18 @@ export default function ContactPage() {
         </section>
       </div>
 
+      {/* Zdjęcie punktu */}
+      <section className="ui-wrap">
+        <figure className="cp-photo">
+          <img src="/salon.jpg" width="1600" height="1200" loading="lazy" decoding="async"
+            alt="Wejście do punktu Fonexpert w Pasażu Kaufland — podświetlony szyld TELEFONY AKCESORIA GSM, gabloty z telefonami i lada" />
+          <figcaption>
+            <strong>Tak wyglądamy</strong>
+            <span>Szukaj podświetlonego szyldu <b>„TELEFONY AKCESORIA GSM”</b> w Pasażu Kaufland — to my.</span>
+          </figcaption>
+        </figure>
+      </section>
+
       {/* Dojazd */}
       <section className="ui-wrap cp-tips" aria-label="Jak do nas trafić">
         <div className="cp-tip">

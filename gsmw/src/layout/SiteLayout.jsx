@@ -104,6 +104,7 @@ export function SiteFooter() {
         <span>© {new Date().getFullYear()} {SHOP.legalName}</span>
         <span className="sl-footer-legal">
           <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
+          <Link to="/regulamin">Regulamin serwisu</Link>
           <Link to="/zasady-rezerwacji">Zasady rezerwacji i zadatku</Link>
         </span>
       </div>
@@ -128,8 +129,16 @@ function ScrollManager() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
     if (hash) {
+      // Strony ładują się leniwie – czekamy, aż element z kotwicy się pojawi (do ~3 s)
       const id = decodeURIComponent(hash.slice(1));
-      const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }), 60);
+      let tries = 0;
+      let t;
+      const go = () => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ block: 'start' });
+        else if (tries++ < 30) t = setTimeout(go, 100);
+      };
+      t = setTimeout(go, 60);
       return () => clearTimeout(t);
     }
     window.scrollTo(0, 0);

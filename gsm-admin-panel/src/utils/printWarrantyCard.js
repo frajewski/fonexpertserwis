@@ -11,6 +11,7 @@
 
 import { blockPrintInNativeApp } from './platform';
 import { COMPANY as SHOP } from '../constants/shopInfo';
+import { consentCss, consentLineHtml, salesWarrantyTermsText } from './termsConsent';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 
@@ -44,6 +45,7 @@ export function buildWarrantyCardHtml(phone) {
           .sign { text-align: center; width: 40%; }
           .signLine { border-top: 1px solid #999; margin-bottom: 6px; }
           .signLabel { font-size: 10px; color: #777; }
+          ${consentCss}
           @media print { @page { margin: 16mm; } }
         </style>
       </head>
@@ -90,6 +92,8 @@ export function buildWarrantyCardHtml(phone) {
           <h3>Warunki skorzystania z gwarancji</h3>
           <p>Warunkiem rozpatrzenia zgłoszenia gwarancyjnego jest okazanie niniejszej karty wraz z dowodem zakupu (paragon lub faktura). Zgłoszenia przyjmowane są w punkcie serwisowym lub telefonicznie pod numerem ${SHOP.phone}.</p>
         </div>
+
+        ${consentLineHtml(salesWarrantyTermsText(), phone.warrantyTermsAccepted)}
 
         <div class="signRow">
           <div class="sign"><div class="signLine"></div><p class="signLabel">Podpis sprzedawcy</p></div>

@@ -20,6 +20,17 @@ export const COMPANY = {
   shopAddress: 'ul. Żołnierzy Wyklętych 16 (Pasaż Kaufland), 09-100 Płońsk',
 };
 
+// Regulamin serwisu – wersja (data „Obowiązuje od”) i adres publikacji.
+// Zmieniasz regulamin? Podbij version – zlecenia zapisują, którą wersję
+// klient zaakceptował (repair.termsAccepted.version).
+export const TERMS = {
+  version: '26.10.2026',
+  url: `${SHOP.clientUrl}/regulamin`,
+  diagnosisFee: 123,      // §3 ust. 3 – opłata za diagnozę przy rezygnacji z naprawy (zł brutto)
+  storageDays: 30,        // §6 ust. 4 – czas na odbiór od powiadomienia
+  storageFeePerDay: 5,    // §6 ust. 5 – opłata za przechowanie za każdy dzień zwłoki
+};
+
 // Stare adresy panelu klienta – skaner dalej rozpoznaje wydrukowane wcześniej kody QR
 export const LEGACY_CLIENT_HOSTS = ['gsm-serwis-klient.web.app'];
 export default SHOP;

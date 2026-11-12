@@ -9,3 +9,23 @@
 .ip-doc ul, .ip-doc ol { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
 .ip-doc a { color: var(--accent); font-weight: 600; }
 .ip-note { margin-top: 28px; padding: 14px 16px; border-radius: 12px; background: var(--accent-soft); font-size: 14.5px; }
+
+/* Spis treści regulaminu */
+.ip-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; padding: 16px; border-radius: 14px; background: var(--paper); border: 1px solid var(--line); }
+.ip-toc a { display: inline-flex; align-items: center; min-height: 36px; padding: 6px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); font-size: 14px; font-weight: 600; text-decoration: none; }
+.ip-toc a:hover { border-color: var(--accent); color: var(--accent); }
+.ip-doc section { scroll-margin-top: 90px; }
+.ip-doc ol[type="a"] { margin-top: 6px; list-style-type: lower-alpha; }
+
+/* Regulamin w skrócie */
+.ip-short { margin: 0 0 36px; padding: 24px 26px; border-radius: 18px; background: color-mix(in srgb, var(--accent) 6%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); scroll-margin-top: 90px; }
+.ip-doc .ip-short h2 { margin-top: 0; }
+.ip-short-lead { margin: 0 0 16px; font-size: 14.5px; color: var(--ink-soft); }
+.ip-doc .ip-short-list { margin: 0; padding: 0; list-style: none; counter-reset: sk; display: flex; flex-direction: column; gap: 12px; }
+.ip-doc .ip-short-list li { counter-increment: sk; position: relative; padding-left: 40px; margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: 15px; line-height: 1.55; }
+.ip-short-list li::before { content: counter(sk); position: absolute; left: 0; top: 1px; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--accent); color: #fff; font-size: 13px; font-weight: 800; }
+.ip-short-list strong { font-size: 15.5px; color: var(--ink); }
+.ip-short-list span { color: var(--ink-soft); }
+.ip-short-ref { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.ip-full-h { margin-top: 8px; }
+@media (max-width: 620px) { .ip-short { padding: 18px 16px; } }

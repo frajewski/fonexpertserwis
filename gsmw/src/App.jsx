@@ -13,6 +13,7 @@ const FaqPage = lazy(() => import('./pages/FaqPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const RulesPage = lazy(() => import('./pages/RulesPage'));
+const RegulaminPage = lazy(() => import('./pages/RegulaminPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const B2bCatalogPage = lazy(() => import('./pages/B2bCatalogPage'));
 
@@ -44,6 +45,7 @@ export default function App() {
       <Route path="/kontakt" element={withLayout(<ContactPage />)} />
       <Route path="/polityka-prywatnosci" element={withLayout(<PrivacyPage />)} />
       <Route path="/zasady-rezerwacji" element={withLayout(<RulesPage />)} />
+      <Route path="/regulamin" element={withLayout(<RegulaminPage />)} />
       <Route path="*" element={withLayout(<NotFoundPage />)} />
     </Routes>
   );

@@ -1,0 +1,30 @@
+.mp-page { padding: 28px 32px 60px; max-width: 900px; }
+.mp-back { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+.mp-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--ink); margin: 0 0 8px; }
+.mp-lead { font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 20px; max-width: 720px; }
+.mp-h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-soft); margin: 26px 0 12px; }
+.mp-empty, .mp-hint { font-size: 13px; color: var(--ink-faint); margin: 0 0 10px; }
+.mp-list { display: flex; flex-direction: column; gap: 14px; }
+.mp-model { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.mp-model-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.mp-model-head h3 { margin: 0; font-size: 16px; color: var(--ink); }
+.mp-model-head span { font-size: 12.5px; color: var(--ink-faint); white-space: nowrap; }
+.mp-slot { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 10px; border: 1px dashed var(--line); }
+.mp-slot-on { border-style: solid; }
+.mp-thumb { width: 56px; height: 56px; border-radius: 10px; background: var(--paper); display: grid; place-items: center; flex-shrink: 0; overflow: hidden; }
+.mp-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.mp-thumb span { font-size: 11px; color: var(--ink-faint); }
+.mp-slot-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: var(--ink); }
+.mp-slot-text small { font-size: 12px; color: var(--ink-faint); }
+.mp-slot-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.mp-btn { min-height: 38px; padding: 7px 14px; border-radius: 10px; border: 1.5px solid var(--accent); background: var(--accent); color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; }
+.mp-btn:disabled { opacity: .5; cursor: not-allowed; }
+.mp-btn-ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+.mp-manual { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; }
+.mp-input { min-height: 40px; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font-size: 14px; }
+@media (max-width: 720px) {
+  .mp-page { padding: 20px 16px 60px; }
+  .mp-manual { grid-template-columns: 1fr; }
+  .mp-slot { flex-wrap: wrap; }
+  .mp-slot-actions { width: 100%; justify-content: flex-end; }
+}

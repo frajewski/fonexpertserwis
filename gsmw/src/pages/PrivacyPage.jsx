@@ -37,7 +37,10 @@ export default function PrivacyPage() {
         <h2>5. Ciasteczka i pamięć przeglądarki</h2>
         <p>Strona nie używa ciasteczek reklamowych ani analitycznych. Do działania formularzy i sprawdzania statusu przeglądarka zapisuje identyfikator anonimowej sesji Firebase (pamięć przeglądarki). Mapa Google na stronie <Link to="/kontakt">Kontakt</Link> ładuje się dopiero po kliknięciu — wtedy Google może zapisać własne ciasteczka zgodnie ze swoją polityką.</p>
 
-        <h2>6. Twoje prawa</h2>
+        <h2>6. Monitoring wizyjny w punkcie serwisowym</h2>
+        <p>Wnętrze punktu serwisowego oraz przylegający do niego fragment pasażu CH Kaufland są objęte naszym monitoringiem wizyjnym (miejsce oznaczone tabliczką z piktogramem kamery). Monitoring prowadzimy w celu zapewnienia bezpieczeństwa osób i mienia, w tym urządzeń oddanych do naprawy, oraz ustalenia, dochodzenia lub obrony przed roszczeniami — na podstawie naszego prawnie uzasadnionego interesu (art. 6 ust. 1 lit. f RODO). Rejestrujemy wyłącznie obraz. Nagrania przechowujemy do 30 dni, po czym są automatycznie nadpisywane, chyba że stanowią dowód w postępowaniu — wtedy do jego zakończenia. Nagrania udostępniamy tylko uprawnionym organom (np. Policji, sądowi) na ich żądanie oraz serwisowi technicznemu systemu monitoringu.</p>
+
+        <h2>7. Twoje prawa</h2>
         <p>Masz prawo dostępu do danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania, przeniesienia, sprzeciwu oraz skargi do Prezesa Urzędu Ochrony Danych Osobowych. Podanie danych jest dobrowolne, ale bez nich nie obsłużymy zgłoszenia ani wyceny. W sprawie danych napisz na <a href={`mailto:${SHOP.email}`}>{SHOP.email}</a> albo zadzwoń.</p>
       </article>
     </main>

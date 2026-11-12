@@ -56,6 +56,11 @@ export default function TradeDetailPage() {
   const [editNotes, setEditNotes] = useState('');
   const [editB2bListed, setEditB2bListed] = useState(false);
   const [editB2bPrice, setEditB2bPrice] = useState('');
+  // Oferta na stronie klienta (shopOffer – patrz firebase/functions/shopOffer.js)
+  const [editWebListed, setEditWebListed] = useState(false);
+  const [editWebPrice, setEditWebPrice] = useState('');
+  const [editWebNote, setEditWebNote] = useState('');
+  const [editBattery, setEditBattery] = useState('');
   const [editConsignPrice, setEditConsignPrice] = useState('');
   const [editingUsedParts, setEditingUsedParts] = useState(false);
   const [usedPartsInput, setUsedPartsInput] = useState([]);
@@ -126,13 +131,28 @@ export default function TradeDetailPage() {
     setEditWarranty(phone.warranty || '');
     setEditB2bListed(!!phone.b2bListed);
     setEditB2bPrice(phone.b2bPrice ? String(phone.b2bPrice) : '');
+    setEditWebListed(!!phone.webListed);
+    setEditWebPrice(phone.webPrice ? String(phone.webPrice) : '');
+    setEditWebNote(phone.webNote || '');
+    setEditBattery(phone.batteryHealth ? String(phone.batteryHealth) : '');
     setEditConsignPrice(phone.consignPrice ? String(phone.consignPrice) : '');
     setEditNotes(phone.notes || '');
     setEditing(true);
   };
 
   const handleSaveEdit = async () => {
+    const webPrice = parseFloat(String(editWebPrice).replace(',', '.')) || 0;
+    if (editWebListed && webPrice <= 0) {
+      alert('Podaj cenę na stronie – bez niej telefon nie pojawi się w ofercie.');
+      return;
+    }
+    const battery = parseInt(editBattery, 10);
     await updatePhone(id, {
+      webListed: editWebListed,
+      webPrice,
+      webNote: editWebNote.trim().slice(0, 80),
+      webListedAt: editWebListed ? (phone.webListedAt || new Date().toISOString()) : null,
+      batteryHealth: battery > 0 && battery <= 100 ? battery : null,
       imei: editImei.trim(),
       color: editColor.trim(),
       storage: editStorage,
@@ -338,6 +358,31 @@ export default function TradeDetailPage() {
                   <input className="td-input" value={editWarranty} onChange={(e) => setEditWarranty(e.target.value)} placeholder="np. 30 dni" />
                 </label>
 
+                <label className="td-edit-field">
+                  <span>Kondycja baterii (%)</span>
+                  <input className="td-input" inputMode="numeric" value={editBattery} onChange={(e) => setEditBattery(e.target.value.replace(/\D/g, '').slice(0, 3))} placeholder="np. 92" />
+                </label>
+
+                <div className="td-web-box">
+                  <label className="td-edit-field td-b2b-check">
+                    <input type="checkbox" checked={editWebListed} onChange={(e) => setEditWebListed(e.target.checked)} />
+                    <span>🌐 Pokaż na stronie w ofercie „Telefony na sprzedaż”</span>
+                  </label>
+                  {editWebListed && (
+                    <>
+                      <label className="td-edit-field">
+                        <span>Cena na stronie (zł)</span>
+                        <input className="td-input" inputMode="decimal" value={editWebPrice} onChange={(e) => setEditWebPrice(e.target.value)} placeholder="np. 1100" />
+                      </label>
+                      <label className="td-edit-field">
+                        <span>Krótki opis na stronie (opcjonalnie, do 80 znaków)</span>
+                        <input className="td-input" maxLength={80} value={editWebNote} onChange={(e) => setEditWebNote(e.target.value)} placeholder="np. eSIM, z pudełkiem i ładowarką" />
+                      </label>
+                      <p className="td-web-hint">Na stronie widać: marka, model, pamięć, kolor, stan, bateria, zdjęcie, opis i cena. Po oznaczeniu jako sprzedany telefon sam zniknie z oferty.</p>
+                    </>
+                  )}
+                </div>
+
                 <label className="td-edit-field td-b2b-check">
                   <input type="checkbox" checked={editB2bListed} onChange={(e) => setEditB2bListed(e.target.checked)} />
                   <span>W ofercie B2B (widoczny w katalogu klienta hurtowego)</span>
@@ -382,6 +427,8 @@ export default function TradeDetailPage() {
                   <span>Kupiony: {fmtDate(phone.boughtAt)}</span>
                   {phone.status === TRADE_STATUS.SOLD && <span>Sprzedany: {fmtDate(phone.soldAt)}</span>}
                   {phone.b2bListed && <span>🏷️ B2B: {phone.b2bPrice || 0} zł</span>}
+                  {phone.webListed && <span>🌐 Na stronie: {phone.webPrice || 0} zł{phone.status === TRADE_STATUS.SOLD ? ' (ukryty – sprzedany)' : ''}</span>}
+                  {phone.batteryHealth > 0 && <span>🔋 Bateria: {phone.batteryHealth}%</span>}
                   {phone.consignPrice > 0 && <span>🤝 Cena dla komisanta: {phone.consignPrice} zł{phone.consignedTo ? ` (${phone.consignedTo})` : ''}</span>}
                   {phone.warrantyMonths > 0 ? (
                     <span>🛡️ Gwarancja: {phone.warrantyMonths} mies. — do {fmtDate(phone.warrantyEndDate)}</span>

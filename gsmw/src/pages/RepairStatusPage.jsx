@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import {
-  findRepairsByPhone, lookupRepairByToken, acceptEstimate, respondToSlot, rejectEstimate, STATUS,
+  findRepairsByPhone, lookupRepairByToken, acceptEstimate, respondToSlot, rejectEstimate, acceptTerms, STATUS,
 } from '../firebase/firestoreApi';
 import SHOP from '../shop';
 import {
@@ -14,6 +14,7 @@ import {
   IconInfo, IconChevron, IconHeadset, IconCall, IconMail, IconArrow, IconPhone, IconShield, IconX, IconClock, IconTag,
 } from '../layout/icons';
 import './RepairStatusPage.css';
+import { REGULAMIN_FEES } from '../data/regulamin';
 import { usePageMeta } from '../utils/seo';
 
 const STEPS = [
@@ -72,6 +73,8 @@ export default function RepairStatusPage() {
   const [showSlotNote, setShowSlotNote] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [termsChecked, setTermsChecked] = useState(false);
+  const [termsLoading, setTermsLoading] = useState(false);
 
   useEffect(() => {
     const loadRepair = async () => {
@@ -143,6 +146,9 @@ export default function RepairStatusPage() {
   const needsDecision = canDecide && repair.estimateAccepted === null && total > 0 && !cancelled;
   const slot = repair.proposedSlot && status !== STATUS.DELIVERED && !cancelled ? repair.proposedSlot : null;
   const slotPending = slot && slot.status === 'pending' && canDecide;
+  // Regulamin: pokazujemy, gdy serwer zna wersję (termsVersion) i zlecenie jest otwarte
+  const termsOpen = !!repair.termsVersion && !cancelled && status !== STATUS.DELIVERED;
+  const termsPending = termsOpen && canDecide && !repair.termsAccepted;
 
   const copyNumber = async () => {
     try { await navigator.clipboard.writeText(repair.displayNumber); } catch { /* brak schowka */ }
@@ -164,6 +170,20 @@ export default function RepairStatusPage() {
       setActionError(err?.message || 'Nie udało się zapisać odpowiedzi.');
     } finally {
       setSlotLoading(false);
+    }
+  };
+
+  const handleTerms = async () => {
+    if (!termsChecked) return;
+    setActionError('');
+    setTermsLoading(true);
+    try {
+      const accepted = await acceptTerms(repair.id, phone, token, repair.termsVersion);
+      setRepair((r) => ({ ...r, termsAccepted: accepted }));
+    } catch (err) {
+      setActionError(err?.message || 'Nie udało się zapisać akceptacji regulaminu.');
+    } finally {
+      setTermsLoading(false);
     }
   };
 
@@ -246,7 +266,41 @@ export default function RepairStatusPage() {
     </section>
   );
 
-  const actionFirst = slotPending || (needsDecision && !decision);
+  const termsCard = (termsPending || (termsOpen && repair.termsAccepted)) && (
+    <section className={`rs-card rs-action ${termsPending ? 'rs-action-pending' : ''}`} aria-label="Regulamin serwisu">
+      <div className="rs-action-head">
+        <span className="rs-action-ic"><IconShield size={22} /></span>
+        <div>
+          <span className="rs-action-label">Regulamin serwisu</span>
+          <strong className="rs-action-value">{repair.termsAccepted ? 'Zaakceptowany' : 'Potwierdź, że go znasz'}</strong>
+        </div>
+      </div>
+      {termsPending ? (
+        <>
+          <p className="rs-action-note">Zanim zajmiemy się naprawą, zapoznaj się z regulaminem — <Link to="/regulamin#skrot" target="_blank">wersja skrócona zajmie Ci minutę</Link>. Najważniejsze:</p>
+          <ul className="rs-terms-list">
+            <li>Wycena przy przyjęciu jest orientacyjna — wyższy koszt zawsze uzgadniamy z Tobą.</li>
+            <li>Diagnoza jest bezpłatna, jeśli zlecisz naprawę. Przy rezygnacji po diagnozie: {REGULAMIN_FEES.diagnosisFee}&nbsp;zł.</li>
+            <li>Odbierz urządzenie w ciągu {REGULAMIN_FEES.storageDays} dni od SMS-a o gotowości — później {REGULAMIN_FEES.storageFeePerDay}&nbsp;zł za każdy dzień przechowania.</li>
+            <li>Zrób kopię zapasową danych, jeśli to możliwe.</li>
+          </ul>
+          <label className="rs-terms-check">
+            <input type="checkbox" checked={termsChecked} onChange={(e) => setTermsChecked(e.target.checked)} />
+            <span>Zapoznałem(-am) się z <Link to="/regulamin" target="_blank">Regulaminem serwisu</Link> (obowiązującym od {repair.termsVersion}) i akceptuję go, w tym informacje o przetwarzaniu danych osobowych.</span>
+          </label>
+          <div className="rs-action-btns">
+            <button type="button" className="rs-btn rs-btn-primary" onClick={handleTerms} disabled={!termsChecked || termsLoading}>
+              {termsLoading ? 'Zapisuję…' : <><IconCheck size={16} /> Akceptuję regulamin</>}
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="rs-pill-msg rs-msg-good"><IconCheck size={16} /> Regulamin zaakceptowany{repair.termsAccepted?.at ? ` ${fmtDateTime(repair.termsAccepted.at)}` : ''}</p>
+      )}
+    </section>
+  );
+
+  const actionFirst = slotPending || (needsDecision && !decision) || termsPending;
 
   return (
     <main className="rs">
@@ -315,7 +369,7 @@ export default function RepairStatusPage() {
 
         {actionError && <div className="rs-error" role="alert">{actionError}</div>}
 
-        {actionFirst && <div className="rs-actions-first">{slotCard}{estimateCard}</div>}
+        {actionFirst && <div className="rs-actions-first">{termsCard}{slotCard}{estimateCard}</div>}
 
         {/* ===== Szczegóły + historia ===== */}
         <div className="rs-two-col">
@@ -340,6 +394,7 @@ export default function RepairStatusPage() {
             </section>
             {!actionFirst && slotCard}
             {!actionFirst && estimateCard}
+            {!actionFirst && termsCard}
           </div>
 
           <div className="rs-right">

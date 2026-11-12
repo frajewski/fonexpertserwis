@@ -297,3 +297,7 @@
   border-radius: var(--radius-sm);
 }
 .td-photo-remove-btn:hover { border-color: var(--warn); }
+
+/* Oferta na stronie klienta */
+.td-web-box { border: 1.5px dashed var(--line); border-radius: var(--radius-md, 12px); padding: 10px 12px; margin: 4px 0 8px; display: flex; flex-direction: column; gap: 8px; }
+.td-web-hint { margin: 0; font-size: 12px; color: var(--ink-faint); line-height: 1.45; }

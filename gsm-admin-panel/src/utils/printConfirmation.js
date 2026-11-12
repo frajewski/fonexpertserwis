@@ -13,6 +13,7 @@
 import { blockPrintInNativeApp } from './platform';
 import SHOP from '../constants/shopInfo';
 import { signatureBlockHtml } from '../signature/signatureData';
+import { consentCss, consentLineHtml, serviceTermsText, intakeInfoHtml } from './termsConsent';
 
 const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('pl-PL') : '—';
 
@@ -52,7 +53,7 @@ export function buildRepairConfirmationHtml(repair, customer, shopSettings) {
           .rowValue { color: #111; }
           .totalRow { display: flex; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ccc; }
           .totalLabel, .totalValue { font-size: 16px; font-weight: 800; }
-          .signRow { display: flex; justify-content: space-around; margin-top: 56px; }
+          .signRow { display: flex; justify-content: space-around; margin-top: 44px; }
           .sign { text-align: center; width: 40%; }
           .signLine { border-top: 1px solid #999; margin-bottom: 6px; }
           .signLabel { font-size: 11px; color: #777; }
@@ -68,6 +69,7 @@ export function buildRepairConfirmationHtml(repair, customer, shopSettings) {
           .headerRow { position: relative; }
           .qrBox { position: absolute; top: 0; right: 0; text-align: center; width: 100px; }
           .qrLabel { font-size: 9px; color: #555; margin-top: 2px; }
+          ${consentCss}
           @media print { @page { margin: 16mm; } }
         </style>
       </head>
@@ -109,6 +111,9 @@ export function buildRepairConfirmationHtml(repair, customer, shopSettings) {
           <span class="totalLabel">ŁĄCZNIE:</span>
           <span class="totalValue">${total} zł</span>
         </div>
+
+        ${intakeInfoHtml()}
+        ${consentLineHtml(serviceTermsText(), repair.termsAccepted)}
 
         <div class="divider"></div>
         <div class="signRow">

@@ -16,6 +16,7 @@ import {
 import './BookingPage.css';
 import { modelsFor } from '../data/models';
 import './DevicesPage.css';
+import PhoneOffer from '../components/PhoneOffer';
 import { usePageMeta } from '../utils/seo';
 
 const DEVICE_TYPES = [
@@ -153,7 +154,7 @@ export default function DevicesPage() {
             <p className="ui-lead">Sprzedajemy nowe i używane urządzenia, a Twój stary telefon możemy odkupić. Każdy sprzęt przed sprzedażą przechodzi u nas testy.</p>
             <div className="ui-btn-row dv-hero-btns">
               <button type="button" className="ui-btn ui-btn-cta ui-btn-lg" onClick={scrollToForm}><IconCash size={20} /> Wyceń swój telefon <IconArrow size={18} /></button>
-              <a href={SHOP.phoneHref} className="ui-btn ui-btn-light ui-btn-lg"><IconCall size={18} /> Zapytaj o dostępność</a>
+              <a href="#oferta" className="ui-btn ui-btn-light ui-btn-lg"><IconPhone size={18} /> Zobacz dostępne telefony</a>
             </div>
           </div>
           <ul className="dv-hero-stats" aria-label="Gwarancja">
@@ -163,6 +164,9 @@ export default function DevicesPage() {
           </ul>
         </div>
       </section>
+
+      {/* DOSTĘPNE TERAZ – telefony z magazynu oznaczone „Pokaż na stronie” */}
+      <PhoneOffer />
 
       {/* OFERTA */}
       <section className="ui-section-tight">

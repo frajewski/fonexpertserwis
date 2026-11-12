@@ -11,6 +11,8 @@ import { isNativeCameraAvailable } from '../utils/nativeCamera';
 import { triggerHaptic } from '../native/haptics';
 import { failMessage } from '../utils/friendlyError';
 import SignatureField from '../signature/SignaturePad';
+import TermsCheckbox from '../components/TermsCheckbox';
+import { termsAcceptance } from '../utils/termsConsent';
 import { stampSignature } from '../signature/signatureData';
 import { printRepairConfirmation, buildRepairConfirmationHtml } from '../utils/printConfirmation';
 import { printPickupConfirmation, buildPickupConfirmationHtml } from '../utils/printPickupConfirmation';
@@ -189,6 +191,19 @@ export default function RepairDetailPage() {
   };
 
   // Podpis złożony / usunięty już po zapisaniu zlecenia (np. klient podpisuje później)
+  // Akceptacja regulaminu (przyjęcie) / warunków gwarancji (odbiór) – zaznacza klient
+  const saveTerms = async (field, on) => {
+    setSavingSignature(true);
+    try {
+      await updateRepair(id, { [field]: on ? termsAcceptance() : null });
+    } catch (err) {
+      triggerHaptic('error');
+      alert(failMessage('Nie udało się zapisać akceptacji', err));
+    } finally {
+      setSavingSignature(false);
+    }
+  };
+
   const saveSignature = async (kind, sig) => {
     setSavingSignature(true);
     try {
@@ -601,6 +616,14 @@ export default function RepairDetailPage() {
             {!customer && isStaff && (
               <AssignCustomer repair={repair} onAssign={(customerId) => updateRepair(id, { customerId })} />
             )}
+            {(() => {
+              const t = repair.termsAccepted;
+              const when = t?.at ? new Date(t.at).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' }) : '';
+              const how = t?.via?.startsWith('online') ? 'online (link z SMS)' : 'w punkcie';
+              return t
+                ? <div className="rd-terms rd-terms-ok">✅ Regulamin zaakceptowany {how} · {when}</div>
+                : <div className="rd-terms rd-terms-no">⚠️ Klient nie zaakceptował jeszcze regulaminu — wyślij SMS „Przyjęcie do serwisu” (zawiera link) albo zaznacz akceptację przy podpisie.</div>;
+            })()}
           </div>
 
           {isStaff && customer && (customer.phone || customer.email) && (() => {
@@ -941,6 +964,8 @@ export default function RepairDetailPage() {
           <details className="rd-card rd-fold">
             <summary className="rd-section-title">Podpisy klienta</summary>
             <div className="rd-sign-label">Przyjęcie</div>
+            <TermsCheckbox checked={!!repair.termsAccepted} acceptedAt={repair.termsAccepted?.at}
+              onChange={(on) => saveTerms('termsAccepted', on)} disabled={savingSignature} />
             <SignatureField
               value={repair.signatures?.intake || null}
               onChange={(sig) => saveSignature('intake', sig)}
@@ -952,6 +977,8 @@ export default function RepairDetailPage() {
             {repair.status === STATUS.DELIVERED && (
               <>
                 <div className="rd-sign-label" style={{ marginTop: 12 }}>Odbiór</div>
+                <TermsCheckbox variant="warranty" checked={!!repair.pickupTermsAccepted} acceptedAt={repair.pickupTermsAccepted?.at}
+                  onChange={(on) => saveTerms('pickupTermsAccepted', on)} disabled={savingSignature} />
                 <SignatureField
                   value={repair.signatures?.pickup || null}
                   onChange={(sig) => saveSignature('pickup', sig)}

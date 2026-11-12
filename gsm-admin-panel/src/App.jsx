@@ -28,6 +28,7 @@ import DashboardPage from './pages/DashboardPage';
 import CostsPage from './pages/CostsPage';
 import AccountPage from './pages/AccountPage';
 import TradeDetailPage from './pages/TradeDetailPage';
+import ModelPhotosPage from './pages/ModelPhotosPage';
 import StatsPage from './pages/StatsPage';
 import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
@@ -150,6 +151,7 @@ export default function App() {
       <Route path="/umowa" element={<AdminOnlyRoute><PurchaseContractPage /></AdminOnlyRoute>} />
       <Route path="/skup/import" element={<AdminOnlyRoute><ImportPhonesPage /></AdminOnlyRoute>} />
       <Route path="/skup/kalkulator" element={<AdminOnlyRoute><CalculatorPage /></AdminOnlyRoute>} />
+      <Route path="/skup/zdjecia-modeli" element={<AdminOnlyRoute><ModelPhotosPage /></AdminOnlyRoute>} />
       <Route path="/magazyn" element={<ProtectedRoute><PartsPage /></ProtectedRoute>} />
       <Route path="/pulpit" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/koszty" element={<AdminOnlyRoute><CostsPage /></AdminOnlyRoute>} />

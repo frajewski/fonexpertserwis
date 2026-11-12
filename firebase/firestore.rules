@@ -171,6 +171,19 @@ service cloud.firestore {
 
     // Wspólna lista zadań zespołu (Admin + Pracownik) – "zrób X dzisiaj",
     // nie dane finansowe, więc dostęp dla całego staffu.
+    // Oferta telefonów na stronie klienta – publiczna, zapisuje ją
+    // wyłącznie Cloud Function syncShopOffer (biała lista pól)
+    // Biblioteka zdjęć poglądowych modeli (panel → Skup → Zdjęcia modeli)
+    match /modelPhotos/{key} {
+      allow read: if isStaff();
+      allow write: if isAdmin();
+    }
+
+    match /shopOffer/{itemId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /b2bCatalog/{token}/items/{itemId} {
       allow read: if isSignedIn();
       allow write: if false;

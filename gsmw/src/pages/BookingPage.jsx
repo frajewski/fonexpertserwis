@@ -357,10 +357,10 @@ export default function BookingPage() {
                   <div className={`bp-terms ${errors.acceptTerms ? 'bp-terms-error' : ''}`} data-field="acceptTerms">
                     <label className="bp-accept">
                       <input type="checkbox" checked={form.acceptTerms} onChange={(e) => { setForm((f) => ({ ...f, acceptTerms: e.target.checked })); setErrors((x) => ({ ...x, acceptTerms: '' })); }} />
-                      <span>Akceptuję <strong>zasady rezerwacji i zadatku</strong> oraz zapoznałem/am się z informacją o przetwarzaniu danych.</span>
+                      <span>Akceptuję <strong>zasady rezerwacji i zadatku</strong> oraz <strong>regulamin serwisu</strong> i zapoznałem/am się z informacją o przetwarzaniu danych.</span>
                     </label>
                     {errors.acceptTerms && <span className="ui-field-msg">{errors.acceptTerms}</span>}
-                    <p className="bp-doclinks"><Link to="/zasady-rezerwacji" target="_blank">Zasady rezerwacji i zadatku</Link> · <Link to="/polityka-prywatnosci" target="_blank">Polityka prywatności</Link></p>
+                    <p className="bp-doclinks"><Link to="/zasady-rezerwacji" target="_blank">Zasady rezerwacji i zadatku</Link> · <Link to="/regulamin" target="_blank">Regulamin serwisu</Link> · <Link to="/polityka-prywatnosci" target="_blank">Polityka prywatności</Link></p>
                     <details className="bp-rodo">
                       <summary>Zasady rezerwacji i zadatku</summary>
                       <ul>
